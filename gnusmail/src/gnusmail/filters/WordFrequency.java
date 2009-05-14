@@ -3,8 +3,7 @@
  * and open the template in the editor.
  */
 package gnusmail.filters;
-
-import com.rapidminer.operator.reducer.SnowballStemmer;
+import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import gnusmail.core.WordStore;
 import gnusmail.core.cnx.MensajeInfo;
 import java.io.IOException;
@@ -23,7 +22,7 @@ public class WordFrequency extends Filter {
 
     String palabraAMirar;
     Set<String> stringsEsteDocumento;
-    SnowballStemmer sbstemmer;
+    SnowballAnalyzer sbstemmer;
 
     public String getPalabraAMirar() {
         return palabraAMirar;
