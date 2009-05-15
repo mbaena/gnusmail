@@ -12,7 +12,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,7 +23,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 
 /**
@@ -80,7 +78,7 @@ public class WordStore {
             Collection<WordCount> coll = wordCount.values();
             List<WordCount> list = new ArrayList<WordCount>(coll);
             Collections.sort(list);
-            int size = list.size();
+            //int size = list.size();
             outFile = new FileWriter(FICH_WORDS);
             PrintWriter out = new PrintWriter(outFile);
             // Also could be written as follows on one line
