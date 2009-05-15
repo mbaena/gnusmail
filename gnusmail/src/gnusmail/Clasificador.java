@@ -26,7 +26,6 @@ import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 import java.util.StringTokenizer;
@@ -332,8 +331,7 @@ public class Clasificador {
 
         try {
             //System.out.println("Procesando mensaje...");
-            for (Iterator e1 = filtros.iterator(); e1.hasNext();) {
-                String sfiltro = (String) e1.next();
+            for (String sfiltro : filtros) {
                 Filter f1 = (Filter) Class.forName(sfiltro).newInstance();
                 if (f1 instanceof WordFrequency) {
                     List<String> palabras = leerPalabrasAAnalizar();

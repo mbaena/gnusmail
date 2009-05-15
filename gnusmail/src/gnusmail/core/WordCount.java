@@ -9,7 +9,7 @@ package gnusmail.core;
  *
  * @author jmcarmona
  */
-class WordCount implements Comparable {
+class WordCount implements Comparable<WordCount> {
     String word;
     int count;
 
@@ -64,16 +64,13 @@ class WordCount implements Comparable {
     }
 
 
-
-    public int compareTo(Object o) {
+    @Override
+    public int compareTo(WordCount wc) {
         int res = 0;
-        if (o instanceof WordCount) {
-            WordCount wc = (WordCount) o;
-            if (getCount() < wc.getCount()) {
-                res = -1;
-            } else if (getCount() > wc.getCount()) {
-                res = 1;
-            }
+        if (getCount() < wc.getCount()) {
+            res = -1;
+        } else if (getCount() > wc.getCount()) {
+            res = 1;
         }
         return res;
     }
@@ -82,4 +79,6 @@ class WordCount implements Comparable {
     public String toString() {
         return getWord() + " " + getCount();
     }
+
+
 }
