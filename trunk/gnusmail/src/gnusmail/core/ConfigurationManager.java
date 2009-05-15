@@ -11,16 +11,16 @@ import java.util.*;
 import java.io.*;
 
 public class ConfigurationManager {
-	final String FICHERO_CONFIGURACION = "/local/home/jmcarmona/clasificador.properties";
+	final String FICHERO_CONFIGURACION = "clasificador.properties";
     Properties propiedades;
     
     /* Carga del fichero de propiedades */
-	public ConfigurationManager() {	    
+	public ConfigurationManager() {
+		propiedades = new Properties();
 	    try {
-	      FileInputStream f = new FileInputStream(FICHERO_CONFIGURACION);
+		  InputStream f = this.getClass().getClassLoader().getResourceAsStream("gnusmail/" + FICHERO_CONFIGURACION);
 	      System.out.println("Cargando configuracion de usuario...\n");
 
-	      propiedades = new Properties();
 	      propiedades.load(f);
           System.out.println(propiedades.getProperty("genusmail.filters.WordFrequency"));
 	      f.close();    
@@ -29,6 +29,30 @@ public class ConfigurationManager {
 	      /* Manejo de excepciones */
 	    	System.out.println("Fichero de Propiedades no valido!!");
 	    }
+
+		String fileName = System.getProperty("user.home") + "/.gnusmail/" + FICHERO_CONFIGURACION;
+		try {
+			FileInputStream f = new FileInputStream(fileName);
+		    propiedades.load(f);
+		    f.close();
+		    
+		} catch (FileNotFoundException e) {
+
+			File f = new File(fileName);
+			try {
+				boolean success = (new File(System.getProperty("user.home") + "/.gnusmail")).mkdir();
+			    if (success) {
+					f.createNewFile();
+			    }				
+			} catch (IOException e1) {
+				
+				e1.printStackTrace();
+			}
+		
+		} catch (IOException e) {
+	    	System.out.println("Fichero de Propiedades de usuario no valido!!");
+	    	System.exit(-1);
+		}	    
 	}
 	
 	/* Almacena en el parametro pasado todos 
