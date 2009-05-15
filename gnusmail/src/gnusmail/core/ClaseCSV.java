@@ -16,7 +16,7 @@ public class ClaseCSV {
     String[][] todo;
     String[] cabeceras;
     int numRegistros = 0;
-    public final static String FILE_CSV = "/local/home/jmcarmona/atributos.csv";
+    public final static String FILE_CSV = System.getProperty("user.home") + "/.gnusmail/atributos.csv";
 
     public ClaseCSV() throws IOException {
         File fich = new File(FILE_CSV);
