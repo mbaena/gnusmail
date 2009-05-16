@@ -4,6 +4,9 @@
  */
 package gnusmail.core;
 
+import gnusmail.core.cnx.Conexion;
+import gnusmail.core.cnx.MensajeInfo;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -23,6 +26,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+
 import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 
 /**
@@ -131,4 +138,50 @@ public class WordStore {
         }
         return res;
     }
+
+    public void leerListaPalabras(Conexion miconexion) {
+        Folder[] carpetas;
+        System.out.println("Extrayendo informacion de palabras de los correos...");
+        try {
+            carpetas = miconexion.getCarpetas();
+
+            for (int i = 0; i < carpetas.length; i++) {
+                System.out.println("Extrayendo informacion de palabres de  " + carpetas[i].getFullName());
+                leerListaPalabrasCarpeta(carpetas[i]);
+            }
+            System.out.println("Extraida la info de las palabras");
+            writeToFile();
+
+        } catch (MessagingException e) {
+            System.out.println("Imposible obtener Carpetas de usuario");
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println();
+            e.printStackTrace();
+        }
+    }
+
+    public void leerListaPalabrasCarpeta(Folder buzon) {
+        if (buzon != null) {
+            try {
+                if (!buzon.isOpen()) {
+                    buzon.open(javax.mail.Folder.READ_WRITE);
+                }
+
+                for (int i = 1; i <= buzon.getMessageCount(); i++) {
+                    MensajeInfo msj = new MensajeInfo(buzon.getMessage(i));
+                    String body = msj.getBody();
+                    addTokenizedString(body);
+                }//for
+
+            } catch (MessagingException e) {
+                System.out.println("Folder " + buzon.getFullName() + " no encontrado al leer palabras");
+            //e.printStackTrace();
+            } catch (IOException e) {
+                System.out.println("Error al escribir en CSV");
+                e.printStackTrace();
+            }
+        }//if
+    }
+
 }

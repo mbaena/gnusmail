@@ -1,5 +1,7 @@
 package gnusmail.core.cnx;
 
+import gnusmail.core.ConfigurationManager;
+
 import java.util.*;
 import java.io.*;
 
@@ -19,13 +21,12 @@ public class Conexion {
     private URLName url;
     private String protocol;
     private String mbox = "INBOX";
-    private final String fich_conf = "/user.conf";
 
     public Conexion(){
         System.out.println("Creando conexion...");
     	FileReader fr;
     	String texto= "";
-    	String ruta= gnusmail.Clasificador.directorio+"/"+fich_conf;
+    	String ruta= ConfigurationManager.fich_conf;
     	try {    		
 			fr = new FileReader(ruta);
 			BufferedReader br = new BufferedReader(fr);
@@ -212,15 +213,9 @@ public class Conexion {
     	FileWriter fw;
     	BufferedWriter bf;
     	String linea;
-    	
-    	File direct = new File(gnusmail.Clasificador.directorio);
-    	if (!direct.exists()) {
-    		direct.mkdir();
-    		//System.out.println("Directorio "+ direct.getAbsolutePath()+" creado");
-    	}
-    	    	
+    	  	    	
 		try {
-			fw = new FileWriter(direct.getAbsolutePath()+"/"+fich_conf);
+			fw = new FileWriter(ConfigurationManager.fich_conf);
 			bf = new BufferedWriter(fw);
 			
 			linea = "PROTOCOL="+this.protocol+"\nUSERNAME="+this.username+
@@ -229,12 +224,12 @@ public class Conexion {
 			bf.newLine();			
 			bf.close();
 		} catch (IOException e) {
-			System.out.println("Error en el fichero " + fich_conf);
+			System.out.println("Error en el fichero " + ConfigurationManager.fich_conf);
 			e.printStackTrace();
 		}
     	
     	@SuppressWarnings("unused")
-		FilePermission perm = new FilePermission(fich_conf, "read, write");
+		FilePermission perm = new FilePermission(ConfigurationManager.fich_conf, "read, write");
     }
 
     /** Logout from the mail host. */
@@ -258,13 +253,13 @@ public class Conexion {
     }
     
     /** Imprime los atributos del correo n */
-    public void mostrarAtributos(int n) throws Exception {
+    public void mostrarAtributos(int mail_id) throws Exception {
 		Folder buzon = folder;//miconexion.getFolder();
 		
-		System.out.println("Mostrando atributos del mensaje "+ n +"...");
+		System.out.println("Mostrando atributos del mensaje "+ mail_id +"...");
 		System.out.println("--------------------------------------------");
-		if (n>0 && n<=buzon.getMessageCount()) {
-			MensajeInfo msj = new MensajeInfo(buzon.getMessage(n));
+		if (mail_id>0 && mail_id<=buzon.getMessageCount()) {
+			MensajeInfo msj = new MensajeInfo(buzon.getMessage(mail_id));
 			
 			System.out.println("De: "+ msj.getFrom());
 			System.out.println("Para: "+ msj.getTo());

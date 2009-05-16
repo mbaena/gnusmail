@@ -11,7 +11,11 @@ import java.util.*;
 import java.io.*;
 
 public class ConfigurationManager {
+    public final static String directorio = System.getProperty("user.home") + "/.genusmail/";
 	final String FICHERO_CONFIGURACION = "clasificador.properties";
+    public final static String fich_conf = "/user.conf";	
+    public final static File fich_modelo = new File(directorio + "/model.conf");
+    public final static File FICH_DATASET = new File(directorio + "/dataset.arff");
     Properties propiedades;
     
     /* Carga del fichero de propiedades */
@@ -40,10 +44,11 @@ public class ConfigurationManager {
 
 			File f = new File(fileName);
 			try {
-				boolean success = (new File(System.getProperty("user.home") + "/.gnusmail")).mkdir();
-			    if (success) {
-					f.createNewFile();
-			    }				
+				File folder = new File(System.getProperty("user.home") + "/.gnusmail");
+				if (!folder.exists()) {
+					folder.mkdir();
+				}
+				f.createNewFile();
 			} catch (IOException e1) {
 				
 				e1.printStackTrace();
