@@ -74,20 +74,20 @@ public class ClassifierManager {
         }
         System.out.println(model);
         try {
-            FileOutputStream f = new FileOutputStream(ConfigurationManager.fich_modelo);
+            FileOutputStream f = new FileOutputStream(ConfigurationManager.MODEL_FILE);
             ObjectOutputStream fis = new ObjectOutputStream(f);
             fis.writeObject(model);
             fis.close();
 
 
-            Writer w = new BufferedWriter(new FileWriter(ConfigurationManager.FICH_DATASET));
+            Writer w = new BufferedWriter(new FileWriter(ConfigurationManager.DATASET_FILE));
             Instances h = new Instances(dataSet);
             w.write(h.toString());
             w.write("\n");
             w.close();
 
         } catch (FileNotFoundException e) {
-            System.out.println("Fichero " + ConfigurationManager.fich_modelo.getAbsolutePath() + " no encontrado");
+            System.out.println("Fichero " + ConfigurationManager.MODEL_FILE.getAbsolutePath() + " no encontrado");
             e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -97,7 +97,7 @@ public class ClassifierManager {
 
     public void clasificarCorreo(MimeMessage mimeMessage) throws Exception {
         MensajeInfo msg = new MensajeInfo(mimeMessage);   	
-        Reader r = new BufferedReader(new FileReader(ConfigurationManager.FICH_DATASET));
+        Reader r = new BufferedReader(new FileReader(ConfigurationManager.DATASET_FILE));
         dataSet = new Instances(r, 0); // Sólo necesitamos las cabeceras de los atributos
         dataSet.setClass(dataSet.attribute("Folder"));
         r.close();
@@ -114,11 +114,11 @@ public class ClassifierManager {
         Classifier model;
         //System.out.println(inst);
 
-        if (!ConfigurationManager.fich_modelo.exists()) {
+        if (!ConfigurationManager.MODEL_FILE.exists()) {
             entrenarModelo();
         }
 
-        FileInputStream fe = new FileInputStream(ConfigurationManager.fich_modelo);
+        FileInputStream fe = new FileInputStream(ConfigurationManager.MODEL_FILE);
         ObjectInputStream fie = new ObjectInputStream(fe);
         model = (Classifier) fie.readObject();
 

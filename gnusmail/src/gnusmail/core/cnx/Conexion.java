@@ -26,7 +26,7 @@ public class Conexion {
         System.out.println("Creando conexion...");
     	FileReader fr;
     	String texto= "";
-    	String ruta= ConfigurationManager.fich_conf;
+    	String ruta= ConfigurationManager.ACCOUNT_FILE;
     	try {    		
 			fr = new FileReader(ruta);
 			BufferedReader br = new BufferedReader(fr);
@@ -215,7 +215,7 @@ public class Conexion {
     	String linea;
     	  	    	
 		try {
-			fw = new FileWriter(ConfigurationManager.fich_conf);
+			fw = new FileWriter(ConfigurationManager.ACCOUNT_FILE);
 			bf = new BufferedWriter(fw);
 			
 			linea = "PROTOCOL="+this.protocol+"\nUSERNAME="+this.username+
@@ -224,12 +224,12 @@ public class Conexion {
 			bf.newLine();			
 			bf.close();
 		} catch (IOException e) {
-			System.out.println("Error en el fichero " + ConfigurationManager.fich_conf);
+			System.out.println("Error en el fichero " + ConfigurationManager.ACCOUNT_FILE);
 			e.printStackTrace();
 		}
     	
     	@SuppressWarnings("unused")
-		FilePermission perm = new FilePermission(ConfigurationManager.fich_conf, "read, write");
+		FilePermission perm = new FilePermission(ConfigurationManager.ACCOUNT_FILE, "read, write");
     }
 
     /** Logout from the mail host. */

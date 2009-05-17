@@ -23,7 +23,6 @@ import weka.core.Instances;
 public class FilterManager {
 	
 	ClaseCSV csvmanager;
-    static ConfigurationManager cfg;
 
 	public FilterManager() {
 		try {
@@ -50,7 +49,7 @@ public class FilterManager {
 
                     //el Vector filtros contiene todos los filtros activos
                     Vector<String> filtros = new Vector<String>();
-                    cfg.getFiltrosActivos(filtros);
+                    ConfigurationManager.getFiltrosActivos(filtros);
 
                     /* Y los escribimos en el fichero CSV */
                     csvmanager.addRegistro(atributos, expandirFiltros(filtros));
@@ -104,7 +103,7 @@ public class FilterManager {
         Instance inst = new Instance(atribs.length);
 
         Vector<String> filtros = new Vector<String>();
-        cfg.getFiltrosActivos(filtros);
+        ConfigurationManager.getFiltrosActivos(filtros);
 
         inst.setDataset(dataSet);
 
@@ -142,7 +141,7 @@ public class FilterManager {
 
         //filtros contiene todos los filtros activos
         Vector<String> filtros = new Vector<String>();
-        cfg.getFiltrosActivos(filtros);
+        ConfigurationManager.getFiltrosActivos(filtros);
 
 
 
@@ -151,8 +150,7 @@ public class FilterManager {
             for (String sfiltro : filtros) {
                 Filter f1 = (Filter) Class.forName(sfiltro).newInstance();
                 if (f1 instanceof WordFrequency) {
-                	WordFrequency wordFrequency = (WordFrequency) f1;
-                    List<String> palabras = wordFrequency.leerPalabrasAAnalizar();
+                    List<String> palabras = WordFrequency.leerPalabrasAAnalizar();
                     try {
                         for (String palabra : palabras) {
                             WordFrequency filtroPalabras = (WordFrequency) f1;
