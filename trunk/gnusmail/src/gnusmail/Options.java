@@ -7,7 +7,6 @@ import gnusmail.core.ConfigurationManager;
 
 
 public class Options {
-    static ConfigurationManager cfg;
 
     private MainManager mainManager;
 	private String url;
@@ -20,7 +19,6 @@ public class Options {
 	private int openMail;
 	
 	public Options() {
-        cfg = new ConfigurationManager();
         this.url = null;
         this.showAttributes = -1;
         this.attributeExtraction = false;
@@ -97,8 +95,8 @@ public class Options {
 	}
 
 	public void setProperties(String clave, String valor) {
-        cfg.añadirPropiedad("genusmail.filters." + clave, valor);
-        cfg.grabarFichero();
+        ConfigurationManager.añadirPropiedad("genusmail.filters." + clave, valor);
+        ConfigurationManager.grabarFichero();
 		
 	}
 
