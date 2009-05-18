@@ -11,10 +11,9 @@ import java.util.*;
 import java.io.*;
 
 public class ConfigurationManager {
-    public final static String CONF_FOLDER = System.getProperty("user.home") + "/.genusmail/";
-	public final static String CONF_FILE = "filters.properties";
-    public final static String ACCOUNT_FILE = CONF_FOLDER +"account.conf";	
-    public final static File MODEL_FILE = new File(CONF_FOLDER + "model.conf");
+    public final static String CONF_FOLDER = System.getProperty("user.home") + "/.gnusmail/";
+	public final static String CONF_FILE = "gnusmail.properties";
+    public final static File MODEL_FILE = new File(CONF_FOLDER + "model.bin");
     public final static File DATASET_FILE = new File(CONF_FOLDER + "dataset.arff");
     private static Properties properties = loadProperties();
     
@@ -45,6 +44,9 @@ public class ConfigurationManager {
 					folder.mkdir();
 				}
 				f.createNewFile();
+				FileOutputStream fileOutputStream = new FileOutputStream(f);				
+				props.store(fileOutputStream, "");
+				fileOutputStream.close();
 			} catch (IOException e1) {
 				
 				e1.printStackTrace();
@@ -59,15 +61,10 @@ public class ConfigurationManager {
 	/* Almacena en el parametro pasado todos 
 	 * los filtros activos al momento de la llamada 
 	 */
-	public static void getFiltrosActivos(Vector<String> filtros){
-			Enumeration<?> e = properties.propertyNames();
-			String nombre;
-			
-			while( e.hasMoreElements() ) {
-		        nombre = (String) e.nextElement() ;
-                if ( verValor(nombre) )
-					filtros.addElement(nombre);
-		     }		
+	public static String[] getFilters(){
+		String filters = properties.getProperty("filters");
+		String[] filterList = filters.split(" ");
+		return filterList;
 	}
 		
 	/* Lista por pantalla todas las propiedades y sus valores */
@@ -77,13 +74,6 @@ public class ConfigurationManager {
 	      System.out.println();
 	}
 	
-	/* Devuelve el valor de una propiedad */
-	public static boolean verValor(String clave) {
-		boolean valor = Boolean.valueOf(
-		        properties.getProperty(clave)); 
-
-		return valor;		
-	}
 	
 	/* Añade un par propiedad-valor */
 	public static void añadirPropiedad(String clave, String valor){
@@ -101,5 +91,13 @@ public class ConfigurationManager {
 		} catch (IOException ioe) {
 			System.out.println("Error al escribir en fichero!!");
 		}
+	}
+
+	public static String getProperty(String key) {
+		return properties.getProperty(key);
+	}
+
+	public static void setProperty(String key, String value) {
+		properties.setProperty(key, value);
 	}
 }

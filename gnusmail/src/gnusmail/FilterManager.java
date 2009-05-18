@@ -2,7 +2,7 @@ package gnusmail;
 
 import gnusmail.core.ClaseCSV;
 import gnusmail.core.ConfigurationManager;
-import gnusmail.core.cnx.Conexion;
+import gnusmail.core.cnx.Conection;
 import gnusmail.core.cnx.MensajeInfo;
 import gnusmail.filters.Filter;
 import gnusmail.filters.WordFrequency;
@@ -48,8 +48,7 @@ public class FilterManager {
                     atributos = getAtributosCorreo(msj);
 
                     //el Vector filtros contiene todos los filtros activos
-                    Vector<String> filtros = new Vector<String>();
-                    ConfigurationManager.getFiltrosActivos(filtros);
+                    String[] filtros = ConfigurationManager.getFilters();
 
                     /* Y los escribimos en el fichero CSV */
                     csvmanager.addRegistro(atributos, expandirFiltros(filtros));
@@ -66,9 +65,9 @@ public class FilterManager {
 
     }
 
-    public void saveAtributos(Conexion miconexion) {
+    public void saveAtributos(Conection miconexion) {
         if (miconexion == null) {
-            miconexion = new Conexion();
+            miconexion = new Conection();
         }
         Folder[] carpetas;
         System.out.println("Extrayendo informacion de los correos...");
@@ -102,15 +101,14 @@ public class FilterManager {
 
         Instance inst = new Instance(atribs.length);
 
-        Vector<String> filtros = new Vector<String>();
-        ConfigurationManager.getFiltrosActivos(filtros);
+        String[] filtros = ConfigurationManager.getFilters();
 
         inst.setDataset(dataSet);
 
         for (int i = 0; i < atribs.length; i++) {
             //Este bucle toma el nombre del filtro, eliminando
             // la cadena "genusmail.filters." del pricipio
-            StringTokenizer str = new StringTokenizer(filtros.get(i), ".");
+            StringTokenizer str = new StringTokenizer(filtros[i], ".");
             String p = "";
             int max = str.countTokens();
             for (int j = 1; j <= max; j++) {
@@ -140,8 +138,7 @@ public class FilterManager {
         Vector<String> res = new Vector<String>();
 
         //filtros contiene todos los filtros activos
-        Vector<String> filtros = new Vector<String>();
-        ConfigurationManager.getFiltrosActivos(filtros);
+        String[] filtros = ConfigurationManager.getFilters();
 
 
 
@@ -202,7 +199,7 @@ public class FilterManager {
      * @param filtros
      * @return
      */
-    private static Vector<String> expandirFiltros(Vector<String> filtros) {
+    private static Vector<String> expandirFiltros(String[] filtros) {
         Vector<String> res = new Stack<String>();
         for (String s : filtros) {
             if (s.contains("WordFrequency")) {

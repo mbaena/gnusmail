@@ -4,7 +4,7 @@
  */
 package gnusmail.core;
 
-import gnusmail.core.cnx.Conexion;
+import gnusmail.core.cnx.Conection;
 import gnusmail.core.cnx.MensajeInfo;
 
 import java.io.BufferedReader;
@@ -139,7 +139,7 @@ public class WordStore {
         return res;
     }
 
-    public void leerListaPalabras(Conexion miconexion) {
+    public void leerListaPalabras(Conection miconexion) {
         Folder[] carpetas;
         System.out.println("Extrayendo informacion de palabras de los correos...");
         try {
