@@ -13,7 +13,7 @@ public class Main {
         longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
         longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
 
-        Getopt getopt = new Getopt("Clasificador", argv, "-:efgibd::r::p::a::c::hx", longopts);
+        Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgil::r::p::a::c::hx", longopts);
         getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
         System.out.println("BIENVENIDO A GENUSMAIL!!!\n");
@@ -74,6 +74,9 @@ public class Main {
                     break;
                 case 'i':	//Clasifica el Correo pasado por linea de comandos
                 	options.setMailClassification(true);
+                    break;
+                case 'l':	//Clasifica el Correo pasado por linea de comandos
+                	options.setListMails(true);
                     break;
                 case 'p':	//Cambia una pareja de valores en el objeto Properties
                     String clave = getopt.getOptarg();

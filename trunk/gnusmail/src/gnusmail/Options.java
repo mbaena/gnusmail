@@ -17,6 +17,7 @@ public class Options {
 	private boolean listMailsInFolder;
 	private boolean mailClassification;
 	private int openMail;
+	private boolean listMails;
 	
 	public Options() {
         this.url = null;
@@ -24,6 +25,7 @@ public class Options {
         this.attributeExtraction = false;
         this.modelTraining = false;
         this.listFolders = false;
+        this.listMails = false;
         this.listMailsInFolder = false;
         this.mailClassification = false;
         this.openMail = -1;
@@ -46,6 +48,9 @@ public class Options {
         }
         if (this.listFolders) {
         	mainManager.listFolders();
+        }
+        if (this.listMails) {
+        	mainManager.listMails();
         }
         if (this.listMailsInFolder) {
         	mainManager.mailsInFolder();
@@ -102,6 +107,10 @@ public class Options {
 
 	public void setOpenMail(int mail_id) {
 		this.openMail = mail_id;		
+	}
+
+	public void setListMails(boolean b) {
+		this.listMails = b;
 	}
 
 }

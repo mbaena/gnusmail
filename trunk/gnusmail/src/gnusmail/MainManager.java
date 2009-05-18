@@ -2,7 +2,9 @@ package gnusmail;
 
 import gnusmail.core.WordStore;
 import gnusmail.core.cnx.Connection;
+import gnusmail.core.cnx.MensajeInfo;
 
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -65,6 +67,20 @@ public class MainManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public void listMails() {
+		MessageReader reader = new MessageReader(connection);
+		for (Message msg: reader) {
+			MensajeInfo msgInfo = new MensajeInfo(msg);
+			try {
+				System.out.println(msgInfo.getReceivedDate() + " " + msgInfo.getSubject());
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	public void mailsInFolder() {
