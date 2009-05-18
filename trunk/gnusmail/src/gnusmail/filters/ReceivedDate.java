@@ -13,7 +13,7 @@ public final class ReceivedDate extends Filter {
 	}
 
 	@Override
-	public String applyTo(MensajeInfo mess, String initialFolderName) {
+	public String applyTo(MensajeInfo mess) {
 		// TODO Auto-generated method stub
 		try {
 			return mess.getReceivedDate();

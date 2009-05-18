@@ -11,7 +11,7 @@ public final class Folder extends Filter {
 	}
 
 	@Override
-	public String applyTo(MensajeInfo mess, String initialFolderName){
+	public String applyTo(MensajeInfo mess){
 		// TODO Auto-generated method stub
 		if (mess.getFolder()== null) return "?";
 		return (String)mess.getFolder().toString();

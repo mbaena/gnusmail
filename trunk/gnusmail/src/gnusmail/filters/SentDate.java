@@ -11,7 +11,7 @@ public final class SentDate extends Filter {
 	}
 
 	@Override
-	public String applyTo(MensajeInfo mess, String initialFolderName) {
+	public String applyTo(MensajeInfo mess) {
 		try {
 			//String res = csvmng.getValue(this.getNombreFiltro(), mess);
 			return mess.getSentDate();

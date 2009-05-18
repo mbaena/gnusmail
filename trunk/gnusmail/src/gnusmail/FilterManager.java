@@ -2,7 +2,7 @@ package gnusmail;
 
 import gnusmail.core.ClaseCSV;
 import gnusmail.core.ConfigurationManager;
-import gnusmail.core.cnx.Conection;
+import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MensajeInfo;
 import gnusmail.filters.Filter;
 import gnusmail.filters.WordFrequency;
@@ -14,6 +14,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
 import weka.core.Attribute;
@@ -48,7 +49,7 @@ public class FilterManager {
 
 				for (int i = 1; i <= buzon.getMessageCount(); i++) {
 					MensajeInfo msj = new MensajeInfo(buzon.getMessage(i));
-					atributos = getAtributosCorreo(msj, buzon.getFullName());
+					atributos = getAtributosCorreo(msj);
 
 					// el Vector filtros contiene todos los filtros activos
 					String[] filtros = ConfigurationManager.getFilters();
@@ -69,10 +70,7 @@ public class FilterManager {
 
 	}
 
-	public void saveAtributos(Conection miconexion) {
-		if (miconexion == null) {
-			miconexion = new Conection();
-		}
+	public void saveAtributos(Connection miconexion) {
 		Folder[] carpetas;
 		System.out.println("Extrayendo informacion de los correos...");
 		try {
@@ -93,6 +91,14 @@ public class FilterManager {
 		}
 
 	}
+	
+	public void saveAttributesInOrder(Connection connection) {
+		MessageReader reader = new MessageReader(connection);
+		for (Message msg: reader) {
+			MensajeInfo msgInfo = new MensajeInfo(msg);
+			getAtributosCorreo(msgInfo);
+		}
+	}
 
 	/**
 	 * Este método crea una nueva instancia con los datos extraídos de msg para
@@ -109,7 +115,7 @@ public class FilterManager {
 	 */
 	public Instance makeInstance(MensajeInfo msg, String initialFolderName,
 			Instances dataSet) throws Exception {
-		String[] atribs = getAtributosCorreo(msg, initialFolderName);
+		String[] atribs = getAtributosCorreo(msg);
 		// for (int j=0;j<atribs.length;j++) System.out.print(atribs[j]+',');
 		// System.out.println();
 
@@ -149,7 +155,7 @@ public class FilterManager {
 	 * Extrae los atributos del correo de la carpeta actual (según los filtros
 	 * activos en el Properties)
 	 */
-	public String[] getAtributosCorreo(MensajeInfo msj, String folderName) {
+	public String[] getAtributosCorreo(MensajeInfo msj) {
 		System.out.println("   Analizando " + msj.getMessageId());
 		// res es un vector q contendrá el contenido de todos los atributos
 		// activos
@@ -181,8 +187,7 @@ public class FilterManager {
 					for (String palabra : palabras) {
 						WordFrequency filtroPalabras = (WordFrequency) filter;
 						filtroPalabras.setPalabraAMirar(palabra);
-						String elemento = filtroPalabras.applyTo(msj,
-								folderName);
+						String elemento = filtroPalabras.applyTo(msj);
 						res.addElement(elemento);
 					}
 				} catch (Exception e) {
@@ -191,7 +196,7 @@ public class FilterManager {
 				}
 			} else {
 				try {
-					String elemento = filter.applyTo(msj, folderName);
+					String elemento = filter.applyTo(msj);
 					System.out.println("Elemento = " + elemento);
 					res.addElement(elemento);
 				} catch (Exception e) {

@@ -17,7 +17,7 @@ public final class Bcc extends Filter {
 		return "Bcc";
 	}
 	
-	public String applyTo(MensajeInfo mess, String initialFolderName){		
+	public String applyTo(MensajeInfo mess){		
 		//String res = csvmng.getValue(this.getNombreFiltro(), mess);
 		try {
 			return mess.getBcc();

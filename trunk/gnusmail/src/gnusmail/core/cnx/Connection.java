@@ -17,7 +17,7 @@ import com.sun.mail.imap.IMAPSSLStore;
 import com.sun.mail.imap.IMAPStore;
 
 /** Esta clase almacena la informacion del usuario */
-public class Conection {
+public class Connection {
     private IMAPFolder folder;
     private String hostname; 
     private String username; 
@@ -28,7 +28,7 @@ public class Conection {
     private String protocol;
     private String mbox = "INBOX";
 
-    public Conection(){
+    public Connection(){
         System.out.println("Creando conexion...");
         username = ConfigurationManager.getProperty("username");
         password = ConfigurationManager.getProperty("password");
@@ -44,7 +44,7 @@ public class Conection {
     	
     }
     
-    public Conection(String cadena) {
+    public Connection(String cadena) {
     	URLName url= new URLName(cadena);
     	this.hostname = url.getHost();
         this.username = url.getUsername();

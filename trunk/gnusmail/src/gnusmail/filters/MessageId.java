@@ -17,7 +17,7 @@ public final class MessageId extends Filter {
 	}
 
 	@Override
-	public String applyTo(MensajeInfo mess, String initialFolderName) {
+	public String applyTo(MensajeInfo mess) {
 		//String res = csvmng.getValue(this.getNombreFiltro(), mess);
 		return mess.getMessageId();
 	}
