@@ -59,18 +59,30 @@ public class MainManager {
 	}
 	
 	public void listFolders() {
-		// TODO Auto-generated method stub
-		
+		try {
+			connection.listarCarpetas();
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void mailsInFolder() {
-		// TODO Auto-generated method stub
-		
+		try {
+			connection.mostrarCorreos("INBOX");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public void openMail(int openMail) {
-		// TODO Auto-generated method stub
-		
+	public void openMail(int mail_id) {
+		try {
+			connection.mostrarAtributos(mail_id);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 

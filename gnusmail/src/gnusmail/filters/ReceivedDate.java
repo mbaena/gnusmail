@@ -7,13 +7,13 @@ import gnusmail.core.cnx.MensajeInfo;
 public final class ReceivedDate extends Filter {
 
 	@Override
-	public String getNombreFiltro() {
+	public String getName() {
 		// TODO Auto-generated method stub
 		return "ReceivedDate";
 	}
 
 	@Override
-	public String aplicarFiltro(MensajeInfo mess) {
+	public String applyTo(MensajeInfo mess, String initialFolderName) {
 		// TODO Auto-generated method stub
 		try {
 			return mess.getReceivedDate();

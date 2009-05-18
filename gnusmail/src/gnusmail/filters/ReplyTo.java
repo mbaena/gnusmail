@@ -11,11 +11,11 @@ public final class ReplyTo extends Filter {
 		// TODO Auto-generated method stub
 
 	}
-	public String getNombreFiltro(){
+	public String getName(){
 		return "ReplyTo";
 	}
 	
-	public String aplicarFiltro(MensajeInfo mess){
+	public String applyTo(MensajeInfo mess, String initialFolderName){
 		try{
 //			String res = csvmng.getValue(this.getNombreFiltro(), mess);
 			return mess.getReplyTo();

@@ -1,11 +1,10 @@
 package gnusmail.filters;
 
 import gnusmail.core.cnx.MensajeInfo;
-//import csvMng.ClaseCSV;
 
 public abstract class Filter {
 
-	abstract public String getNombreFiltro();
+	abstract public String getName();
 	
-	abstract public String aplicarFiltro(MensajeInfo mess);	
+	abstract public String applyTo(MensajeInfo mess, String initialFolderName);	
 }
