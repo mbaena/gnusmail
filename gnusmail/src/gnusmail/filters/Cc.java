@@ -17,7 +17,7 @@ public final class Cc extends Filter{
 		return "Cc";
 	}
 	
-	public String applyTo(MensajeInfo mess, String initialFolderName) {		
+	public String applyTo(MensajeInfo mess) {		
 		String res;// = csvmng.getValue(this.getNombreFiltro(), mess);
 		try {
 			res= mess.getCc();

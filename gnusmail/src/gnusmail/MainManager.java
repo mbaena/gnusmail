@@ -1,14 +1,14 @@
 package gnusmail;
 
 import gnusmail.core.WordStore;
-import gnusmail.core.cnx.Conection;
+import gnusmail.core.cnx.Connection;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 public class MainManager {
 
-    private Conection connection;
+    private Connection connection;
 	private ClassifierManager classifierManager;
 	private FilterManager filterManager;
 	
@@ -32,7 +32,7 @@ public class MainManager {
     private void connect(String url) throws MessagingException {
         if (url != null) {
             try {
-                connection = new Conection(url);
+                connection = new Connection(url);
                 connection.login(url);
                 System.out.println("Connected!");
             } catch (Exception e) {
@@ -44,7 +44,7 @@ public class MainManager {
             }
         } else {
             if (connection == null) {
-                connection = new Conection();
+                connection = new Connection();
             }        	
         }
     }

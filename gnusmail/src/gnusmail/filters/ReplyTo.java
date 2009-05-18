@@ -15,7 +15,7 @@ public final class ReplyTo extends Filter {
 		return "ReplyTo";
 	}
 	
-	public String applyTo(MensajeInfo mess, String initialFolderName){
+	public String applyTo(MensajeInfo mess){
 		try{
 //			String res = csvmng.getValue(this.getNombreFiltro(), mess);
 			return mess.getReplyTo();

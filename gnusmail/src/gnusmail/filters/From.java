@@ -17,7 +17,7 @@ public final class From extends Filter {
 		return "From";
 	}
 	
-	public String applyTo(MensajeInfo mess, String initialFolderName) {
+	public String applyTo(MensajeInfo mess) {
 		//String res = csvmng.getValue(this.getNombreFiltro(),mess);
 		try {
 			return mess.getFrom();

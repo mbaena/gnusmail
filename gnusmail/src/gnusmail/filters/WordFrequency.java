@@ -56,7 +56,7 @@ public class WordFrequency extends Filter {
     }
 
     @Override
-    public String applyTo(MensajeInfo mess, String initialFolderName) {
+    public String applyTo(MensajeInfo mess) {
         String res = "";
         try {
             if (stringsEsteDocumento == null) {
