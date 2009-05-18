@@ -33,7 +33,10 @@ import javax.mail.MessagingException;
 import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 
 /**
- *
+ * Esta clase gestiona un mapa palabras -> numero de apariciones. Se ha creado la 
+ * clase WordCount para gestionar el
+ * numero de apariciones (y por si en el futuro se emplea algun metodo diferente
+ * a simplemente contar el numero de palabras). tfidf,e tc...
  * @author jmcarmona
  */
 public class WordStore {
