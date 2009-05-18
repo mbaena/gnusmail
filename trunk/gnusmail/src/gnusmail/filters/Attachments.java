@@ -5,12 +5,12 @@ import gnusmail.core.cnx.MensajeInfo;
 public final class Attachments extends Filter{
 
 	@Override
-	public String getNombreFiltro() {
+	public String getName() {
 		return "Attachments";
 	}
 
 	@Override
-	public String aplicarFiltro(MensajeInfo mess) {
+	public String applyTo(MensajeInfo mess, String initialFolderName) {
 		//String res = csvmng.getValue(this.getNombreFiltro(), mess);
 		try {
 			if (mess.hasAttachments()) return "True";

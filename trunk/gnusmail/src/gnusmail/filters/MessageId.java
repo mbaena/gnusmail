@@ -12,12 +12,12 @@ public final class MessageId extends Filter {
 	}
 	
 	@Override
-	public String getNombreFiltro() {
+	public String getName() {
 		return "MessageId";
 	}
 
 	@Override
-	public String aplicarFiltro(MensajeInfo mess) {
+	public String applyTo(MensajeInfo mess, String initialFolderName) {
 		//String res = csvmng.getValue(this.getNombreFiltro(), mess);
 		return mess.getMessageId();
 	}

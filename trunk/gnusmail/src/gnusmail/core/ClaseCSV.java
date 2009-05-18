@@ -183,7 +183,7 @@ public class ClaseCSV {
             res[i] = cabeceras[i];
         }
         try {
-            res[cabeceras.length] = ((gnusmail.filters.Filter) Class.forName(nombre).newInstance()).getNombreFiltro();
+            res[cabeceras.length] = ((gnusmail.filters.Filter) Class.forName(nombre).newInstance()).getName();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

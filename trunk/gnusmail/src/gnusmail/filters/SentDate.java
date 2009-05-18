@@ -5,13 +5,13 @@ import gnusmail.core.cnx.MensajeInfo;
 public final class SentDate extends Filter {
 
 	@Override
-	public String getNombreFiltro() {
+	public String getName() {
 		// TODO Auto-generated method stub
 		return "SentDate";
 	}
 
 	@Override
-	public String aplicarFiltro(MensajeInfo mess) {
+	public String applyTo(MensajeInfo mess, String initialFolderName) {
 		try {
 			//String res = csvmng.getValue(this.getNombreFiltro(), mess);
 			return mess.getSentDate();

@@ -51,12 +51,12 @@ public class WordFrequency extends Filter {
     }
 
     @Override
-    public String getNombreFiltro() {
+    public String getName() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public String aplicarFiltro(MensajeInfo mess) {
+    public String applyTo(MensajeInfo mess, String initialFolderName) {
         String res = "";
         try {
             if (stringsEsteDocumento == null) {

@@ -13,11 +13,11 @@ public final class Cc extends Filter{
 		// TODO Auto-generated method stub
 
 	}
-	public String getNombreFiltro(){
+	public String getName(){
 		return "Cc";
 	}
 	
-	public String aplicarFiltro(MensajeInfo mess) {		
+	public String applyTo(MensajeInfo mess, String initialFolderName) {		
 		String res;// = csvmng.getValue(this.getNombreFiltro(), mess);
 		try {
 			res= mess.getCc();
