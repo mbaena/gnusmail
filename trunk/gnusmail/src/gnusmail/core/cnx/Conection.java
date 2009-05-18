@@ -2,16 +2,22 @@ package gnusmail.core.cnx;
 
 import gnusmail.core.ConfigurationManager;
 
-import java.util.*;
-import java.io.*;
+import java.security.Security;
+import java.util.Properties;
 
-import javax.mail.*;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.URLName;
 
-import java.security.*;
-import com.sun.mail.imap.*;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPSSLStore;
+import com.sun.mail.imap.IMAPStore;
 
 /** Esta clase almacena la informacion del usuario */
-public class Conexion {
+public class Conection {
     private IMAPFolder folder;
     private String hostname; 
     private String username; 
@@ -22,46 +28,15 @@ public class Conexion {
     private String protocol;
     private String mbox = "INBOX";
 
-    public Conexion(){
+    public Conection(){
         System.out.println("Creando conexion...");
-    	FileReader fr;
-    	String texto= "";
-    	String ruta= ConfigurationManager.ACCOUNT_FILE;
-    	try {    		
-			fr = new FileReader(ruta);
-			BufferedReader br = new BufferedReader(fr);
-			
-			texto = br.readLine();
-			while (texto!=null){
-                StringTokenizer stok = new StringTokenizer(texto,"=");				
-				if (texto.contains("USERNAME")){
-					stok.nextToken();
-					username = stok.nextToken();
-                    
-				} else if (texto.contains("PASSWORD")){
-					stok.nextToken();
-					password = stok.nextToken();
-                    
-				} else if (texto.contains("HOSTNAME")) {
-					stok.nextToken();
-					hostname = stok.nextToken();
-                    
-				} else if (texto.contains("PROTOCOL")){
-					stok.nextToken();
-					protocol = stok.nextToken();
-                    
-				}
-				texto = br.readLine();
-			}
-			//System.out.println(protocol+"://"+username+":"+password+"@"+hostname);
-			login(protocol+"://"+username+":"+password+"@"+hostname);
-			
-		} catch (FileNotFoundException e) {
-			System.out.println("Fichero "+ ruta+" no encontrado");
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("Error de lectura de fichero");
-			e.printStackTrace();
+        username = ConfigurationManager.getProperty("username");
+        password = ConfigurationManager.getProperty("password");
+        hostname = ConfigurationManager.getProperty("hostname");
+        protocol = ConfigurationManager.getProperty("protocol");
+        //System.out.println(protocol+"://"+username+":"+password+"@"+hostname);
+        try {
+        	login(protocol+"://"+username+":"+password+"@"+hostname);
 		}catch (MessagingException e){
 			System.out.println("Error de conexion");
 			e.printStackTrace();
@@ -69,7 +44,7 @@ public class Conexion {
     	
     }
     
-    public Conexion(String cadena) {
+    public Conection(String cadena) {
     	URLName url= new URLName(cadena);
     	this.hostname = url.getHost();
         this.username = url.getUsername();
@@ -160,7 +135,7 @@ public class Conexion {
 		    try {
 			// configure the jvm to use thte jsse security
 			Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
-			Security.setProperty( "ssl.SocketFactory.provider", "genusmail.core.cnx.DummySSLSocketFactory");   
+			Security.setProperty( "ssl.SocketFactory.provider", "gnusmail.core.cnx.DummySSLSocketFactory");   
 			
 			// crea el properties para la sesion
 			props = System.getProperties();
@@ -210,26 +185,11 @@ public class Conexion {
     /** Guarda los datos de conexion del usuario en una linea con formato
      *  protocolo, username, password, hostname */
     private void guardarDatosConexion() {
-    	FileWriter fw;
-    	BufferedWriter bf;
-    	String linea;
-    	  	    	
-		try {
-			fw = new FileWriter(ConfigurationManager.ACCOUNT_FILE);
-			bf = new BufferedWriter(fw);
-			
-			linea = "PROTOCOL="+this.protocol+"\nUSERNAME="+this.username+
-						"\nPASSWORD="+this.password+"\nHOSTNAME="+this.hostname;
-			bf.write(linea);
-			bf.newLine();			
-			bf.close();
-		} catch (IOException e) {
-			System.out.println("Error en el fichero " + ConfigurationManager.ACCOUNT_FILE);
-			e.printStackTrace();
-		}
-    	
-    	@SuppressWarnings("unused")
-		FilePermission perm = new FilePermission(ConfigurationManager.ACCOUNT_FILE, "read, write");
+    	ConfigurationManager.setProperty("username", username);
+    	ConfigurationManager.setProperty("password", password);
+    	ConfigurationManager.setProperty("hostname", hostname);
+    	ConfigurationManager.setProperty("protocol", protocol);
+    	ConfigurationManager.grabarFichero();
     }
 
     /** Logout from the mail host. */
