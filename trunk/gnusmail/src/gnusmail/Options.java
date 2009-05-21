@@ -18,6 +18,7 @@ public class Options {
 	private boolean mailClassification;
 	private int openMail;
 	private boolean listMails;
+	private int listMailsLimit;
 	
 	public Options() {
         this.url = null;
@@ -26,6 +27,7 @@ public class Options {
         this.modelTraining = false;
         this.listFolders = false;
         this.listMails = false;
+        this.listMailsLimit = 0;
         this.listMailsInFolder = false;
         this.mailClassification = false;
         this.openMail = -1;
@@ -50,7 +52,7 @@ public class Options {
         	mainManager.listFolders();
         }
         if (this.listMails) {
-        	mainManager.listMails();
+        	mainManager.listMails(this.listMailsLimit);
         }
         if (this.listMailsInFolder) {
         	mainManager.mailsInFolder();
@@ -109,7 +111,8 @@ public class Options {
 		this.openMail = mail_id;		
 	}
 
-	public void setListMails(boolean b) {
+	public void setListMails(boolean b, int limit) {
+		this.listMailsLimit = limit;
 		this.listMails = b;
 	}
 
