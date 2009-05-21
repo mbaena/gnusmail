@@ -41,27 +41,30 @@ public class MensajeInfo {
     /** Devuelve el cuerpo del mensaje (si es solo texto). */
     public String getBody() throws MessagingException, IOException {
         Object content = message.getContent();
+        String result = "";
         
         if (message.isMimeType("text/plain")) {
-            return (String)content;
+            result = (String)content;
         } else if (message.isMimeType("multipart/alternative")) {
         	Multipart mp = (Multipart)message.getContent();
             int numParts = mp.getCount();
             for (int i = 0; i < numParts; ++i) {
                 if (mp.getBodyPart(i).isMimeType("text/plain"))
                     try {
-                    return (String)mp.getBodyPart(i).getContent();
+                    result = (String)mp.getBodyPart(i).getContent();
                     } catch (Exception e) {
                         System.out.println("Excepcion cogiendo cuerpo de correo");
                     }
             }
-            return "";   
+            result = "";
         } else if (message.isMimeType("multipart/*")) { 
         	Multipart mp = (Multipart)content;
             if (mp.getBodyPart(0).isMimeType("text/plain"))
-                return (String)mp.getBodyPart(0).getContent();
-            else return "";
-        } else return "";
+                result = (String)mp.getBodyPart(0).getContent();
+            else result = "";
+        } else result = "";
+        result = new String(result.getBytes(), "UTF-8");
+        return result;
     }
     
     /** Devuelve el campo Cc: */
