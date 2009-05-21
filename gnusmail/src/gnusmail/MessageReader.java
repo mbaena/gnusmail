@@ -40,10 +40,10 @@ public class MessageReader implements Iterable<Message>{
 		
 	}
 
-	private class MessageReaderIterator implements Iterator<Message> {
+	private class LimitedMessageReaderIterator implements Iterator<Message> {
 		
 		TreeSet<ComparableMessage> message_list;
-		public MessageReaderIterator(Connection connection) {
+		public LimitedMessageReaderIterator(Connection connection, int limit) {
 			message_list = new TreeSet<ComparableMessage>();
 			long total_msgs = 0;
 			Folder[] folders = null;
@@ -63,12 +63,24 @@ public class MessageReader implements Iterable<Message>{
 				if (msg_count<=0) {
 					continue;
 				}
-				Message msg = folder.getMessage(1); // this is the first message
+				int first_msg = msg_count - limit + 1;
+				if (limit > 0 && first_msg < 1) {
+					first_msg = 1;
+				} else if (limit <= 0) {
+					first_msg = 1;
+				}
+				Message msg = folder.getMessage(first_msg);
 				ComparableMessage comparableMsg = new ComparableMessage(msg);
 				message_list.add(comparableMsg);
-				folder.close(false);
 				} catch (MessagingException e) {
 					e.printStackTrace();
+				} finally {
+					try {
+						folder.close(false);
+					} catch (MessagingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 			System.out.println("Total: " + total_msgs);
@@ -93,10 +105,16 @@ public class MessageReader implements Iterable<Message>{
 					Message nextMsg = folder.getMessage(number+1);
 					ComparableMessage nextComparableMsg = new ComparableMessage(nextMsg);
 					message_list.add(nextComparableMsg);
-					folder.close(false);
 				}
 			} catch (MessagingException e) {
 				e.printStackTrace();
+			} finally {
+				try {
+					folder.close(false);
+				} catch (MessagingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}				
 			}
 			return msg;
 		}
@@ -110,15 +128,18 @@ public class MessageReader implements Iterable<Message>{
 	}
 	
 	private Connection connection;
+	private int limit;
 	
-	public MessageReader(Connection connection) {
+	public MessageReader(Connection connection, int limit) {
 		this.connection = connection;
+		this.limit = limit;
 	}
 	
 	@Override
 	public Iterator<Message> iterator() {
-		return new MessageReaderIterator(connection);
+		Iterator<Message> iterator;
+		iterator = new LimitedMessageReaderIterator(connection, limit);
+		return iterator;
 	}
-	
 }
 

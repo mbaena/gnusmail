@@ -92,8 +92,8 @@ public class FilterManager {
 
 	}
 	
-	public void saveAttributesInOrder(Connection connection) {
-		MessageReader reader = new MessageReader(connection);
+	public void saveAttributesInOrder(Connection connection, int limit) {
+		MessageReader reader = new MessageReader(connection, limit);
 		for (Message msg: reader) {
 			MensajeInfo msgInfo = new MensajeInfo(msg);
 			getAtributosCorreo(msgInfo);

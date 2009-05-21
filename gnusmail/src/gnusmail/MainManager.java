@@ -69,8 +69,9 @@ public class MainManager {
 		}
 	}
 	
-	public void listMails() {
-		MessageReader reader = new MessageReader(connection);
+	public void listMails(int limit) {
+		Iterable<Message> reader; 
+		reader = new MessageReader(connection, limit);
 		for (Message msg: reader) {
 			MensajeInfo msgInfo = new MensajeInfo(msg);
 			try {
