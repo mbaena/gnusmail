@@ -15,14 +15,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.mail.Folder;
 import javax.mail.MessagingException;
 
 /**
@@ -57,6 +54,7 @@ public class WordFrequency extends Filter {
 
     @Override
     public String applyTo(MensajeInfo mess) {
+        
         String res = "";
         try {
             if (stringsEsteDocumento == null) {
