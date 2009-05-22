@@ -49,7 +49,8 @@ public class Main {
                     break;
                     
                 case 'c':	//Login
-                    arg = getopt.getOptarg();                	
+                    arg = getopt.getOptarg();
+                    System.out.println("Arg es" + arg);
                     if (arg != null) {
                     	options.setURL(arg);
                     }
@@ -95,6 +96,7 @@ public class Main {
             } //switch
             System.out.println();
         }//while
+        System.out.println("Running options...");
         options.run();
         
         System.out.println("ADIOS!!!");
