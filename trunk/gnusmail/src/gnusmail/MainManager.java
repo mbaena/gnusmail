@@ -32,6 +32,7 @@ public class MainManager {
 	/** Connects to URL 
      * @throws Exception */
     private void connect(String url) throws MessagingException {
+        System.out.println("URL es " + url);
         if (url != null) {
             try {
                 connection = new Connection(url);
@@ -108,6 +109,8 @@ public class MainManager {
         	WordStore wordStore = new WordStore();
             wordStore.leerListaPalabras(connection);
             System.out.println("Salvando atributos...");
+            connection.logout();
+            connection = null;
             filterManager.saveAtributos(connection);
             System.out.println("Atributos salvados");
         } catch (Exception e1) {

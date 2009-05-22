@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -72,6 +74,7 @@ public class MessageReader implements Iterable<Message>{
 				Message msg = folder.getMessage(first_msg);
 				ComparableMessage comparableMsg = new ComparableMessage(msg);
 				message_list.add(comparableMsg);
+               
 				} catch (MessagingException e) {
 					e.printStackTrace();
 				} finally {
@@ -105,6 +108,7 @@ public class MessageReader implements Iterable<Message>{
 					Message nextMsg = folder.getMessage(number+1);
 					ComparableMessage nextComparableMsg = new ComparableMessage(nextMsg);
 					message_list.add(nextComparableMsg);
+					
 				}
 			} catch (MessagingException e) {
 				e.printStackTrace();
