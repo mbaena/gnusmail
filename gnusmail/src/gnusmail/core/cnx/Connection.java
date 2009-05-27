@@ -156,9 +156,9 @@ public class Connection {
 		store = new IMAPSSLStore(session, url);
        
 		try {
-			System.out.print("Conectando... ");
+			System.out.println("Conectando... ");
 			store.connect();
-			System.out.println("CONECTADO!!");
+			//System.out.println("CONECTADO!!");
 		} catch (MessagingException e){
             System.out.println(e.getMessage());
 			throw(e);

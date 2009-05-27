@@ -21,9 +21,8 @@ public class ConfigurationManager {
 		Properties props = new Properties();
 	    try {
 		  InputStream f = ConfigurationManager.class.getClassLoader().getResourceAsStream("gnusmail/" + CONF_FILE);
-	      System.out.println("Cargando configuracion de usuario...\n");
+	      System.out.println("Cargando configuracion de usuario...");
 	      props.load(f);
-          System.out.println(props.getProperty("genusmail.filters.WordFrequency"));
 	      f.close();    
 	    } catch (Exception e) {
 			e.printStackTrace();
@@ -84,7 +83,7 @@ public class ConfigurationManager {
 	public static void grabarFichero(){
 		try {		
 			FileOutputStream f = new FileOutputStream(CONF_FOLDER + CONF_FILE);
-			System.out.println("Grabando fichero de Properties...\n");
+			//System.out.println("Grabando fichero de Properties...\n");
 			properties.store(f,"#########################################\n" +
 								"#   Fichero de configuracion\n" +
 								"#########################################");

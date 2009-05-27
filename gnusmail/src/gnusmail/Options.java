@@ -104,7 +104,6 @@ public class Options {
 	public void setProperties(String clave, String valor) {
         ConfigurationManager.añadirPropiedad("genusmail.filters." + clave, valor);
         ConfigurationManager.grabarFichero();
-		
 	}
 
 	public void setOpenMail(int mail_id) {

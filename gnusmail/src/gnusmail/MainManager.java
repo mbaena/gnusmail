@@ -32,7 +32,6 @@ public class MainManager {
 	/** Connects to URL 
      * @throws Exception */
     private void connect(String url) throws MessagingException {
-        System.out.println("URL es " + url);
         if (url != null) {
             try {
                 connection = new Connection(url);
