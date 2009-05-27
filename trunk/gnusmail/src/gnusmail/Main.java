@@ -2,6 +2,7 @@ package gnusmail;
 
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
+import gnusmail.core.ConfigurationManager;
 
 public class Main {
 
@@ -13,10 +14,10 @@ public class Main {
         longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
         longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
 
-        Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgi::r::p::a::c::l::hx", longopts);
+        Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgi::r:a:c::l::h", longopts);
         getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
-        System.out.println("BIENVENIDO A GENUSMAIL!!!\n");
+        System.out.println("BIENVENIDO A GENUSMAIL!!!");
 
         String arg;
         int c;
@@ -40,7 +41,6 @@ public class Main {
                     break;
                 case 'a':	//Muestra x pantalla los atributos de un correo
                     arg = getopt.getOptarg();
-                    System.out.println("! " + arg);
                 	options.setShowAttributes(Integer.parseInt(arg));
                     break;
 
@@ -50,7 +50,6 @@ public class Main {
                     
                 case 'c':	//Login
                     arg = getopt.getOptarg();
-                    System.out.println("Arg es" + arg);
                     if (arg != null) {
                     	options.setURL(arg);
                     }
@@ -72,7 +71,7 @@ public class Main {
                     break;
                 case 'h':	//Muestra la ayuda
                     printMenu();
-                    break;
+                    return;
                 case 'i':	//Clasifica el Correo pasado por linea de comandos
                 	options.setMailClassification(true);
                     break;
@@ -80,13 +79,9 @@ public class Main {
                     arg = getopt.getOptarg();
                 	options.setListMails(true, Integer.parseInt(arg));
                     break;
-                case 'p':	//Cambia una pareja de valores en el objeto Properties
-                    String clave = getopt.getOptarg();
-                    String valor = argv[getopt.getOptind()];
-                	options.setProperties(clave, valor);
-                    break;
                 case 'r':	//Abrir Correo
                     arg = (getopt.getOptarg());
+                    System.out.println(arg);
                     options.setOpenMail(Integer.parseInt(arg));
                     break;
                 case '?':
@@ -94,13 +89,9 @@ public class Main {
                             "\nUse el comando --help o -h para ver las operaciones disponibles");
                     break;
             } //switch
-            System.out.println();
         }//while
         System.out.println("Running options...");
         options.run();
-        
-        System.out.println("ADIOS!!!");
-
     }
     
 
@@ -111,18 +102,19 @@ public class Main {
         System.out.println("----------------------------------------------");
         System.out.println("-h/--help\n	Muestra este menú de ayuda\n");
         System.out.println("-a/--atrib numCorreo\n	Obtener atributos de un Correo\n");
-        System.out.println("-b	Extrae atributos de todos los correos del usuario y los almacena en el CSV\n");
-        System.out.println("-c/--connect url\n	Se conecta, donde url es " +
-                "protocolo://usuario:contraseña@servidor[/rutaCarpeta.subCarpeta]\n");
+        System.out.println("-b	Extrae atributos de todos los correos del usuario y los almacena en\n" +
+                           "\tel fichero CSV " + ConfigurationManager.DATASET_FILE);
+        System.out.println("-c/--connect url\n\tEspecifica una url de conexión:\n " +
+                "\tprotocolo://usuario:contraseña@servidor[/rutaCarpeta.subCarpeta]\n");
         //System.out.println("-d numCorreo\n	Clasifica con el modelo el correo numCorreo-esimo" +
         //		" de la carpeta actual\n");
         System.out.println("-e	Entrena el modelo\n");
         System.out.println("-f	Obtener lista de carpetas\n");
         System.out.println("-g	Listar Correos de la carpeta actual\n");
         System.out.println("-i	Clasifica el correo pasado por la entrada estandar\n");
-        System.out.println("-p Clave Valor\n	Cambiar par en Properties\n");
-        System.out.println("-r numCorreo\n	Muestra el contenido del Correo indicado\n");
-        System.out.println("-x	Desconectar");
+        System.out.println("-l[N]\tLista mensajes en todas las carpetas ordenados por fecha de recepcción \n" +
+                           "\t(limitar a N mensajes por carpeta).\n");
+        System.out.println("-r numCorreo\n\tMuestra el contenido del Correo indicado\n");
         System.out.println("----------------------------------------------");
     }
 
