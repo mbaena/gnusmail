@@ -24,7 +24,7 @@ public class Connection {
     private String password; 
     private Session session;
     private IMAPStore store;
-    private URLName url;
+    //private URLName url;
     private String protocol;
     private String mbox = "INBOX";
 
@@ -36,7 +36,7 @@ public class Connection {
         protocol = ConfigurationManager.getProperty("protocol");
         //System.out.println(protocol+"://"+username+":"+password+"@"+hostname);
         try {
-        	login(protocol+"://"+username+":"+password+"@"+hostname);
+        	login();
 		}catch (MessagingException e){
 			System.out.println("Error de conexion");
 			e.printStackTrace();
@@ -48,7 +48,24 @@ public class Connection {
     	URLName url= new URLName(cadena);
     	this.hostname = url.getHost();
         this.username = url.getUsername();
-        this.password = url.getPassword();	    
+        this.password = url.getPassword();
+        this.protocol = url.getProtocol();
+		try {
+			if (url.getFile()==null)
+				folder = (IMAPFolder) store.getFolder(mbox);
+			else
+				folder = (IMAPFolder) store.getFolder(url.getFile());
+		} catch (Exception e){
+			folder=null;
+			System.out.println("\nCarpeta '"+url.getFile()+"' no encontrada!!!");
+		}
+        try {
+        	login();
+    		guardarDatosConexion();
+		}catch (MessagingException e){
+			System.out.println("Error de conexion");
+			e.printStackTrace();
+		}
     }
 
     /** Returns the javax.mail.Folder object. */
@@ -116,20 +133,13 @@ public class Connection {
         this.store = store;
     }
 
-    /** Gets the  url */
-    public URLName getUrl() {
-        return url;
-    }
-
     /** Method for checking if the user is logged in. */
     public boolean isLoggedIn() {
         return (store !=null && store.isConnected());
     }
       
     /** Method used to login to the mail host. */
-    public void login(String cad) throws MessagingException {
-		url = new URLName(cad);
-		this.protocol = url.getProtocol();
+    public void login() throws MessagingException {
 		if (session == null) {
 		    Properties props = null;
 		    try {
@@ -152,7 +162,7 @@ public class Connection {
 		    session = Session.getInstance(props);
 		    
 		}
-		
+        URLName url = new URLName(protocol + "://" + username + ":" + password + "@" + hostname);
 		store = new IMAPSSLStore(session, url);
        
 		try {
@@ -164,22 +174,6 @@ public class Connection {
 			throw(e);
 			//return;
 		}
-		try {			
-			if (url.getFile()==null) 
-				folder = (IMAPFolder) store.getFolder(mbox);
-			else 
-				folder = (IMAPFolder) store.getFolder(url.getFile());
-			
-			folder.open(Folder.READ_WRITE);
-		} catch (Exception e){
-			folder=null;
-			System.out.println("\nCarpeta '"+url.getFile()+"' no encontrada!!!");
-		}
-		this.username = url.getUsername();
-		this.hostname = url.getHost();
-		this.password = url.getPassword();
-		
-		guardarDatosConexion();				
     }
     
     /** Guarda los datos de conexion del usuario en una linea con formato
