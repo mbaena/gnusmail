@@ -34,7 +34,7 @@ public class Connection {
         password = ConfigurationManager.getProperty("password");
         hostname = ConfigurationManager.getProperty("hostname");
         protocol = ConfigurationManager.getProperty("protocol");
-        //System.out.println(protocol+"://"+username+":"+password+"@"+hostname);
+        System.out.println(protocol+"://"+username+":"+"@"+hostname);
         try {
         	login();
 		}catch (MessagingException e){
