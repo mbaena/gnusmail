@@ -32,8 +32,7 @@ public class ConfigurationManager {
 		try {
 			FileInputStream f = new FileInputStream(fileName);
 		    props.load(f);
-		    f.close();
-		    
+		    f.close();            
 		} catch (FileNotFoundException e) {
 
 			File f = new File(fileName);
