@@ -35,6 +35,9 @@ public class MainManager {
         if (url != null) {
             try {
                 connection = new Connection(url);
+               // connection.login(url);
+                connection.login();
+                System.out.println("Connected!");
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Unable to connect to the requested host!");
