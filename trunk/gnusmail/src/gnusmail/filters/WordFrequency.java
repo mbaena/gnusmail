@@ -3,10 +3,14 @@
  * and open the template in the editor.
  */
 package gnusmail.filters;
+import gnusmail.Languages.Language;
 import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import gnusmail.core.WordStore;
 import gnusmail.core.cnx.MensajeInfo;
 
+import gnusmail.languagefeatures.EmailTokenizer;
+import gnusmail.languagefeatures.LanguageDetection;
+import gnusmail.languagefeatures.Token;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -15,7 +19,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,7 +60,7 @@ public class WordFrequency extends Filter {
         
         String res = "";
         try {
-            if (stringsEsteDocumento == null) {
+           /* if (stringsEsteDocumento == null) {
                 stringsEsteDocumento = new TreeSet<String>();
                 String body = mess.getBody();
                 StringTokenizer st = new StringTokenizer(body, WordStore.patronToken);
@@ -66,6 +69,17 @@ public class WordFrequency extends Filter {
                     token = token.toLowerCase();
                     stringsEsteDocumento.add(token);
                    
+                }
+            }*/
+            if (stringsEsteDocumento == null) {
+                stringsEsteDocumento = new TreeSet<String>();
+                String body = mess.getBody();
+                Language lang = new LanguageDetection().detectLanguage(body);
+                EmailTokenizer et = new EmailTokenizer(body);
+                List<Token> tokens = et.tokenize();
+                for (Token token : tokens) {
+                    token.setLanguage(lang);
+                    stringsEsteDocumento.add(token.getStemmedForm());
                 }
             }
 
