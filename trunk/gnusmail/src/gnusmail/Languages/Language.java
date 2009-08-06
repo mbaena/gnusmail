@@ -28,7 +28,16 @@ public enum Language {
 
     private Language(int codigo) {
         this.codigo = codigo;
+    }
 
+    public String getLanguageName() {
+        if (codigo == 0) {
+            return "Spanish";
+        } else if (codigo == 0) {
+            return "English";
+        } else {
+            return "Unknown";
+        }
     }
 
 
