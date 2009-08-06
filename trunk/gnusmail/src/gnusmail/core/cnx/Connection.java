@@ -272,7 +272,13 @@ public class Connection {
     }
     
     public Folder[] getCarpetas() throws MessagingException {
-    	
+    	System.out.println("Vamos a intentar un getCarpetas");
+        if (isLoggedIn()) {
+            System.out.println("Is logged in");
+        } else {
+            login();
+            System.out.println("Not logged in");
+        }
     	Folder f[];
 		f = (store.getFolder("INBOX")).list("*");
 		
