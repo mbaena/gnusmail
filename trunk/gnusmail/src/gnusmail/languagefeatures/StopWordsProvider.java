@@ -28,7 +28,7 @@ public class StopWordsProvider {
     static final String ENGLISH_FILE = MAIN_FOLDER + "english-stopwords.data";
     public Map<Language, List<String>> stopwordsMap;
 
-    public Map<Language, List<String>> getStopwordsMap() {
+        public Map<Language, List<String>> getStopwordsMap() {
         return stopwordsMap;
     }
 
