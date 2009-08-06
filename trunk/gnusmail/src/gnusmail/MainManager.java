@@ -13,6 +13,7 @@ public class MainManager {
     private Connection connection;
 	private ClassifierManager classifierManager;
 	private FilterManager filterManager;
+    private String url;
 	
     public MainManager(String url) {
 		try {
@@ -32,6 +33,7 @@ public class MainManager {
 	/** Connects to URL 
      * @throws Exception */
     private void connect(String url) throws MessagingException {
+        this.url = url;
         if (url != null) {
             try {
                 connection = new Connection(url);
@@ -109,9 +111,12 @@ public class MainManager {
         	WordStore wordStore = new WordStore();
             wordStore.leerListaPalabras(connection);
             System.out.println("Salvando atributos...");
-            connection.logout();
+            connection.logout(); //por que?
             connection = null;
+            connect(url);
             filterManager.saveAtributos(connection);
+            
+            //connection = null;
             System.out.println("Atributos salvados");
         } catch (Exception e1) {
             filterManager.escribirFichero();
