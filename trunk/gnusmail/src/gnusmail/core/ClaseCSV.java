@@ -154,8 +154,13 @@ public class ClaseCSV {
                 j = cabeceras.length - 1;
             }
 
-            
+            System.out.println("res[" + j + "/" + res.length + "] = registro["
+                    + i + "/" + registro.length + "]");
+            //TODO esto da a veces error de rango, mirar por qué
+            try {
             res[j] = registro[i];
+            } catch (Exception e) {}
+
         }
         return res;
     }
@@ -223,7 +228,13 @@ public class ClaseCSV {
         }
         i = estructura.length - 1;
         for (j = 0; j < estructura[0].length; j++) {
+            //TODO: la asignación de abajo da a veces problemas,
+            //hay que quitarle la excepcion
+            try {
             estructura[i][j] = nuevo[j];
+            } catch (Exception e) {
+                //
+            }
         }
         todo = estructura.clone();
     }

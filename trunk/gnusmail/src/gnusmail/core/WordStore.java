@@ -43,7 +43,7 @@ public class WordStore {
 
     Map<String, WordCount> wordCount;
     public final static String patronToken = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
-    public final static String directorio = System.getProperty("user.home") + "/.genusmail/";
+    public final static String directorio = System.getProperty("user.home") + "/.gnusmail/";
     public final static File FICH_WORDS = new File(directorio + "/wordlist.data");
     public final static File FICH_STOPWORDS = new File(directorio + "/wordlist.data");
     public final static double PROP_DOCUMENTOS = 0.25;
