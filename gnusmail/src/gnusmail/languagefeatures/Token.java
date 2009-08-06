@@ -2,13 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package gnusmail.languagefeatures;
 
 import gnusmail.Languages.Language;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import gnusmail.languagefeatures.stemming.StemmerFactory;
 
 /**
  * This class encapsulates a token, and has method to return several variations of
@@ -16,8 +13,19 @@ import java.util.logging.Logger;
  * @author jmcarmona
  */
 public class Token {
+
     String originalForm;
-    Language lang;
+    Language language;
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
+    }
+
+    
 
     public Token(String originalForm) {
         this.originalForm = originalForm;
@@ -31,10 +39,12 @@ public class Token {
         return originalForm.toLowerCase();
     }
 
+    /**
+     * This function obtains a stemmed form of the lower case of the original form
+     * of the word, attending to the detected language
+     * @return
+     */
     public String getStemmedForm() {
-        throw new UnsupportedOperationException("Not still implemented");
+        return StemmerFactory.getStemmer(language).raiz(getLowerCaseForm());
     }
-
-   
-
 }
