@@ -45,6 +45,13 @@ public class Token {
      * @return
      */
     public String getStemmedForm() {
-        return StemmerFactory.getStemmer(language).raiz(getLowerCaseForm());
+        String toStem = getLowerCaseForm().replaceAll("\\.|:|,|\\(|\\)", "");
+       // String toStem = getLowerCaseForm();
+        return StemmerFactory.getStemmer(language).raiz(toStem);
+    }
+
+    @Override
+    public String toString() {
+        return "[" + originalForm + " " + getStemmedForm() + " " + language.getLanguageName() + "]";
     }
 }

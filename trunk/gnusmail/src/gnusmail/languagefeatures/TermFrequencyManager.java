@@ -17,6 +17,16 @@ import java.util.TreeMap;
 public class TermFrequencyManager {
     Map<String, List<TFIDFSummary>> tfidfByFolder;
 
+    public Map<String, List<TFIDFSummary>> getTfidfByFolder() {
+        return tfidfByFolder;
+    }
+
+    public void setTfidfByFolder(Map<String, List<TFIDFSummary>> tfidfByFolder) {
+        this.tfidfByFolder = tfidfByFolder;
+    }
+
+    
+
     public TermFrequencyManager() {
         tfidfByFolder = new TreeMap<String, List<TFIDFSummary>>();
     }
@@ -35,6 +45,19 @@ public class TermFrequencyManager {
         summary.addNewAppearances(appearances);
     }
 
+    /**
+     * Like addTermAppearancesInDocumentForFolder, but adding appearances one by one
+     * @param term
+     * @param folder
+     */
+    public void addSingleTermAppearanceInDocumentForFolder(String term, String folder) {
+        if (!tfidfByFolder.containsKey(folder)) {
+            tfidfByFolder.put(folder, new LinkedList<TFIDFSummary>());
+        }
+        TFIDFSummary summary = locateTermInList(term, tfidfByFolder.get(folder));
+        summary.addNewAppearances(1);
+    }
+
     private TFIDFSummary locateTermInList(String term, List<TFIDFSummary> list) {
         boolean found = false;
         int counter = 0;
@@ -50,8 +73,14 @@ public class TermFrequencyManager {
         if (res == null) {
             res = new TFIDFSummary();
             res.setTerm(term);
+            list.add(res);
         }
         return res;
+    }
+
+    public void addNewDocumentForWord(String term, String folder) {
+        TFIDFSummary tfidf = locateTermInList(term, this.tfidfByFolder.get(folder));
+        tfidf.addNewDocumentAppearance();
     }
 
 
