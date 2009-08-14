@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * @author jmcarmona
  */
 public class StopWordsProvider {
-    static private final String MAIN_FOLDER = System.getProperty("user.home") + "./gnusmail/";
+    static private final String MAIN_FOLDER = System.getProperty("user.home") + "/.gnusmail/";
 
     static StopWordsProvider instance;
     static final String SPANISH_FILE = MAIN_FOLDER + "spanish-stopwords.data";
