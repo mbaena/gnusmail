@@ -4,9 +4,15 @@
  */
 package gnusmail.core;
 
+import gnusmail.Languages.Language;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MensajeInfo;
 
+import gnusmail.languagefeatures.EmailTokenizer;
+import gnusmail.languagefeatures.LanguageDetection;
+import gnusmail.languagefeatures.TFIDFSummary;
+import gnusmail.languagefeatures.TermFrequencyManager;
+import gnusmail.languagefeatures.Token;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -20,10 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,43 +44,56 @@ import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
  */
 public class WordStore {
 
-    Map<String, WordCount> wordCount;
+    TermFrequencyManager termFrequencyManager;
     public final static String patronToken = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
     public final static String directorio = System.getProperty("user.home") + "/.gnusmail/";
     public final static File FICH_WORDS = new File(directorio + "/wordlist.data");
     public final static File FICH_STOPWORDS = new File(directorio + "/wordlist.data");
     public final static double PROP_DOCUMENTOS = 0.25;
     public final static int MIN_DOCUMENTOS = 5;
-    public final static int MAX_NUM_ATRIBUTOS = 200;
+    public final static int MAX_NUM_ATRIBUTOS = 20;
     int numDocumentosAnalizados = 0;
     String stopWordsArray[];
     SnowballAnalyzer sbAna;
 
-    public void addTokenizedString(String str) {
-        Set<String> stringsEsteDocumento = new TreeSet<String>();
-
-        StringTokenizer st = new StringTokenizer(str, patronToken);
-        while (st.hasMoreTokens()) {
-            String token = st.nextToken();
-            token = token.toLowerCase();
-
-            stringsEsteDocumento.add(token);
+    public void addTokenizedString(MensajeInfo str, String buzon) {
+        Map<String, WordCount> wordCount = new TreeMap<String, WordCount>();
+        String body = null;
+        try {
+            body = str.getBody() + " " + str.getSubject();
+        } catch (MessagingException ex) {
+            Logger.getLogger(WordStore.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(WordStore.class.getName()).log(Level.SEVERE, null, ex);
         }
-        for (String tokenSet : stringsEsteDocumento) {
-            if (!wordCount.containsKey(tokenSet)) {
-                wordCount.put(tokenSet, new WordCount(tokenSet, 1));
+        Language lang = new LanguageDetection().detectLanguage(body);
+        EmailTokenizer et = new EmailTokenizer(body);
+        List<Token> tokens = et.tokenize();
+        for (Token token : tokens) {
+            token.setLanguage(lang); //language for stemming
+            String stemmedForm = token.getStemmedForm();
+            if (!wordCount.containsKey(stemmedForm)) {
+                wordCount.put(stemmedForm, new WordCount(stemmedForm, 1));
             } else {
-                WordCount wc = wordCount.get(tokenSet);
+                WordCount wc = wordCount.get(stemmedForm);
                 wc.setCount(wc.getCount() + 1);
             }
+
+        }
+        for (String word : wordCount.keySet()) {
+            termFrequencyManager.addTermAppearancesInDocumentForFolder(word,
+                    wordCount.get(word).getCount(),
+                    buzon);
+            termFrequencyManager.addNewDocumentForWord(word, buzon);
         }
         numDocumentosAnalizados++;
     }
 
     public WordStore() {
-        wordCount = new TreeMap<String, WordCount>();
-        // leerFicheroStopWords().toArray();
-        //ssbAna = new SnowballAnalyzer("Spanish", stopWordsArray);
+        //wordCount = new TreeMap<String, WordCount>();
+        termFrequencyManager = new TermFrequencyManager();
+    // leerFicheroStopWords().toArray();
+    //ssbAna = new SnowballAnalyzer("Spanish", stopWordsArray);
     }
 
     public void writeToFile() {
@@ -85,26 +101,46 @@ public class WordStore {
         FileWriter outFile = null;
         System.out.println("Guardando palabras");
         try {
-            Collection<WordCount> coll = wordCount.values();
+            outFile = new FileWriter(FICH_WORDS);
+            PrintWriter out = new PrintWriter(outFile);
+            //For each folder, we store the most frequent non-stopword terms
+            for (String folder : termFrequencyManager.getTfidfByFolder().keySet()) {
+                int contador = 0;
+                System.out.println("Folder " + folder + " size " + termFrequencyManager.getTfidfByFolder().
+                        get(folder).size());
+
+                while (contador < 10 && contador < termFrequencyManager.getTfidfByFolder().
+                        get(folder).size()) {
+
+                    TFIDFSummary ts = termFrequencyManager.getTfidfByFolder().
+                            get(folder).get(contador);
+                    if (!stopWords.contains(ts.getTerm())) {
+                        System.out.println(ts);
+                        contador++;
+                    }
+                }
+            }
+
+            /* Collection<WordCount> coll = wordCount.values();
             List<WordCount> list = new ArrayList<WordCount>(coll);
             Collections.sort(list);
             //int size = list.size();
-            outFile = new FileWriter(FICH_WORDS);
-            PrintWriter out = new PrintWriter(outFile);
+            
+            
             // Also could be written as follows on one line
             // Printwriter out = new PrintWriter(new FileWriter(args[0]));
             // Write text to file
             int i = 0;
             int palabrasanadidas = 0;
             while (palabrasanadidas <= MAX_NUM_ATRIBUTOS && i < list.size()) {
-                if (list.get(i).getCount() > MIN_DOCUMENTOS && !stopWords.contains(list.get(i))) {
-                    out.println(list.get(i).getWord());
-                    palabrasanadidas++;
-                }
-                i++;
+            if (list.get(i).getCount() > MIN_DOCUMENTOS && !stopWords.contains(list.get(i))) {
+            out.println(list.get(i).getWord());
+            palabrasanadidas++;
+            }
+            i++;
 
             }
-            System.out.println("La maxima era " + list.get(list.size() - 1));
+            System.out.println("La maxima era " + list.get(list.size() - 1));*/
             out.close();
         } catch (IOException ex) {
             Logger.getLogger(WordStore.class.getName()).log(Level.SEVERE, null, ex);
@@ -132,7 +168,7 @@ public class WordStore {
             //Read File Line By Line
             while ((strLine = br.readLine()) != null) {
                 // Print the content on the console
-               res.add(strLine);
+                res.add(strLine);
             }
             //Close the input stream
             in.close();
@@ -149,8 +185,13 @@ public class WordStore {
             carpetas = miconexion.getCarpetas();
 
             for (int i = 0; i < carpetas.length; i++) {
-                System.out.println("Extrayendo informacion de palabres de  " + carpetas[i].getFullName());
-                leerListaPalabrasCarpeta(carpetas[i]);
+                if (!carpetas[i].getFullName().contains(".Sent")) {
+                    System.out.println("Extrayendo informacion de palabres de  " + carpetas[i].getFullName());
+                    leerListaPalabrasCarpeta(carpetas[i]);
+                } else {
+                    System.out.println("No es necesario extraer palabras de " + carpetas[i].getFullName());
+                }
+
             }
             System.out.println("Extraida la info de las palabras");
             writeToFile();
@@ -173,18 +214,14 @@ public class WordStore {
 
                 for (int i = 1; i <= buzon.getMessageCount(); i++) {
                     MensajeInfo msj = new MensajeInfo(buzon.getMessage(i));
-                    String body = msj.getBody();
-                    addTokenizedString(body);
+                    //String body = msj.getBody();
+                    addTokenizedString(msj, buzon.getName());
                 }//for
 
             } catch (MessagingException e) {
                 System.out.println("Folder " + buzon.getFullName() + " no encontrado al leer palabras");
             //e.printStackTrace();
-            } catch (IOException e) {
-                System.out.println("Error al escribir en CSV");
-                e.printStackTrace();
             }
         }//if
     }
-
 }
