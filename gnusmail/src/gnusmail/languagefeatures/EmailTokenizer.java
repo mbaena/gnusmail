@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 public class EmailTokenizer {
    String body;
    List<Token> tokens;
+   public final static String patronToken = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
 
 
     public EmailTokenizer(String emailBody) {
@@ -24,7 +25,7 @@ public class EmailTokenizer {
     }
 
     public  List<Token> tokenize() {
-        StringTokenizer st = new StringTokenizer(body);
+        StringTokenizer st = new StringTokenizer(body, patronToken);
         while (st.hasMoreElements()) {
             tokens.add(new Token(st.nextToken()));
         }

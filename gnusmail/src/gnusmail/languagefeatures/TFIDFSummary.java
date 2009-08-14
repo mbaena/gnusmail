@@ -51,7 +51,11 @@ public class TFIDFSummary implements Comparable {
     }
 
     public double getTFIDFScore() {
-        return getTermFrequency() / getNumberOfDocuments();
+        if (getNumberOfDocuments() == 0) {
+            return 0.0;
+        } else {
+            return (1.0 * getTermFrequency()) / (1.0 * getNumberOfDocuments());
+        }
     }
 
     public int compareTo(Object o) {
@@ -67,5 +71,11 @@ public class TFIDFSummary implements Comparable {
                 return 0;
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return this.term + " " + this.getTFIDFScore() + " " +
+                this.getNumberOfDocuments() + " " + this.getTermFrequency();
     }
 }
