@@ -73,12 +73,14 @@ public class WordFrequency extends Filter {
             }*/
             if (stringsEsteDocumento == null) {
                 stringsEsteDocumento = new TreeSet<String>();
-                String body = mess.getBody();
+                //Extraemos las palabras del cuerpo y la cabecera
+                String body = mess.getBody() + " " + mess.getSubject();
                 Language lang = new LanguageDetection().detectLanguage(body);
                 EmailTokenizer et = new EmailTokenizer(body);
                 List<Token> tokens = et.tokenize();
                 for (Token token : tokens) {
                     token.setLanguage(lang);
+                    System.out.println("Token: " + token);
                     stringsEsteDocumento.add(token.getStemmedForm());
                 }
             }
