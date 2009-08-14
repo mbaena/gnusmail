@@ -140,11 +140,11 @@ public class ClaseCSV {
             res[z] = "?";
         }
 
+
         for (int i = 0; i < registro.length; i++) {
             String atrib = filtros.get(i);
             if (cabeceras != null) {
                 j = buscarPosicion(atrib, cabeceras);
-                
             } else {
                 j = i;
             }
@@ -154,12 +154,7 @@ public class ClaseCSV {
                 j = cabeceras.length - 1;
             }
 
-            System.out.println("res[" + j + "/" + res.length + "] = registro["
-                    + i + "/" + registro.length + "]");
-            //TODO esto da a veces error de rango, mirar por qué
-            try {
             res[j] = registro[i];
-            } catch (Exception e) {}
 
         }
         return res;
@@ -168,9 +163,7 @@ public class ClaseCSV {
     /** Devuelve la posicion de cadena en el array de Strings, -1 si no está */
     private int buscarPosicion(String cadena, String[] array) {
         int pos = 0;
-        while ((pos < array.length) && (pos >= 0) 
-                && (cadena.compareTo("genusmail.filters." + array[pos]) != 0)
-                && (cadena.compareTo(array[pos]) != 0)) { //Por las palabras sueltas
+        while ((pos < array.length) && (pos >= 0) && (cadena.compareTo("gnusmail.filters." + array[pos]) != 0) && (cadena.compareTo(array[pos]) != 0)) { //Por las palabras sueltas
             pos++;
         }
 
@@ -230,11 +223,8 @@ public class ClaseCSV {
         for (j = 0; j < estructura[0].length; j++) {
             //TODO: la asignación de abajo da a veces problemas,
             //hay que quitarle la excepcion
-            try {
             estructura[i][j] = nuevo[j];
-            } catch (Exception e) {
-                //
-            }
+
         }
         todo = estructura.clone();
     }
