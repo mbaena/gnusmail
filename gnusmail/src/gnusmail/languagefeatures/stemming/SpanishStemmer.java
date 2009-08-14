@@ -644,16 +644,16 @@ public class SpanishStemmer implements IStemmer {
              System.out.println("       Palabra de la que se quiere extraer su raíz.");
         }
         palabra=palabraRecibida;
-        for(int pos=0;pos<palabra.length();pos++)
+     /*   for(int pos=0;pos<palabra.length();pos++)
         {
             car=palabra.charAt(pos);
             if (!isalpha(car))
                 if(!(car=='á' || car=='é' || car=='í' || car=='ó' || car=='ú'))
                 {
 		    System.out.println(palabra);
-                    return "ERROR:"+palabra;
+                    return palabra;
                 }
-        }
+        }*/
         end=palabra.length();//Contiene la posicion del último caracter de la palabra
         palabra=palabra.toLowerCase();
         idRegla=sustituirFinal(listaReglas1);
