@@ -19,6 +19,7 @@ public class Options {
 	private int openMail;
 	private boolean listMails;
 	private int listMailsLimit;
+    private boolean extractWords;
 	
 	public Options() {
         this.url = null;
@@ -31,6 +32,7 @@ public class Options {
         this.listMailsInFolder = false;
         this.mailClassification = false;
         this.openMail = -1;
+        this.extractWords = false;
 	}
 	
 	public void run() {
@@ -57,6 +59,12 @@ public class Options {
         if (this.listMailsInFolder) {
         	mainManager.mailsInFolder();
         }
+
+        if (this.extractWords) {
+            System.out.println("Procediendo a extraer frequent words");
+            mainManager.extractFrequentWords();
+        }
+
         if (this.mailClassification) {
             MimeMessage msg;
 			try {
@@ -114,5 +122,15 @@ public class Options {
 		this.listMailsLimit = limit;
 		this.listMails = b;
 	}
+
+    public boolean isExtractWords() {
+        return extractWords;
+    }
+
+    public void setExtractWords(boolean extractWords) {
+        this.extractWords = extractWords;
+    }
+
+    
 
 }

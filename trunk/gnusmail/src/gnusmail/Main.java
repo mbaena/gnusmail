@@ -14,7 +14,7 @@ public class Main {
         longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
         longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
 
-        Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgi::r:a:c::l::h", longopts);
+        Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgi::r::p::a::c::l::w::hx", longopts);
         getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
         System.out.println("BIENVENIDO A GENUSMAIL!!!");
@@ -23,6 +23,7 @@ public class Main {
         int c;
         Options options = new Options();
         while ((c = getopt.getopt()) != -1) {
+            System.out.println("C es " + c + " w es " + 'w');
             switch (c) {
                 case 0:
                     char car = (char) (new Integer(sb.toString())).intValue();
@@ -54,6 +55,10 @@ public class Main {
                     	options.setURL(arg);
                     }
                     break;
+                case 'w':	//Extraer lista de palabras frecuentes
+                    options.setExtractWords(true);
+                    System.out.println("SetExtractWords");
+                    break;
                 /*case 'd':	//Clasifica el correo n-esimo de la carpeta actual
                 arg =  (g.getOptarg());
                 if (miconexion==null) miconexion=new Conexion();
@@ -84,6 +89,7 @@ public class Main {
                     System.out.println(arg);
                     options.setOpenMail(Integer.parseInt(arg));
                     break;
+                
                 case '?':
                     System.out.println("Opcion no valida." +
                             "\nUse el comando --help o -h para ver las operaciones disponibles");
