@@ -22,18 +22,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 
-import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 
 /**
  * Esta clase gestiona un mapa palabras -> numero de apariciones. Se ha creado la 
@@ -43,20 +43,22 @@ import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
  * @author jmcarmona
  */
 public class WordStore {
+    //Max number of messages to extract information from
 
+    private final int MAX_MESSAGES_PER_FOLDER = 50;
     TermFrequencyManager termFrequencyManager;
-    public final static String patronToken = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
-    public final static String directorio = System.getProperty("user.home") + "/.gnusmail/";
-    public final static File FICH_WORDS = new File(directorio + "/wordlist.data");
-    public final static File FICH_STOPWORDS = new File(directorio + "/wordlist.data");
-    public final static double PROP_DOCUMENTOS = 0.25;
-    public final static int MIN_DOCUMENTOS = 5;
-    public final static int MAX_NUM_ATRIBUTOS = 20;
-    int numDocumentosAnalizados = 0;
-    String stopWordsArray[];
-    SnowballAnalyzer sbAna;
+    public final static String tokenPattern = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
+    public final static String configFolder = System.getProperty("user.home") + "/.gnusmail/";
+    public final static File WORDS_FILE = new File(configFolder + "/wordlist.data");
+    public final static File STOPWORDS_FILE_EN = new File(configFolder + "/english-stopwords.data");
+    public final static File STOPWORDS_FILE_ES = new File(configFolder + "/spanish-stopwords.data");
+    public final static double PROP_DOCUMENTS = 0.25;
+    public final static int MIN_DOCUMENTS = 5;
+    public final static int MAX_NUM_ATTRIBUTES = 20;
+    int numAnalyzedDocuments = 0;
+    Map<Language, List<String>> stopWords;
 
-    public void addTokenizedString(MensajeInfo str, String buzon) {
+    public void addTokenizedString(MensajeInfo str, String folderName) {
         Map<String, WordCount> wordCount = new TreeMap<String, WordCount>();
         String body = null;
         try {
@@ -72,75 +74,61 @@ public class WordStore {
         for (Token token : tokens) {
             token.setLanguage(lang); //language for stemming
             String stemmedForm = token.getStemmedForm();
-            if (!wordCount.containsKey(stemmedForm)) {
-                wordCount.put(stemmedForm, new WordCount(stemmedForm, 1));
-            } else {
-                WordCount wc = wordCount.get(stemmedForm);
-                wc.setCount(wc.getCount() + 1);
+            if (!stopWords.get(lang).contains(stemmedForm)) {
+                if (!wordCount.containsKey(stemmedForm)) {
+                    wordCount.put(stemmedForm, new WordCount(stemmedForm, 1));
+                } else {
+                    WordCount wc = wordCount.get(stemmedForm);
+                    wc.setCount(wc.getCount() + 1);
+                }
             }
 
         }
         for (String word : wordCount.keySet()) {
             termFrequencyManager.addTermAppearancesInDocumentForFolder(word,
                     wordCount.get(word).getCount(),
-                    buzon);
-            termFrequencyManager.addNewDocumentForWord(word, buzon);
+                    folderName);
+            termFrequencyManager.addNewDocumentForWord(word, folderName);
         }
-        numDocumentosAnalizados++;
+        numAnalyzedDocuments++;
     }
 
     public WordStore() {
         //wordCount = new TreeMap<String, WordCount>();
         termFrequencyManager = new TermFrequencyManager();
-    // leerFicheroStopWords().toArray();
+        readStopWordsFile();
     //ssbAna = new SnowballAnalyzer("Spanish", stopWordsArray);
     }
 
     public void writeToFile() {
-        List<String> stopWords = leerFicheroStopWords();
         FileWriter outFile = null;
         System.out.println("Guardando palabras");
+        Set<String> wordsToWrite = new TreeSet<String>();
+
         try {
-            outFile = new FileWriter(FICH_WORDS);
+            outFile = new FileWriter(WORDS_FILE);
             PrintWriter out = new PrintWriter(outFile);
             //For each folder, we store the most frequent non-stopword terms
             for (String folder : termFrequencyManager.getTfidfByFolder().keySet()) {
-                int contador = 0;
+                int index = 0;
                 System.out.println("Folder " + folder + " size " + termFrequencyManager.getTfidfByFolder().
                         get(folder).size());
+                List<TFIDFSummary> tfidSummaries =
+                        termFrequencyManager.getTfidfByFolder().get(folder);
+                Collections.sort(tfidSummaries);
 
-                while (contador < 10 && contador < termFrequencyManager.getTfidfByFolder().
-                        get(folder).size()) {
+                while (index < 10 && index < tfidSummaries.size()) {
+                    TFIDFSummary ts = tfidSummaries.get(tfidSummaries.size() - 1 - index);
+                    System.out.println(ts);
+                    wordsToWrite.add(ts.getTerm());
+                    index++;
 
-                    TFIDFSummary ts = termFrequencyManager.getTfidfByFolder().
-                            get(folder).get(contador);
-                    if (!stopWords.contains(ts.getTerm())) {
-                        System.out.println(ts);
-                        contador++;
-                    }
                 }
             }
-
-            /* Collection<WordCount> coll = wordCount.values();
-            List<WordCount> list = new ArrayList<WordCount>(coll);
-            Collections.sort(list);
-            //int size = list.size();
-            
-            
-            // Also could be written as follows on one line
-            // Printwriter out = new PrintWriter(new FileWriter(args[0]));
-            // Write text to file
-            int i = 0;
-            int palabrasanadidas = 0;
-            while (palabrasanadidas <= MAX_NUM_ATRIBUTOS && i < list.size()) {
-            if (list.get(i).getCount() > MIN_DOCUMENTOS && !stopWords.contains(list.get(i))) {
-            out.println(list.get(i).getWord());
-            palabrasanadidas++;
+            for (String word : wordsToWrite) {
+                out.println(word);
             }
-            i++;
 
-            }
-            System.out.println("La maxima era " + list.get(list.size() - 1));*/
             out.close();
         } catch (IOException ex) {
             Logger.getLogger(WordStore.class.getName()).log(Level.SEVERE, null, ex);
@@ -155,41 +143,83 @@ public class WordStore {
 
     }
 
-    private List<String> leerFicheroStopWords() {
+    /**
+     * This function creates a list with the maxMessagesPerFolder newer messages
+     * of a given folder
+     * @param buzon
+     * @param maxMessagesPerFolder
+     * @return
+     * @throws javax.mail.MessagingException
+     */
+    private List<MensajeInfo> createLastMessagesList(Folder folder, int maxMessagesPerFolder) throws MessagingException {
+        List<MensajeInfo> messages = new ArrayList<MensajeInfo>();
+        List<MensajeInfo> messagesToReturn = new ArrayList<MensajeInfo>();
+
+        if (folder.getMessageCount() > 0) {
+
+            for (int i = 1; i <= folder.getMessageCount(); i++) {
+                MensajeInfo msj = new MensajeInfo(folder.getMessage(i));
+                messages.add(msj);
+            }//for
+            Collections.sort(messages);
+            for (int i = 0; i < maxMessagesPerFolder && i < messages.size(); i++) {
+                messagesToReturn.add(messages.get(messages.size() - 1 - i));
+            }
+        }
+        return messagesToReturn;
+    }
+
+    private void readStopWordsFile() {
         List<String> res = new ArrayList<String>();
         try {
             // Open the file that is the first
             // command line parameter
-            FileInputStream fstream = new FileInputStream(FICH_STOPWORDS);
+            FileInputStream fstream = new FileInputStream(STOPWORDS_FILE_ES);
             // Get the object of DataInputStream
             DataInputStream in = new DataInputStream(fstream);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String strLine;
             //Read File Line By Line
+            List<String> wordsEs = new ArrayList<String>();
             while ((strLine = br.readLine()) != null) {
                 // Print the content on the console
-                res.add(strLine);
+                wordsEs.add(strLine);
             }
             //Close the input stream
             in.close();
+            fstream = new FileInputStream(STOPWORDS_FILE_EN);
+            // Get the object of DataInputStream
+            in = new DataInputStream(fstream);
+            br = new BufferedReader(new InputStreamReader(in));
+            //Read File Line By Line
+            List<String> wordsEn = new ArrayList<String>();
+            while ((strLine = br.readLine()) != null) {
+                // Print the content on the console
+                wordsEn.add(strLine);
+            }
+            //Close the input stream
+            in.close();
+
+            stopWords = new TreeMap<Language, List<String>>();
+            stopWords.put(Language.SPANISH, wordsEs);
+            stopWords.put(Language.ENGLISH, wordsEn);
         } catch (Exception e) {//Catch exception if any
             System.err.println("Error: " + e.getMessage());
         }
-        return res;
     }
 
-    public void leerListaPalabras(Connection miconexion) {
-        Folder[] carpetas;
+    public void readWordsList(Connection myConnection) {
+        Folder[] folders;
         System.out.println("Extrayendo informacion de palabras de los correos...");
         try {
-            carpetas = miconexion.getCarpetas();
+            folders = myConnection.getCarpetas();
 
-            for (int i = 0; i < carpetas.length; i++) {
-                if (!carpetas[i].getFullName().contains(".Sent")) {
-                    System.out.println("Extrayendo informacion de palabres de  " + carpetas[i].getFullName());
-                    leerListaPalabrasCarpeta(carpetas[i]);
+            for (int i = 0; i < folders.length; i++) {
+                if (!folders[i].getFullName().contains(".Sent")) {
+                    System.out.println("Extrayendo informacion de palabres de  " + folders[i].getFullName());
+                    readWordsListForFolder(folders[i]);
                 } else {
-                    System.out.println("No es necesario extraer palabras de " + carpetas[i].getFullName());
+                    System.out.println("No es necesario extraer palabras de " + folders[i].getFullName());
                 }
 
             }
@@ -205,22 +235,28 @@ public class WordStore {
         }
     }
 
-    public void leerListaPalabrasCarpeta(Folder buzon) {
-        if (buzon != null) {
+    public void readWordsListForFolder(Folder folder) {
+        if (folder != null) {
             try {
-                if (!buzon.isOpen()) {
-                    buzon.open(javax.mail.Folder.READ_WRITE);
+                if (!folder.isOpen()) {
+                    System.out.println("leer ListaPalabrasCarpeta : abrir buzon");
+                    folder.open(javax.mail.Folder.READ_WRITE);
+                }
+                System.out.println("Numero de palabras del buzon: " + folder.getMessageCount());
+                List<MensajeInfo> lastMessagesInFolder = createLastMessagesList(folder, MAX_MESSAGES_PER_FOLDER);
+                for (MensajeInfo msj : lastMessagesInFolder) {
+                    //MensajeInfo msj = new MensajeInfo(buzon.getMessage(i));
+
+                    //String body = msj.getBody();
+                    addTokenizedString(msj, folder.getName());
+                }//for
+                if (folder.isOpen()) {
+                    folder.close(false); //Cerramos el buzon
                 }
 
-                for (int i = 1; i <= buzon.getMessageCount(); i++) {
-                    MensajeInfo msj = new MensajeInfo(buzon.getMessage(i));
-                    //String body = msj.getBody();
-                    addTokenizedString(msj, buzon.getName());
-                }//for
-
             } catch (MessagingException e) {
-                System.out.println("Folder " + buzon.getFullName() + " no encontrado al leer palabras");
-            //e.printStackTrace();
+                System.out.println("Folder " + folder.getFullName() + " no encontrado al leer palabras");
+                e.printStackTrace();
             }
         }//if
     }
