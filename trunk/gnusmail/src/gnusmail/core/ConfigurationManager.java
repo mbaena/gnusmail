@@ -9,6 +9,24 @@ package gnusmail.core;
 
 import java.util.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+class ConsoleEraser extends Thread {
+
+    private boolean running = true;
+
+    @Override
+    public void run() {
+        while (running) {
+            System.out.print("\b ");
+        }
+    }
+
+    public synchronized void halt() {
+        running = false;
+    }
+}
 
 public class ConfigurationManager {
     public final static String CONF_FOLDER = System.getProperty("user.home") + "/.gnusmail/";
@@ -18,6 +36,19 @@ public class ConfigurationManager {
     private static Properties properties = loadProperties();
     
 	private static Properties loadProperties() {
+        ConsoleEraser consoleEraser = new ConsoleEraser();
+        System.out.print("Please enter password for given account: ");
+        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+        consoleEraser.start();
+        String pass = "null";
+        try {
+            pass = stdin.readLine();
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        consoleEraser.halt();
+        System.out.print("\b");
+
 		Properties props = new Properties();
 	    try {
 		  InputStream f = ConfigurationManager.class.getClassLoader().getResourceAsStream("gnusmail/" + CONF_FILE);
@@ -53,6 +84,7 @@ public class ConfigurationManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+        props.setProperty("password", pass);
 		return props;
 	}
 	
