@@ -130,7 +130,7 @@ public class MainManager {
 
     public void extractFrequentWords() {
         WordStore wordStore = new WordStore();
-        wordStore.leerListaPalabras(connection);
+        wordStore.readWordsList(connection);
     }
 
     public void trainModel() {
