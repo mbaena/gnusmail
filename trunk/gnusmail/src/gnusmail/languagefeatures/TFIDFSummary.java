@@ -75,7 +75,7 @@ public class TFIDFSummary implements Comparable {
 
     @Override
     public String toString() {
-        return this.term + " " + this.getTFIDFScore() + " " +
+        return this.term + " <" + this.getTFIDFScore() + "> " +
                 this.getNumberOfDocuments() + " " + this.getTermFrequency();
     }
 }

@@ -63,7 +63,7 @@ public class WordFrequency extends Filter {
            /* if (stringsEsteDocumento == null) {
                 stringsEsteDocumento = new TreeSet<String>();
                 String body = mess.getBody();
-                StringTokenizer st = new StringTokenizer(body, WordStore.patronToken);
+                StringTokenizer st = new StringTokenizer(body, WordStore.tokenPattern);
                 while (st.hasMoreTokens()) {
                     String token = st.nextToken();
                     token = token.toLowerCase();
@@ -109,7 +109,7 @@ public class WordFrequency extends Filter {
             try {
                 // Open the file that is the first
                 // command line parameter
-                FileInputStream fstream = new FileInputStream(WordStore.FICH_WORDS);
+                FileInputStream fstream = new FileInputStream(WordStore.WORDS_FILE);
                 // Get the object of DataInputStream
                 DataInputStream in = new DataInputStream(fstream);
                 BufferedReader br = new BufferedReader(new InputStreamReader(in));
