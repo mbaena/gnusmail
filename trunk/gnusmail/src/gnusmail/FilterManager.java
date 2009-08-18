@@ -13,6 +13,8 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -99,9 +101,23 @@ public class FilterManager {
 
     public void saveAttributesInOrder(Connection connection, int limit) {
         MessageReader reader = new MessageReader(connection, limit);
+        String[] atributos;
         for (Message msg : reader) {
             MensajeInfo msgInfo = new MensajeInfo(msg);
-            getAtributosCorreo(msgInfo);
+            try {
+                System.out.println("Atributos de: " + msgInfo.getMessageId() + " " + msgInfo.getDateAsStr());
+                atributos = getAtributosCorreo(msgInfo);
+
+                    // el Vector filtros contiene todos los filtros activos
+                    String[] filtros = ConfigurationManager.getFilters();
+
+                    /* Y los escribimos en el fichero CSV */
+                    csvmanager.addRegistro(atributos, expandirFiltros(filtros));
+            } catch (IOException ex) {
+                Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (MessagingException ex) {
+                Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -158,8 +174,15 @@ public class FilterManager {
     /**
      * Extrae los atributos del correo de la carpeta actual (según los filtros
      * activos en el Properties)
+     * TODO: se abre y se cierra conexiones a las carpetas por cada correo. Esto se hace
+     * porque si el numero posible de conexiones es limitado, y si leemos los
+     * emails por orden de fecha, no podemos controlar cuantas conexiones tenemos
+     * abiertas.
      */
-    public String[] getAtributosCorreo(MensajeInfo msj) {
+    public String[] getAtributosCorreo(MensajeInfo msj) throws MessagingException {
+        if (!msj.getFolder().isOpen()) {
+                msj.getFolder().open(Folder.READ_ONLY);
+        }
         System.out.println("   Analizando " + msj.getMessageId());
         // res es un vector q contendrá el contenido de todos los atributos
         // activos
@@ -201,7 +224,6 @@ public class FilterManager {
             } else {
                 try {
                     String elemento = filter.applyTo(msj);
-                    System.out.println("Elemento = " + elemento);
                     res.addElement(elemento);
                 } catch (Exception e) {
                     System.out.println("Mensaje no encontrado");
@@ -212,7 +234,10 @@ public class FilterManager {
 
         // Interesa devolver un array de String, no un Vector
         String[] sres = new String[res.size()];
+        msj.getFolder().close(false);
         return res.toArray(sres);
+
+        
     }
 
     public void escribirFichero() {
@@ -235,7 +260,6 @@ public class FilterManager {
     private static Vector<String> expandirFiltros(String[] filtros) {
         Vector<String> res = new Stack<String>();
         for (String s : filtros) {
-            System.out.println("Mirando filtro: " + s);
             if (s.contains("WordFrequency")) {
                 for (String palabra : WordFrequency.leerPalabrasAAnalizar()) {
                     res.add(palabra);

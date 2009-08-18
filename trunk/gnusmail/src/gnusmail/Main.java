@@ -3,19 +3,11 @@ package gnusmail;
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 import gnusmail.core.ConfigurationManager;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 
 
 public class Main {
 
     public static void main(String argv[]) throws Exception {
-
-        
-
-
-
         LongOpt[] longopts = new LongOpt[3];
         StringBuffer sb = new StringBuffer();
         longopts[0] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
