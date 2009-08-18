@@ -59,10 +59,8 @@ public class Options {
         if (this.listMailsInFolder) {
         	mainManager.mailsInFolder();
         }
-
         if (this.extractWords) {
-            System.out.println("Procediendo a extraer frequent words");
-            mainManager.extractFrequentWords();
+             mainManager.extractFrequentWords();
         }
 
         if (this.mailClassification) {

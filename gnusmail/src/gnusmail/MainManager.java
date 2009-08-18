@@ -107,15 +107,12 @@ public class MainManager {
 
     public void extractAttributes() {
         try {
-
-
-            System.out.println("Salvando atributos...");
             //connection.logout(); //por que?
             //connection = null;
             //connect(url);
 
-            filterManager.saveAtributos(connection);
-
+          //  filterManager.saveAtributos(connection);
+            filterManager.saveAttributesInOrder(connection, 100);
             //connection = null;
             System.out.println("Vamos a escribir a fichero");
             filterManager.escribirFichero();
@@ -134,7 +131,8 @@ public class MainManager {
     }
 
     public void trainModel() {
-        classifierManager.entrenarModelo();
+        System.out.println("TrainModel");
+        classifierManager.trainModel();
     }
 
     public void classifyMail(MimeMessage msg) {
