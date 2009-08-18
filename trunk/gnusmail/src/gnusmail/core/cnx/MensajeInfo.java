@@ -3,16 +3,19 @@ package gnusmail.core.cnx;
 import java.text.*;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.*;
 import javax.mail.internet.*;
 
 /** Usada para almacenar informacion del mensaje. */
-public class MensajeInfo {
+public class MensajeInfo implements Comparable {
     public Message message;
 
     /** Metodo que mapea un Message en la clase MensajeInfo */
     public MensajeInfo (Message message){
         this.message = message;
+
     }
     
     /** Devuelve el campo Message-Id */
@@ -81,7 +84,7 @@ public class MensajeInfo {
     
     /** Devuelve la fecha de envio del mensaje 
 		(o la de recepcion si la de envio es null. */
-    public String getDate() throws MessagingException {
+    public String getDateAsStr() throws MessagingException {
         Date date;
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
         if ((date = message.getSentDate()) != null)
@@ -90,6 +93,18 @@ public class MensajeInfo {
             return (df.format(date));
         else
             return "";
+     }
+
+    /** Devuelve la fecha de envio del mensaje
+		(o la de recepcion si la de envio es null. */
+    public Date getDate() throws MessagingException {
+        Date date;
+        if ((date = message.getSentDate()) != null)
+            return date;
+        else if ((date = message.getReceivedDate()) != null)
+            return date;
+        else
+            return null;
      }
        
     /** Devuelve el campo From: */
@@ -250,6 +265,21 @@ public class MensajeInfo {
         } else 
 		addr = a.toString();
         return addr;
+    }
+
+    public int compareTo(Object o) {
+        int res = 0;
+
+        if (o instanceof MensajeInfo) {
+            MensajeInfo mi = (MensajeInfo) o;
+            try {
+                res = getDate().compareTo(mi.getDate());
+            } catch (MessagingException ex) {
+                Logger.getLogger(MensajeInfo.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return res;
     }
 
 }

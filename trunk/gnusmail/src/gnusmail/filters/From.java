@@ -18,8 +18,7 @@ public final class From extends Filter {
 	}
 	
 	public String applyTo(MensajeInfo mess) {
-        System.out.println("Aplicando filtro From");
-		//String res = csvmng.getValue(this.getNombreFiltro(),mess);
+        //String res = csvmng.getValue(this.getNombreFiltro(),mess);
 		try {
             
 			return mess.getFrom();

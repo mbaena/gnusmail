@@ -246,7 +246,7 @@ public class Connection {
 			System.out.print(mensaje.getNum() + "	");
 			System.out.print(mensaje.getFrom()+"	");
 			System.out.print(mensaje.getSubject() + "		");
-			System.out.print(mensaje.getDate()+"	");
+			System.out.print(mensaje.getDateAsStr()+"	");
 			if (mensaje.hasAttachments()) System.out.print("Si");
 			else System.out.print("No");
 			System.out.println();
