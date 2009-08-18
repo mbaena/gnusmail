@@ -42,7 +42,7 @@ public class ClassifierManager {
 		} //Creamos el manejador de ficheros CSV
         filterManager = new FilterManager();
     }
-    public void entrenarModelo() {
+    public void trainModel() {
     	// TODO: on-line training
     	// IMAP fetch command with (BODY[HEADER.FIELDS (DATE)])
         Classifier model = new BayesNet();
@@ -53,6 +53,7 @@ public class ClassifierManager {
 
         System.out.println("Entrenando modelo...");
 
+       
         CSVLoader csvdata = new CSVLoader();
         try {
             // MANOLO: ¿Por qué la llamada a escribirFichero aquí?
@@ -115,7 +116,7 @@ public class ClassifierManager {
         //System.out.println(inst);
 
         if (!ConfigurationManager.MODEL_FILE.exists()) {
-            entrenarModelo();
+            trainModel();
         }
 
         FileInputStream fe = new FileInputStream(ConfigurationManager.MODEL_FILE);
