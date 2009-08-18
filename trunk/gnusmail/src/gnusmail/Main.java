@@ -81,6 +81,9 @@ public class Main {
                 case 'i':	//Clasifica el Correo pasado por linea de comandos
                     options.setMailClassification(true);
                     break;
+                case 'k': //Modifica el modelo, con el correo (como String) pasado por linea de comandos
+                     arg = (getopt.getOptarg());
+                     options.setUpdateModelWithMail();
                 case 'l':	//Clasifica el Correo pasado por linea de comandos
                     arg = getopt.getOptarg();
                     options.setListMails(true, Integer.parseInt(arg));

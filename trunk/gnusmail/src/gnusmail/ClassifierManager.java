@@ -18,16 +18,21 @@ import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.internet.MimeMessage;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.BayesNet;
+import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.CSVLoader;
 
 public class ClassifierManager {
+
     static Instances dataSet;
     static ClaseCSV csvmanager;
     private FilterManager filterManager;
@@ -35,17 +40,18 @@ public class ClassifierManager {
 
     public ClassifierManager() {
         try {
-			csvmanager = new ClaseCSV();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} //Creamos el manejador de ficheros CSV
+            csvmanager = new ClaseCSV();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } //Creamos el manejador de ficheros CSV
         filterManager = new FilterManager();
     }
+
     public void trainModel() {
-    	// TODO: on-line training
-    	// IMAP fetch command with (BODY[HEADER.FIELDS (DATE)])
-        Classifier model = new BayesNet();
+        // TODO: on-line training
+        // IMAP fetch command with (BODY[HEADER.FIELDS (DATE)])
+        Classifier model = new NaiveBayesUpdateable();
         //J48 j48 = new J48();
         //j48.setBinarySplits(true);
         //Classifier model = j48;
@@ -53,7 +59,7 @@ public class ClassifierManager {
 
         System.out.println("Entrenando modelo...");
 
-       
+
         CSVLoader csvdata = new CSVLoader();
         try {
             // MANOLO: ¿Por qué la llamada a escribirFichero aquí?
@@ -97,7 +103,7 @@ public class ClassifierManager {
     }
 
     public void clasificarCorreo(MimeMessage mimeMessage) throws Exception {
-        MensajeInfo msg = new MensajeInfo(mimeMessage);   	
+        MensajeInfo msg = new MensajeInfo(mimeMessage);
         Reader r = new BufferedReader(new FileReader(ConfigurationManager.DATASET_FILE));
         dataSet = new Instances(r, 0); // Sólo necesitamos las cabeceras de los atributos
         dataSet.setClass(dataSet.attribute("Folder"));
@@ -143,4 +149,41 @@ public class ClassifierManager {
     //msg.imprimir(System.out);
     }
 
+    void updateModelWithMessage(MimeMessage mimeMessage) {
+        Reader r = null;
+        try {
+            MensajeInfo msg = new MensajeInfo(mimeMessage);
+            r = new BufferedReader(new FileReader(ConfigurationManager.DATASET_FILE));
+            dataSet = new Instances(r, 0); // Sólo necesitamos las cabeceras de los atributos
+            dataSet.setClass(dataSet.attribute("Folder"));
+            r.close();
+            Instance inst = filterManager.makeInstance(msg, dataSet);
+            Classifier model;
+            //System.out.println(inst);
+
+            FileInputStream fe = new FileInputStream(ConfigurationManager.MODEL_FILE);
+            ObjectInputStream fie = new ObjectInputStream(fe);
+            model = (Classifier) fie.readObject();
+            UpdateableClassifier updateableModel = (UpdateableClassifier) model;
+            updateableModel.updateClassifier(inst);
+
+            FileOutputStream f = new FileOutputStream(ConfigurationManager.MODEL_FILE);
+            ObjectOutputStream fis = new ObjectOutputStream(f);
+            fis.writeObject(updateableModel);
+            fis.close();
+
+            //Se debe guardar esto?
+
+            //TODO falta updatear el modelo con esta instancia
+            throw new UnsupportedOperationException("Not yet implemented");
+        } catch (Exception ex) {
+            Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                r.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 }

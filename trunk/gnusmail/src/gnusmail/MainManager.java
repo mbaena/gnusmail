@@ -144,6 +144,15 @@ public class MainManager {
         }
     }
 
+    public void updateModelWithMail(MimeMessage msg) {
+        try {
+            classifierManager.updateModelWithMessage(msg);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     public void close() {
         if ((connection != null) && (connection.isLoggedIn())) {
             try {
