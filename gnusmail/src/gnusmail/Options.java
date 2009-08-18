@@ -4,6 +4,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import gnusmail.core.ConfigurationManager;
+import gnusmail.core.cnx.MensajeInfo;
 
 
 public class Options {
@@ -20,6 +21,7 @@ public class Options {
 	private boolean listMails;
 	private int listMailsLimit;
     private boolean extractWords;
+    private boolean updateModelWithMail;
 	
 	public Options() {
         this.url = null;
@@ -33,6 +35,7 @@ public class Options {
         this.mailClassification = false;
         this.openMail = -1;
         this.extractWords = false;
+        this.updateModelWithMail = false;
 	}
 	
 	public void run() {
@@ -61,6 +64,16 @@ public class Options {
         }
         if (this.extractWords) {
              mainManager.extractFrequentWords();
+        }
+
+        if (this.updateModelWithMail) {
+             MimeMessage msg;
+			try {
+				msg = new MimeMessage(null, System.in); // std. input
+                mainManager.updateModelWithMail(msg);
+			} catch (MessagingException e) {
+				e.printStackTrace();
+			}
         }
 
         if (this.mailClassification) {
@@ -127,6 +140,10 @@ public class Options {
 
     public void setExtractWords(boolean extractWords) {
         this.extractWords = extractWords;
+    }
+
+    public void setUpdateModelWithMail() {
+        this.updateModelWithMail = true;
     }
 
     
