@@ -23,7 +23,6 @@ public class CapitalLettersProportion extends Filter {
 
     @Override
     public String applyTo(MensajeInfo mess) {
-        System.out.println("Aplicando filtro CapitalLettersProportion");
         int capitals = 0;
         int total = 1;
         try {
