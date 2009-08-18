@@ -80,13 +80,11 @@ public class WordFrequency extends Filter {
                 List<Token> tokens = et.tokenize();
                 for (Token token : tokens) {
                     token.setLanguage(lang);
-                    System.out.println("Token: " + token);
                     stringsEsteDocumento.add(token.getStemmedForm());
                 }
             }
 
             if (stringsEsteDocumento.contains(getPalabraAMirar())) {
-                System.out.println("Retornaremos true");
                 return "True";
             } else {
                 return "False";
