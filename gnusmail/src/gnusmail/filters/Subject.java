@@ -19,8 +19,7 @@ public final class Subject extends Filter {
 	
 	public String applyTo(MensajeInfo mess){
 		//String res = csvmng.getValue(this.getNombreFiltro(), mess);
-        System.out.println("Aplicando filtro Subject");
-		try {
+        try {
 			return mess.getSubject();
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
