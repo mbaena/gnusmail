@@ -7,6 +7,7 @@
 
 package gnusmail.core;
 
+import gnusmail.filters.WordFrequency;
 import java.util.*;
 import java.io.*;
 import java.util.logging.Level;
@@ -34,6 +35,25 @@ public class ConfigurationManager {
     public final static File MODEL_FILE = new File(CONF_FOLDER + "model.bin");
     public final static File DATASET_FILE = new File(CONF_FOLDER + "dataset.arff");
     private static Properties properties = loadProperties();
+	private static List<String> classificationAttributes;
+
+	public static List<String> getClassificationAttributes() {
+		if (classificationAttributes == null) {
+		String[] filters = getFilters();
+		classificationAttributes = new ArrayList<String>();
+		for (String filter : filters) {
+			if (!filter.contains("WordFrequency")) {
+				classificationAttributes.add(filter);
+			} else {
+                for (String word : WordFrequency.leerPalabrasAAnalizar()) {
+					classificationAttributes.add(word);
+				}
+			}
+		}
+		}
+		return classificationAttributes;
+
+	}
     
 	private static Properties loadProperties() {
         ConsoleEraser consoleEraser = new ConsoleEraser();
