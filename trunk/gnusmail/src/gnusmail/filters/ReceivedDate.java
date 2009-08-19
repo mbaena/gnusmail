@@ -2,7 +2,7 @@ package gnusmail.filters;
 
 import javax.mail.MessagingException;
 
-import gnusmail.core.cnx.MensajeInfo;
+import gnusmail.core.cnx.MessageInfo;
 
 public final class ReceivedDate extends Filter {
 
@@ -13,7 +13,7 @@ public final class ReceivedDate extends Filter {
 	}
 
 	@Override
-	public String applyTo(MensajeInfo mess) {
+	public String applyTo(MessageInfo mess) {
 		// TODO Auto-generated method stub
 		try {
 			return mess.getReceivedDate();

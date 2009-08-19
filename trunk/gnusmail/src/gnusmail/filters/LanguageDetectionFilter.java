@@ -6,7 +6,7 @@
 package gnusmail.filters;
 
 import gnusmail.Languages.Language;
-import gnusmail.core.cnx.MensajeInfo;
+import gnusmail.core.cnx.MessageInfo;
 import gnusmail.languagefeatures.LanguageDetection;
 import gnusmail.languagefeatures.StopWordsProvider;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class LanguageDetectionFilter extends Filter {
     }
 
     @Override
-    public String applyTo(MensajeInfo mess) {
+    public String applyTo(MessageInfo mess) {
         String body = "";
         try {
             body = mess.getBody();
