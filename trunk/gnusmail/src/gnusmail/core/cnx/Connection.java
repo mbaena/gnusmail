@@ -207,13 +207,13 @@ public class Connection {
     }
     
     /** Imprime los atributos del correo n */
-    public void mostrarAtributos(int mail_id) throws Exception {
+    public void showAttributes(int mail_id) throws Exception {
 		Folder buzon = folder;//miconexion.getFolder();
 		
 		System.out.println("Mostrando atributos del mensaje "+ mail_id +"...");
 		System.out.println("--------------------------------------------");
 		if (mail_id>0 && mail_id<=buzon.getMessageCount()) {
-			MensajeInfo msj = new MensajeInfo(buzon.getMessage(mail_id));
+			MessageInfo msj = new MessageInfo(buzon.getMessage(mail_id));
 			
 			System.out.println("De: "+ msj.getFrom());
 			System.out.println("Para: "+ msj.getTo());
@@ -229,10 +229,10 @@ public class Connection {
     }
     
     /** Muestra por pantalla las cabeceras de los correos de la carpeta actual */
-    public void mostrarCorreos(String nombre_carpeta) throws Exception {	
+    public void showMessages(String nombre_carpeta) throws Exception {
 		Folder buzon_entrada = (getStore()).getFolder(nombre_carpeta);
 		int num_mes = buzon_entrada.getMessageCount();
-		MensajeInfo mensaje;
+		MessageInfo mensaje;
 		System.out.println("Abriendo carpeta "+ nombre_carpeta +"...");	
 		
 		buzon_entrada.open(Folder.READ_WRITE);
@@ -241,7 +241,7 @@ public class Connection {
 		System.out.println("----------------------------------------------------------------------------------------");
 	
 		for (int i=1; i <= num_mes; i++){
-			mensaje = new MensajeInfo(buzon_entrada.getMessage(i));
+			mensaje = new MessageInfo(buzon_entrada.getMessage(i));
 			
 			System.out.print(mensaje.getNum() + "	");
 			System.out.print(mensaje.getFrom()+"	");
@@ -259,7 +259,7 @@ public class Connection {
 		Folder buzon = folder;
 
 		if (n>0 && n<=buzon.getMessageCount()){
-			MensajeInfo msj = new MensajeInfo(buzon.getMessage(n));
+			MessageInfo msj = new MessageInfo(buzon.getMessage(n));
 			
 			System.out.print("------------------------------------------" +
 					"Message Text------------------------------------\n");
@@ -288,7 +288,7 @@ public class Connection {
     
     /** Lista por pantalla las carpetas del Store  
      * @throws MessagingException */
-    public void listarCarpetas() throws MessagingException {	    
+    public void listFolders() throws MessagingException {
      	Folder rf = folder;
      	    	
 		abrirFolder(rf, false, "");
@@ -325,7 +325,7 @@ public class Connection {
 	}//dumpFolder
     
     /** Mueve el correo msg de la carpeta actual a la carpeta destino */
-    public void moverCorreo(MensajeInfo msg, Folder destino){
+    public void moverCorreo(MessageInfo msg, Folder destino){
     	Message[] msjs = new Message[1];
     	msjs[0] = msg.message;
     	    
