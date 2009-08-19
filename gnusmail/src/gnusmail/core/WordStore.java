@@ -6,7 +6,7 @@ package gnusmail.core;
 
 import gnusmail.Languages.Language;
 import gnusmail.core.cnx.Connection;
-import gnusmail.core.cnx.MensajeInfo;
+import gnusmail.core.cnx.MessageInfo;
 
 import gnusmail.languagefeatures.EmailTokenizer;
 import gnusmail.languagefeatures.LanguageDetection;
@@ -58,7 +58,7 @@ public class WordStore {
     int numAnalyzedDocuments = 0;
     Map<Language, List<String>> stopWords;
 
-    public void addTokenizedString(MensajeInfo str, String folderName) {
+    public void addTokenizedString(MessageInfo str, String folderName) {
         Map<String, WordCount> wordCount = new TreeMap<String, WordCount>();
         String body = null;
         try {
@@ -151,14 +151,14 @@ public class WordStore {
      * @return
      * @throws javax.mail.MessagingException
      */
-    private List<MensajeInfo> createLastMessagesList(Folder folder, int maxMessagesPerFolder) throws MessagingException {
-        List<MensajeInfo> messages = new ArrayList<MensajeInfo>();
-        List<MensajeInfo> messagesToReturn = new ArrayList<MensajeInfo>();
+    private List<MessageInfo> createLastMessagesList(Folder folder, int maxMessagesPerFolder) throws MessagingException {
+        List<MessageInfo> messages = new ArrayList<MessageInfo>();
+        List<MessageInfo> messagesToReturn = new ArrayList<MessageInfo>();
 
         if (folder.getMessageCount() > 0) {
 
             for (int i = 1; i <= folder.getMessageCount(); i++) {
-                MensajeInfo msj = new MensajeInfo(folder.getMessage(i));
+                MessageInfo msj = new MessageInfo(folder.getMessage(i));
                 messages.add(msj);
             }//for
             Collections.sort(messages);
@@ -243,8 +243,8 @@ public class WordStore {
                     folder.open(javax.mail.Folder.READ_WRITE);
                 }
                 System.out.println("Numero de palabras del buzon: " + folder.getMessageCount());
-                List<MensajeInfo> lastMessagesInFolder = createLastMessagesList(folder, MAX_MESSAGES_PER_FOLDER);
-                for (MensajeInfo msj : lastMessagesInFolder) {
+                List<MessageInfo> lastMessagesInFolder = createLastMessagesList(folder, MAX_MESSAGES_PER_FOLDER);
+                for (MessageInfo msj : lastMessagesInFolder) {
                     //MensajeInfo msj = new MensajeInfo(buzon.getMessage(i));
 
                     //String body = msj.getBody();
