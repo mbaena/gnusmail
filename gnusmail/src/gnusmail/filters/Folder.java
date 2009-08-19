@@ -1,6 +1,6 @@
 package gnusmail.filters;
 
-import gnusmail.core.cnx.MensajeInfo;
+import gnusmail.core.cnx.MessageInfo;
 
 public final class Folder extends Filter {
 
@@ -11,7 +11,7 @@ public final class Folder extends Filter {
 	}
 
 	@Override
-	public String applyTo(MensajeInfo mess){
+	public String applyTo(MessageInfo mess){
 		// TODO Auto-generated method stub
 		if (mess.getFolder()== null) return "?";
 		return (String)mess.getFolder().toString();

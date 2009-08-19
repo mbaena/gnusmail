@@ -4,7 +4,7 @@
  */
 package gnusmail.filters;
 
-import gnusmail.core.cnx.MensajeInfo;
+import gnusmail.core.cnx.MessageInfo;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +22,7 @@ public class CapitalLettersProportion extends Filter {
     }
 
     @Override
-    public String applyTo(MensajeInfo mess) {
+    public String applyTo(MessageInfo mess) {
         int capitals = 0;
         int total = 1;
         try {

@@ -1,6 +1,6 @@
 package gnusmail.filters;
 
-import gnusmail.core.cnx.MensajeInfo;
+import gnusmail.core.cnx.MessageInfo;
 
 public final class MessageId extends Filter {
 	/**
@@ -17,7 +17,7 @@ public final class MessageId extends Filter {
 	}
 
 	@Override
-	public String applyTo(MensajeInfo mess) {
+	public String applyTo(MessageInfo mess) {
 		//String res = csvmng.getValue(this.getNombreFiltro(), mess);
 		return mess.getMessageId();
 	}

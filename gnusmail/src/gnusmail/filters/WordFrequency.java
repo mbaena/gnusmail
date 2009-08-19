@@ -4,9 +4,9 @@
  */
 package gnusmail.filters;
 import gnusmail.Languages.Language;
-import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
+//import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import gnusmail.core.WordStore;
-import gnusmail.core.cnx.MensajeInfo;
+import gnusmail.core.cnx.MessageInfo;
 
 import gnusmail.languagefeatures.EmailTokenizer;
 import gnusmail.languagefeatures.LanguageDetection;
@@ -33,7 +33,6 @@ public class WordFrequency extends Filter {
 
     String palabraAMirar;
     Set<String> stringsEsteDocumento;
-    SnowballAnalyzer sbstemmer;
     public static WordStore wordStore;
     static List<String> palabrasAAnalizar;
 
@@ -46,7 +45,7 @@ public class WordFrequency extends Filter {
         return palabraAMirar;
     }
 
-    public void setPalabraAMirar(String palabraAMirar) {
+    public void setWordToCheck(String palabraAMirar) {
         this.palabraAMirar = palabraAMirar;
     }
 
@@ -56,7 +55,7 @@ public class WordFrequency extends Filter {
     }
 
     @Override
-    public String applyTo(MensajeInfo mess) {
+    public String applyTo(MessageInfo mess) {
         
         String res = "";
         try {
@@ -101,7 +100,7 @@ public class WordFrequency extends Filter {
      * Esta funcion lee una lista de palabras que deben ser usadas como filtro en el cuerpo
      * @return
      */
-    public static List<String> leerPalabrasAAnalizar() {
+    public static List<String> getWordsToAnalyze() {
         List<String> res = new ArrayList<String>();
         if (palabrasAAnalizar == null) {
             try {

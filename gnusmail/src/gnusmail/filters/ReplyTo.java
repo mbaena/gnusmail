@@ -1,6 +1,6 @@
 package gnusmail.filters;
 
-import gnusmail.core.cnx.MensajeInfo;
+import gnusmail.core.cnx.MessageInfo;
 
 public final class ReplyTo extends Filter {
 
@@ -15,7 +15,7 @@ public final class ReplyTo extends Filter {
 		return "ReplyTo";
 	}
 	
-	public String applyTo(MensajeInfo mess){
+	public String applyTo(MessageInfo mess){
 		try{
 //			String res = csvmng.getValue(this.getNombreFiltro(), mess);
 			return mess.getReplyTo();

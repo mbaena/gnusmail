@@ -2,7 +2,7 @@ package gnusmail.filters;
 
 import javax.mail.MessagingException;
 
-import gnusmail.core.cnx.MensajeInfo;
+import gnusmail.core.cnx.MessageInfo;
 
 public final class From extends Filter {
 	/**
@@ -17,7 +17,7 @@ public final class From extends Filter {
 		return "From";
 	}
 	
-	public String applyTo(MensajeInfo mess) {
+	public String applyTo(MessageInfo mess) {
         //String res = csvmng.getValue(this.getNombreFiltro(),mess);
 		try {
             
