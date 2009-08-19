@@ -1,13 +1,9 @@
 package gnusmail;
 
 import gnusmail.core.cnx.Connection;
-
-
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TreeSet;
-
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -18,7 +14,6 @@ public class MessageReader implements Iterable<Message> {
     //Map<String, Integer> mailsToReadFromFolders;
 
     private class ComparableMessage implements Comparable<ComparableMessage> {
-
         private Message message;
         private Date date;
 
@@ -106,7 +101,7 @@ public class MessageReader implements Iterable<Message> {
         @Override
         public Message next() {
             numberOfNexts++;
-            System.out.println("---------- Llamadas a Next " + numberOfNexts);
+            System.out.println("---------- Seen messages " + numberOfNexts);
             ComparableMessage comparableMsg = message_list.pollFirst();
             Message msg = comparableMsg.getMessage();
             Folder folder = msg.getFolder();
