@@ -2,13 +2,10 @@ package gnusmail;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-
 import gnusmail.core.ConfigurationManager;
-import gnusmail.core.cnx.MensajeInfo;
 
 
 public class Options {
-
     private MainManager mainManager;
 	private String url;
 	private int showAttributes;
@@ -145,7 +142,4 @@ public class Options {
     public void setUpdateModelWithMail() {
         this.updateModelWithMail = true;
     }
-
-    
-
 }
