@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package gnusmail.filters;
+
 import gnusmail.Languages.Language;
 //import org.apache.lucene.analysis.snowball.SnowballAnalyzer;
 import gnusmail.core.WordStore;
@@ -32,15 +33,14 @@ import javax.mail.MessagingException;
 public class WordFrequency extends Filter {
 
     String palabraAMirar;
-    Set<String> stringsEsteDocumento;
+    Set<String> stringsInCurrentDocument;
     public static WordStore wordStore;
-    static List<String> palabrasAAnalizar;
-
+    static List<String> wordsToAnalyze;
 
     public WordFrequency() {
-        wordStore = new WordStore();    	
+        wordStore = new WordStore();
     }
-    
+
     public String getPalabraAMirar() {
         return palabraAMirar;
     }
@@ -51,39 +51,27 @@ public class WordFrequency extends Filter {
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return "Word frequency";
     }
 
     @Override
     public String applyTo(MessageInfo mess) {
-        
+
         String res = "";
         try {
-           /* if (stringsEsteDocumento == null) {
-                stringsEsteDocumento = new TreeSet<String>();
-                String body = mess.getBody();
-                StringTokenizer st = new StringTokenizer(body, WordStore.tokenPattern);
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken();
-                    token = token.toLowerCase();
-                    stringsEsteDocumento.add(token);
-                   
-                }
-            }*/
-            if (stringsEsteDocumento == null) {
-                stringsEsteDocumento = new TreeSet<String>();
+            if (stringsInCurrentDocument == null) {
+                stringsInCurrentDocument = new TreeSet<String>();
                 //Extraemos las palabras del cuerpo y la cabecera
                 String body = mess.getBody() + " " + mess.getSubject();
                 Language lang = new LanguageDetection().detectLanguage(body);
-                EmailTokenizer et = new EmailTokenizer(body);
+                EmailTokenizer et = new EmailTokenizer(body, lang);
                 List<Token> tokens = et.tokenize();
                 for (Token token : tokens) {
-                    token.setLanguage(lang);
-                    stringsEsteDocumento.add(token.getStemmedForm());
+                    stringsInCurrentDocument.add(token.getStemmedForm());
                 }
             }
 
-            if (stringsEsteDocumento.contains(getPalabraAMirar())) {
+            if (stringsInCurrentDocument.contains(getPalabraAMirar())) {
                 return "True";
             } else {
                 return "False";
@@ -95,37 +83,32 @@ public class WordFrequency extends Filter {
         }
         return res;
     }
-    
+
     /**
-     * Esta funcion lee una lista de palabras que deben ser usadas como filtro en el cuerpo
+     * This methods initializes the list of frequent words into memory.
+     * A file with this words has to exist (WordStore.WORDS_FILE)
      * @return
      */
     public static List<String> getWordsToAnalyze() {
         List<String> res = new ArrayList<String>();
-        if (palabrasAAnalizar == null) {
+        if (wordsToAnalyze == null) {
             try {
-                // Open the file that is the first
-                // command line parameter
                 FileInputStream fstream = new FileInputStream(WordStore.WORDS_FILE);
-                // Get the object of DataInputStream
                 DataInputStream in = new DataInputStream(fstream);
                 BufferedReader br = new BufferedReader(new InputStreamReader(in));
                 String strLine;
-                //Read File Line By Line
                 while ((strLine = br.readLine()) != null) {
-                    // Print the content on the console
                     res.add(strLine);
                 }
-                //Close the input stream
                 in.close();
-            } catch (Exception e) {//Catch exception if any
-                System.err.println("Error: " + e.getMessage());
+            } catch (IOException e) {
+                System.out.println("Problem trying to access file: " +
+                        WordStore.WORDS_FILE.getAbsolutePath());
             }
-            palabrasAAnalizar = res;
+            wordsToAnalyze = res;
         } else {
-            res = palabrasAAnalizar;
+            res = wordsToAnalyze;
         }
         return res;
     }
-
 }
