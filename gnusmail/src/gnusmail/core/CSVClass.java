@@ -145,6 +145,7 @@ public class CSVClass {
             String atrib = filtros.get(i);
             if (cabeceras != null) {
                 j = buscarPosicion(atrib, cabeceras);
+                
             } else {
                 j = i;
             }
@@ -153,7 +154,6 @@ public class CSVClass {
                 addHeader(atrib);
                 j = cabeceras.length - 1;
             }
-
             res[j] = registro[i];
 
         }

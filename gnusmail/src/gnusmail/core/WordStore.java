@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 
-
 /**
  * Esta clase gestiona un mapa palabras -> numero de apariciones. Se ha creado la 
  * clase WordCount para gestionar el
@@ -54,6 +53,7 @@ public class WordStore {
     public final static double PROP_DOCUMENTS = 0.25;
     public final static int MIN_DOCUMENTS = 5;
     public final static int MAX_NUM_ATTRIBUTES = 20;
+    public final static int WORDS_TO_ADD_BY_FOLDER = 10;
     int numAnalyzedDocuments = 0;
     Map<Language, List<String>> stopWords;
 
@@ -116,10 +116,13 @@ public class WordStore {
                         termFrequencyManager.getTfidfByFolder().get(folder);
                 Collections.sort(tfidSummaries);
 
-                while (index < 10 && index < tfidSummaries.size()) {
+                while (index < WORDS_TO_ADD_BY_FOLDER && index < tfidSummaries.size()) {
                     TFIDFSummary ts = tfidSummaries.get(tfidSummaries.size() - 1 - index);
                     System.out.println(ts);
-                    wordsToWrite.add(ts.getTerm());
+                    String wordToAdd = ts.getTerm();
+                    if (wordToAdd != null && wordToAdd.length() > 0) {
+                        wordsToWrite.add(ts.getTerm());
+                    }
                     index++;
 
                 }
