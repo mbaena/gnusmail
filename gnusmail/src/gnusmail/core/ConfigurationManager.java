@@ -5,6 +5,7 @@
  * la configuración del sistema
  */
 
+
 package gnusmail.core;
 
 import gnusmail.filters.WordFrequency;
@@ -45,7 +46,7 @@ public class ConfigurationManager {
 			if (!filter.contains("WordFrequency")) {
 				classificationAttributes.add(filter);
 			} else {
-                for (String word : WordFrequency.leerPalabrasAAnalizar()) {
+                for (String word : WordFrequency.getWordsToAnalyze()) {
 					classificationAttributes.add(word);
 				}
 			}
