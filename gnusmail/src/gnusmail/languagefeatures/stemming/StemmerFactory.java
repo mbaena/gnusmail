@@ -18,7 +18,7 @@ public class StemmerFactory {
         } else if (lang.equals(Language.SPANISH)) {
             return new SpanishStemmer();
         } else {
-            throw new RuntimeException("Language " + lang + " not supported");
+           return new TrivialStemmer();
         }
     }
 

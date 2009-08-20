@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package gnusmail.languagefeatures.stemming;
 
 import java.util.Enumeration;
@@ -13,50 +12,49 @@ import java.util.Vector;
  * @author jmcarmona
  */
 public class SpanishStemmer implements IStemmer {
+
     /**
-     * Contiene la posicion del último caracter de la palabra
+     * Contiene la posicion del último caracter de la word
      */
     int end;
     /**
      * Palabra de la que se quiere extraer su raíz.
      */
-    String palabra=new String("");
+    String word = new String("");
     /**
-     * Raiz de la palabra
+     * Raiz de la word
      */
-    String raizPalabra=new String("");
+    String wordRoot = new String("");
     /**
      * Lista de reglas de tipo 1.
      */
-    Vector listaReglas1=new Vector(1,6);
+    Vector listaReglas1 = new Vector(1, 6);
     /**
      * Lista de reglas de tipo 2.
      */
-    Vector listaReglas2=new Vector(1,6);
+    Vector listaReglas2 = new Vector(1, 6);
     /**
      * Lista de reglas de tipo 3.
      */
-    Vector listaReglas3=new Vector(1,6);
+    Vector listaReglas3 = new Vector(1, 6);
     /**
      * Lista de reglas de tipo 4.
      */
-    Vector listaReglas4=new Vector(1,6);
+    Vector listaReglas4 = new Vector(1, 6);
     /**
      * Lista de reglas de tipo 5.
      */
-    Vector listaReglas5=new Vector(1,6);
+    Vector listaReglas5 = new Vector(1, 6);
     /**
      * Lista de reglas de tipo 6.
      */
-    Vector listaReglas6=new Vector(1,6);
+    Vector listaReglas6 = new Vector(1, 6);
 
     /**
      * Constructor de la Clase.
      * Se inicializan las reglas.
      */
-
-    public SpanishStemmer()
-    {
+    public SpanishStemmer() {
         inicializarReglas();
     }
 
@@ -64,107 +62,104 @@ public class SpanishStemmer implements IStemmer {
      * Inicialización de las reglas
      * @return void
      */
-    private void inicializarReglas()
-    {
-         inicializaReglas1();
-         inicializaReglas2();
-         inicializaReglas3();
-         inicializaReglas4();
-         inicializaReglas5();
-         inicializaReglas6();
+    private void inicializarReglas() {
+        inicializaReglas1();
+        inicializaReglas2();
+        inicializaReglas3();
+        inicializaReglas4();
+        inicializaReglas5();
+        inicializaReglas6();
     }
 
     /**
      * Inicializa las reglas de tipo 1
      */
-    private void inicializaReglas1()
-    {
-         RuleSpanish r1=new RuleSpanish(101, "ones", "ón", 3, 1, -1, "NULL");
-         RuleSpanish r2=new RuleSpanish(102, "ces", "z", 2, 0, -1, "NULL");
-         RuleSpanish r3=new RuleSpanish(103, "es", "", 1, -1, -1, "NULL");
-         RuleSpanish r4=new RuleSpanish(104, "s", "", 0, -1, -1, "NULL");
-         listaReglas1.addElement(r1);
-         listaReglas1.addElement(r2);
-         listaReglas1.addElement(r3);
-         listaReglas1.addElement(r4);
+    private void inicializaReglas1() {
+        RuleSpanish r1 = new RuleSpanish(101, "ones", "ón", 3, 1, -1, "NULL");
+        RuleSpanish r2 = new RuleSpanish(102, "ces", "z", 2, 0, -1, "NULL");
+        RuleSpanish r3 = new RuleSpanish(103, "es", "", 1, -1, -1, "NULL");
+        RuleSpanish r4 = new RuleSpanish(104, "s", "", 0, -1, -1, "NULL");
+        listaReglas1.addElement(r1);
+        listaReglas1.addElement(r2);
+        listaReglas1.addElement(r3);
+        listaReglas1.addElement(r4);
 
     }
 
     /**
      * Inicializa las reglas de tipo 2
      */
-    private void inicializaReglas2()
-    {
+    private void inicializaReglas2() {
 
-        RuleSpanish r1=new RuleSpanish(201, "aríamos", "ar", 6, 1, -1, "contieneVocal");
-        RuleSpanish r2=new RuleSpanish(202, "eríamos", "er", 6, 1, -1, "contieneVocal");
-        RuleSpanish r3=new RuleSpanish(203, "iríamos", "ir", 6, 1, -1, "contieneVocal");
-        RuleSpanish r4=new RuleSpanish(204, "iésemos", "", 6, -1, -1, "contieneVocal");
-        RuleSpanish r5=new RuleSpanish(205, "iéramos", "", 6,-1, -1, "contieneVocal");
-        RuleSpanish r6=new RuleSpanish(206, "ábamos", "ar", 6, 1, -1, "contieneVocal");
-        RuleSpanish r7=new RuleSpanish(207, "áramos", "ar", 5, 1, -1, "contieneVocal");
-        RuleSpanish r8=new RuleSpanish(208, "aremos", "ar", 5, 1, -1, "contieneVocal");
-        RuleSpanish r9=new RuleSpanish(209, "ásemos", "er", 5, 1, -1, "contieneVocal");
-        RuleSpanish r10=new RuleSpanish(210, "eremos", "ir", 5, 1, -1, "contieneVocal");
-        RuleSpanish r11=new RuleSpanish(211, "iremos", "ar", 4, 1, -1, "contieneVocal");
-        RuleSpanish r12=new RuleSpanish(212, "uemos", "ar", 4, 1, -1, "contieneVocal");
-        RuleSpanish r13=new RuleSpanish(213, "arías", "ar", 4, 1, -1, "contieneVocal");
-        RuleSpanish r14=new RuleSpanish(214, "arían", "er", 4, 1, -1, "contieneVocal");
-        RuleSpanish r15=new RuleSpanish(215, "erían", "er", 4, 1, -1, "contieneVocal");
-        RuleSpanish r16=new RuleSpanish(216, "erías", "ir", 4, 1, -1, "contieneVocal");
-        RuleSpanish r17=new RuleSpanish(217, "irían", "ir", 4, 1, -1, "contieneVocal");
-        RuleSpanish r18=new RuleSpanish(218, "irías", "", 4,-1, -1, "contieneVocal");
-        RuleSpanish r19=new RuleSpanish(219, "iesen", "", 4, -1, -1, "contieneVocal");
-        RuleSpanish r20=new RuleSpanish(220, "ieses", "", 4, -1, -1, "contieneVocal");
-        RuleSpanish r21=new RuleSpanish(221, "iamos", "", 4, -1, -1, "contieneVocal");
-        RuleSpanish r22=new RuleSpanish(222, "ieran", "", 4, -1, -1, "contieneVocal");
-        RuleSpanish r23=new RuleSpanish(223, "ieron", "", 4, -1, -1, "contieneVocal");
-        RuleSpanish r24=new RuleSpanish(224, "iendo", "", 4, -1, -1, "contieneVocal");
-        RuleSpanish r25=new RuleSpanish(225, "ieras", "", 4, -1, -1, "contieneVocal");
-        RuleSpanish r26=new RuleSpanish(226, "abas", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r27=new RuleSpanish(227, "aban", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r28=new RuleSpanish(228, "asen", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r29=new RuleSpanish(229, "ases", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r30=new RuleSpanish(230, "ando", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r31=new RuleSpanish(231, "arán", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r32=new RuleSpanish(232, "aran", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r33=new RuleSpanish(233, "arás", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r34=new RuleSpanish(234, "aras", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r35=new RuleSpanish(235, "aron", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r36=new RuleSpanish(236, "aste", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r37=new RuleSpanish(237, "aría", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r38=new RuleSpanish(238, "anza", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r39=new RuleSpanish(239, "arás", "ar", 3, 1, -1, "contieneVocal");
-        RuleSpanish r40=new RuleSpanish(240, "erás", "er", 3, 1, -1, "contieneVocal");
-        RuleSpanish r41=new RuleSpanish(241, "erán", "er", 3, 1, -1, "contieneVocal");
-        RuleSpanish r42=new RuleSpanish(242, "ería", "er", 3, 1, -1, "contieneVocal");
-        RuleSpanish r43=new RuleSpanish(243, "emos", "er", 3, 1, -1, "contieneVocal");
-        RuleSpanish r44=new RuleSpanish(244, "irán", "ir", 3, 1, -1, "contieneVocal");
-        RuleSpanish r45=new RuleSpanish(245, "irás", "ir", 3, 1, -1, "contieneVocal");
-        RuleSpanish r46=new RuleSpanish(246, "iera", "", 3,-1, -1, "contieneVocal");
-        RuleSpanish r47=new RuleSpanish(247, "iste", "", 3, -1, -1, "contieneVocal");
-        RuleSpanish r48=new RuleSpanish(248, "iese", "", 3, -1, -1, "contieneVocal");
-        RuleSpanish r49=new RuleSpanish(249, "amos", "", 3,-1, -1, "contieneVocal");
-        RuleSpanish r50=new RuleSpanish(250, "imos", "", 3,-1, -1, "contieneVocal");
-        RuleSpanish r51=new RuleSpanish(251, "aba", "ar", 2, 1, -1, "contieneVocal");
-        RuleSpanish r52=new RuleSpanish(252, "ado", "ar", 2, 1, -1, "contieneVocal");
-        RuleSpanish r53=new RuleSpanish(253, "ará", "ar", 2, 1, -1, "contieneVocal");
-        RuleSpanish r54=new RuleSpanish(254, "ara", "ar", 2, 1, -1, "contieneVocal");
-        RuleSpanish r55=new RuleSpanish(255, "aré", "ar", 2, 1, -1, "contieneVocal");
-        RuleSpanish r56=new RuleSpanish(256, "ase", "ar", 2, 1, -1, "contieneVocal");
-        RuleSpanish r57=new RuleSpanish(257, "uen", "ar", 2, 1, -1, "contieneVocal");
-        RuleSpanish r58=new RuleSpanish(258, "erá", "er", 2, 1, -1, "contieneVocal");
-        RuleSpanish r59=new RuleSpanish(259, "eré", "er", 2, 1, -1, "contieneVocal");
-        RuleSpanish r60=new RuleSpanish(260, "irá", "ir", 2, 1, -1, "contieneVocal");
-        RuleSpanish r61=new RuleSpanish(261, "iré", "ir", 2, 1, -1, "contieneVocal");
-        RuleSpanish r62=new RuleSpanish(262, "ían", "", 2,-1, -1, "contieneVocal");
-        RuleSpanish r63=new RuleSpanish(263, "ías", "", 2, -1, -1, "contieneVocal");
-        RuleSpanish r64=new RuleSpanish(264, "ido", "", 2, -1, -1, "contieneVocal");
-        RuleSpanish r65=new RuleSpanish(265, "ué", "ar", 1, 1, -1, "contieneVocal");
-        RuleSpanish r66=new RuleSpanish(266, "ía", "", 1,-1, -1, "contieneVocal");
-        RuleSpanish r67=new RuleSpanish(267, "ió", "", 1, -1, -1, "contieneVocal");
-        RuleSpanish r68=new RuleSpanish(268, "an", "", 1, -1, -1, "contieneVocal");
-        RuleSpanish r69=new RuleSpanish(269, "en", "", 1, -1, -1, "contieneVocal");
+        RuleSpanish r1 = new RuleSpanish(201, "aríamos", "ar", 6, 1, -1, "contieneVocal");
+        RuleSpanish r2 = new RuleSpanish(202, "eríamos", "er", 6, 1, -1, "contieneVocal");
+        RuleSpanish r3 = new RuleSpanish(203, "iríamos", "ir", 6, 1, -1, "contieneVocal");
+        RuleSpanish r4 = new RuleSpanish(204, "iésemos", "", 6, -1, -1, "contieneVocal");
+        RuleSpanish r5 = new RuleSpanish(205, "iéramos", "", 6, -1, -1, "contieneVocal");
+        RuleSpanish r6 = new RuleSpanish(206, "ábamos", "ar", 6, 1, -1, "contieneVocal");
+        RuleSpanish r7 = new RuleSpanish(207, "áramos", "ar", 5, 1, -1, "contieneVocal");
+        RuleSpanish r8 = new RuleSpanish(208, "aremos", "ar", 5, 1, -1, "contieneVocal");
+        RuleSpanish r9 = new RuleSpanish(209, "ásemos", "er", 5, 1, -1, "contieneVocal");
+        RuleSpanish r10 = new RuleSpanish(210, "eremos", "ir", 5, 1, -1, "contieneVocal");
+        RuleSpanish r11 = new RuleSpanish(211, "iremos", "ar", 4, 1, -1, "contieneVocal");
+        RuleSpanish r12 = new RuleSpanish(212, "uemos", "ar", 4, 1, -1, "contieneVocal");
+        RuleSpanish r13 = new RuleSpanish(213, "arías", "ar", 4, 1, -1, "contieneVocal");
+        RuleSpanish r14 = new RuleSpanish(214, "arían", "er", 4, 1, -1, "contieneVocal");
+        RuleSpanish r15 = new RuleSpanish(215, "erían", "er", 4, 1, -1, "contieneVocal");
+        RuleSpanish r16 = new RuleSpanish(216, "erías", "ir", 4, 1, -1, "contieneVocal");
+        RuleSpanish r17 = new RuleSpanish(217, "irían", "ir", 4, 1, -1, "contieneVocal");
+        RuleSpanish r18 = new RuleSpanish(218, "irías", "", 4, -1, -1, "contieneVocal");
+        RuleSpanish r19 = new RuleSpanish(219, "iesen", "", 4, -1, -1, "contieneVocal");
+        RuleSpanish r20 = new RuleSpanish(220, "ieses", "", 4, -1, -1, "contieneVocal");
+        RuleSpanish r21 = new RuleSpanish(221, "iamos", "", 4, -1, -1, "contieneVocal");
+        RuleSpanish r22 = new RuleSpanish(222, "ieran", "", 4, -1, -1, "contieneVocal");
+        RuleSpanish r23 = new RuleSpanish(223, "ieron", "", 4, -1, -1, "contieneVocal");
+        RuleSpanish r24 = new RuleSpanish(224, "iendo", "", 4, -1, -1, "contieneVocal");
+        RuleSpanish r25 = new RuleSpanish(225, "ieras", "", 4, -1, -1, "contieneVocal");
+        RuleSpanish r26 = new RuleSpanish(226, "abas", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r27 = new RuleSpanish(227, "aban", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r28 = new RuleSpanish(228, "asen", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r29 = new RuleSpanish(229, "ases", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r30 = new RuleSpanish(230, "ando", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r31 = new RuleSpanish(231, "arán", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r32 = new RuleSpanish(232, "aran", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r33 = new RuleSpanish(233, "arás", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r34 = new RuleSpanish(234, "aras", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r35 = new RuleSpanish(235, "aron", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r36 = new RuleSpanish(236, "aste", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r37 = new RuleSpanish(237, "aría", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r38 = new RuleSpanish(238, "anza", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r39 = new RuleSpanish(239, "arás", "ar", 3, 1, -1, "contieneVocal");
+        RuleSpanish r40 = new RuleSpanish(240, "erás", "er", 3, 1, -1, "contieneVocal");
+        RuleSpanish r41 = new RuleSpanish(241, "erán", "er", 3, 1, -1, "contieneVocal");
+        RuleSpanish r42 = new RuleSpanish(242, "ería", "er", 3, 1, -1, "contieneVocal");
+        RuleSpanish r43 = new RuleSpanish(243, "emos", "er", 3, 1, -1, "contieneVocal");
+        RuleSpanish r44 = new RuleSpanish(244, "irán", "ir", 3, 1, -1, "contieneVocal");
+        RuleSpanish r45 = new RuleSpanish(245, "irás", "ir", 3, 1, -1, "contieneVocal");
+        RuleSpanish r46 = new RuleSpanish(246, "iera", "", 3, -1, -1, "contieneVocal");
+        RuleSpanish r47 = new RuleSpanish(247, "iste", "", 3, -1, -1, "contieneVocal");
+        RuleSpanish r48 = new RuleSpanish(248, "iese", "", 3, -1, -1, "contieneVocal");
+        RuleSpanish r49 = new RuleSpanish(249, "amos", "", 3, -1, -1, "contieneVocal");
+        RuleSpanish r50 = new RuleSpanish(250, "imos", "", 3, -1, -1, "contieneVocal");
+        RuleSpanish r51 = new RuleSpanish(251, "aba", "ar", 2, 1, -1, "contieneVocal");
+        RuleSpanish r52 = new RuleSpanish(252, "ado", "ar", 2, 1, -1, "contieneVocal");
+        RuleSpanish r53 = new RuleSpanish(253, "ará", "ar", 2, 1, -1, "contieneVocal");
+        RuleSpanish r54 = new RuleSpanish(254, "ara", "ar", 2, 1, -1, "contieneVocal");
+        RuleSpanish r55 = new RuleSpanish(255, "aré", "ar", 2, 1, -1, "contieneVocal");
+        RuleSpanish r56 = new RuleSpanish(256, "ase", "ar", 2, 1, -1, "contieneVocal");
+        RuleSpanish r57 = new RuleSpanish(257, "uen", "ar", 2, 1, -1, "contieneVocal");
+        RuleSpanish r58 = new RuleSpanish(258, "erá", "er", 2, 1, -1, "contieneVocal");
+        RuleSpanish r59 = new RuleSpanish(259, "eré", "er", 2, 1, -1, "contieneVocal");
+        RuleSpanish r60 = new RuleSpanish(260, "irá", "ir", 2, 1, -1, "contieneVocal");
+        RuleSpanish r61 = new RuleSpanish(261, "iré", "ir", 2, 1, -1, "contieneVocal");
+        RuleSpanish r62 = new RuleSpanish(262, "ían", "", 2, -1, -1, "contieneVocal");
+        RuleSpanish r63 = new RuleSpanish(263, "ías", "", 2, -1, -1, "contieneVocal");
+        RuleSpanish r64 = new RuleSpanish(264, "ido", "", 2, -1, -1, "contieneVocal");
+        RuleSpanish r65 = new RuleSpanish(265, "ué", "ar", 1, 1, -1, "contieneVocal");
+        RuleSpanish r66 = new RuleSpanish(266, "ía", "", 1, -1, -1, "contieneVocal");
+        RuleSpanish r67 = new RuleSpanish(267, "ió", "", 1, -1, -1, "contieneVocal");
+        RuleSpanish r68 = new RuleSpanish(268, "an", "", 1, -1, -1, "contieneVocal");
+        RuleSpanish r69 = new RuleSpanish(269, "en", "", 1, -1, -1, "contieneVocal");
 
         listaReglas2.addElement(r1);
         listaReglas2.addElement(r2);
@@ -241,17 +236,16 @@ public class SpanishStemmer implements IStemmer {
     /**
      * Inicializa las reglas de tipo 3
      */
-    private void inicializaReglas3()
-    {
-        RuleSpanish r1=new RuleSpanish(301, "ización", "izar", 6, 2, -1, "NULL");
-        RuleSpanish r2=new RuleSpanish(302, "cional", "ción", 5, 3, -1, "NULL");
-        RuleSpanish r3=new RuleSpanish(303, "ructor", "ruir", 5, 3, -1, "NULL");
-        RuleSpanish r4=new RuleSpanish(304, "alismo", "al", 5, 1, -1, "NULL");
-        RuleSpanish r5=new RuleSpanish(305, "ductor", "ducir", 5, 4, -1, "NULL");
-        RuleSpanish r6=new RuleSpanish(306, "sitor", "ner", 4, 2, -1, "NULL");
-        RuleSpanish r7=new RuleSpanish(307, "ante", "ar", 4, 1, -1, "NULL");
-        RuleSpanish r8=new RuleSpanish(308, "ador", "ar", 3, 1, -1, "NULL");
-        RuleSpanish r9=new RuleSpanish(309, "edor", "er", 3, 1, -1, "NULL");
+    private void inicializaReglas3() {
+        RuleSpanish r1 = new RuleSpanish(301, "ización", "izar", 6, 2, -1, "NULL");
+        RuleSpanish r2 = new RuleSpanish(302, "cional", "ción", 5, 3, -1, "NULL");
+        RuleSpanish r3 = new RuleSpanish(303, "ructor", "ruir", 5, 3, -1, "NULL");
+        RuleSpanish r4 = new RuleSpanish(304, "alismo", "al", 5, 1, -1, "NULL");
+        RuleSpanish r5 = new RuleSpanish(305, "ductor", "ducir", 5, 4, -1, "NULL");
+        RuleSpanish r6 = new RuleSpanish(306, "sitor", "ner", 4, 2, -1, "NULL");
+        RuleSpanish r7 = new RuleSpanish(307, "ante", "ar", 4, 1, -1, "NULL");
+        RuleSpanish r8 = new RuleSpanish(308, "ador", "ar", 3, 1, -1, "NULL");
+        RuleSpanish r9 = new RuleSpanish(309, "edor", "er", 3, 1, -1, "NULL");
         listaReglas3.addElement(r1);
         listaReglas3.addElement(r2);
         listaReglas3.addElement(r3);
@@ -263,13 +257,13 @@ public class SpanishStemmer implements IStemmer {
         listaReglas3.addElement(r9);
 
     }
+
     /**
      * Inicializa las reglas de tipo 4
      */
-    private void inicializaReglas4()
-    {
-        RuleSpanish r1=new RuleSpanish(401, "ativa", "", 4, -1,  1, "NULL");
-        RuleSpanish r2=new RuleSpanish(402, "ativo", "", 4, -1,  1, "NULL");
+    private void inicializaReglas4() {
+        RuleSpanish r1 = new RuleSpanish(401, "ativa", "", 4, -1, 1, "NULL");
+        RuleSpanish r2 = new RuleSpanish(402, "ativo", "", 4, -1, 1, "NULL");
         listaReglas4.addElement(r1);
         listaReglas4.addElement(r2);
 
@@ -278,48 +272,47 @@ public class SpanishStemmer implements IStemmer {
     /**
      * Inicializa las reglas de tipo 5
      */
-    private void inicializaReglas5()
-    {
-        RuleSpanish r1=new RuleSpanish(501, "ilidad", "", 5,-1,  1, "NULL");
-        RuleSpanish r2=new RuleSpanish(502, "miento", "", 5,-1,  1, "NULL");
-        RuleSpanish r3=new RuleSpanish(503, "mente", "", 4, -1,  1, "NULL");
-        RuleSpanish r4=new RuleSpanish(504, "ncial", "n", 4,  0,  0, "NULL");
-        RuleSpanish r5=new RuleSpanish(505, "rcial", "rc", 4, 1,  0, "NULL");
-        RuleSpanish r6=new RuleSpanish(506, "ancia", "", 4,-1,  1, "NULL");
-        RuleSpanish r7=new RuleSpanish(507, "encia", "", 3, -1,  1, "NULL");
-        RuleSpanish r8=new RuleSpanish(508, "ista", "", 3, -1,  1, "NULL");
-        RuleSpanish r9=new RuleSpanish(509, "ance", "", 3, -1,  1, "NULL");
-        RuleSpanish r10=new RuleSpanish(510, "arle", "", 3, -1,  1, "NULL");
-        RuleSpanish r11=new RuleSpanish(511, "arlo", "", 3, -1,  1, "NULL");
-        RuleSpanish r12=new RuleSpanish(512, "arla", "", 3, -1,  1, "NULL");
-        RuleSpanish r13=new RuleSpanish(513, "erle", "", 3, -1,  1, "NULL");
-        RuleSpanish r14=new RuleSpanish(514, "erlo", "", 3, -1,  1, "NULL");
-        RuleSpanish r15=new RuleSpanish(515, "erla", "", 3, -1,  1, "NULL");
-        RuleSpanish r16=new RuleSpanish(516, "irle", "", 3, -1,  1, "NULL");
-        RuleSpanish r17=new RuleSpanish(517, "irlo", "", 3, -1,  1, "NULL");
-        RuleSpanish r18=new RuleSpanish(518, "irla", "", 3, -1,  1, "NULL");
-        RuleSpanish r19=new RuleSpanish(519, "able", "", 3, -1,  1, "NULL");
-        RuleSpanish r20=new RuleSpanish(520, "arse", "", 3, -1,  1, "NULL");
-        RuleSpanish r21=new RuleSpanish(521, "irse", "", 3, -1,  1, "NULL");
-        RuleSpanish r22=new RuleSpanish(522, "ible", "", 3, -1,  1, "NULL");
-        RuleSpanish r23=new RuleSpanish(523, "ción", "", 3, -1,  1, "NULL");
-        RuleSpanish r24=new RuleSpanish(524, "sión", "", 3, -1,  1, "NULL");
-        RuleSpanish r25=new RuleSpanish(525, "ismo", "", 3, -1,  1, "NULL");
-        RuleSpanish r26=new RuleSpanish(526, "ente", "", 3, -1,  1, "NULL");
-        RuleSpanish r27=new RuleSpanish(527, "aria", "", 3, -1,  1, "NULL");
-        RuleSpanish r28=new RuleSpanish(528, "ario", "", 3, -1,  1, "NULL");
-        RuleSpanish r29=new RuleSpanish(529, "ante", "", 3, -1,  1, "NULL");
-        RuleSpanish r30=new RuleSpanish(530, "idad", "", 3, -1,  1, "NULL");
-        RuleSpanish r31=new RuleSpanish(531, "ada", "", 2, -1,  1, "NULL");
-        RuleSpanish r32=new RuleSpanish(532, "ado", "", 2, -1,  1, "NULL");
-        RuleSpanish r33=new RuleSpanish(533, "ano", "", 2, -1,  1, "NULL");
-        RuleSpanish r34=new RuleSpanish(534, "ana", "", 2, -1,  1, "NULL");
-        RuleSpanish r35=new RuleSpanish(535, "era", "", 2, -1,  1, "NULL");
-        RuleSpanish r36=new RuleSpanish(536, "ero", "", 2, -1,  1, "NULL");
-        RuleSpanish r37=new RuleSpanish(537, "al", "", 1, -1,  1, "NULL");
-        RuleSpanish r38=new RuleSpanish(538, "ar", "", 1, -1,  1, "NULL");
-        RuleSpanish r39=new RuleSpanish(539, "er", "", 1, -1,  1, "NULL");
-        RuleSpanish r40=new RuleSpanish(540, "ir", "", 1, -1,  1, "NULL");
+    private void inicializaReglas5() {
+        RuleSpanish r1 = new RuleSpanish(501, "ilidad", "", 5, -1, 1, "NULL");
+        RuleSpanish r2 = new RuleSpanish(502, "miento", "", 5, -1, 1, "NULL");
+        RuleSpanish r3 = new RuleSpanish(503, "mente", "", 4, -1, 1, "NULL");
+        RuleSpanish r4 = new RuleSpanish(504, "ncial", "n", 4, 0, 0, "NULL");
+        RuleSpanish r5 = new RuleSpanish(505, "rcial", "rc", 4, 1, 0, "NULL");
+        RuleSpanish r6 = new RuleSpanish(506, "ancia", "", 4, -1, 1, "NULL");
+        RuleSpanish r7 = new RuleSpanish(507, "encia", "", 3, -1, 1, "NULL");
+        RuleSpanish r8 = new RuleSpanish(508, "ista", "", 3, -1, 1, "NULL");
+        RuleSpanish r9 = new RuleSpanish(509, "ance", "", 3, -1, 1, "NULL");
+        RuleSpanish r10 = new RuleSpanish(510, "arle", "", 3, -1, 1, "NULL");
+        RuleSpanish r11 = new RuleSpanish(511, "arlo", "", 3, -1, 1, "NULL");
+        RuleSpanish r12 = new RuleSpanish(512, "arla", "", 3, -1, 1, "NULL");
+        RuleSpanish r13 = new RuleSpanish(513, "erle", "", 3, -1, 1, "NULL");
+        RuleSpanish r14 = new RuleSpanish(514, "erlo", "", 3, -1, 1, "NULL");
+        RuleSpanish r15 = new RuleSpanish(515, "erla", "", 3, -1, 1, "NULL");
+        RuleSpanish r16 = new RuleSpanish(516, "irle", "", 3, -1, 1, "NULL");
+        RuleSpanish r17 = new RuleSpanish(517, "irlo", "", 3, -1, 1, "NULL");
+        RuleSpanish r18 = new RuleSpanish(518, "irla", "", 3, -1, 1, "NULL");
+        RuleSpanish r19 = new RuleSpanish(519, "able", "", 3, -1, 1, "NULL");
+        RuleSpanish r20 = new RuleSpanish(520, "arse", "", 3, -1, 1, "NULL");
+        RuleSpanish r21 = new RuleSpanish(521, "irse", "", 3, -1, 1, "NULL");
+        RuleSpanish r22 = new RuleSpanish(522, "ible", "", 3, -1, 1, "NULL");
+        RuleSpanish r23 = new RuleSpanish(523, "ción", "", 3, -1, 1, "NULL");
+        RuleSpanish r24 = new RuleSpanish(524, "sión", "", 3, -1, 1, "NULL");
+        RuleSpanish r25 = new RuleSpanish(525, "ismo", "", 3, -1, 1, "NULL");
+        RuleSpanish r26 = new RuleSpanish(526, "ente", "", 3, -1, 1, "NULL");
+        RuleSpanish r27 = new RuleSpanish(527, "aria", "", 3, -1, 1, "NULL");
+        RuleSpanish r28 = new RuleSpanish(528, "ario", "", 3, -1, 1, "NULL");
+        RuleSpanish r29 = new RuleSpanish(529, "ante", "", 3, -1, 1, "NULL");
+        RuleSpanish r30 = new RuleSpanish(530, "idad", "", 3, -1, 1, "NULL");
+        RuleSpanish r31 = new RuleSpanish(531, "ada", "", 2, -1, 1, "NULL");
+        RuleSpanish r32 = new RuleSpanish(532, "ado", "", 2, -1, 1, "NULL");
+        RuleSpanish r33 = new RuleSpanish(533, "ano", "", 2, -1, 1, "NULL");
+        RuleSpanish r34 = new RuleSpanish(534, "ana", "", 2, -1, 1, "NULL");
+        RuleSpanish r35 = new RuleSpanish(535, "era", "", 2, -1, 1, "NULL");
+        RuleSpanish r36 = new RuleSpanish(536, "ero", "", 2, -1, 1, "NULL");
+        RuleSpanish r37 = new RuleSpanish(537, "al", "", 1, -1, 1, "NULL");
+        RuleSpanish r38 = new RuleSpanish(538, "ar", "", 1, -1, 1, "NULL");
+        RuleSpanish r39 = new RuleSpanish(539, "er", "", 1, -1, 1, "NULL");
+        RuleSpanish r40 = new RuleSpanish(540, "ir", "", 1, -1, 1, "NULL");
         listaReglas5.addElement(r1);
         listaReglas5.addElement(r2);
         listaReglas5.addElement(r3);
@@ -366,32 +359,31 @@ public class SpanishStemmer implements IStemmer {
     /**
      * Inicializa las reglas de tipo 6
      */
-    private void inicializaReglas6()
-    {
-        RuleSpanish r1=new RuleSpanish(601, "isi","i",2, 0, 0, "NULL");
-        RuleSpanish r2=new RuleSpanish(602, "ya", "", 1,-1, 0, "NULL");
-        RuleSpanish r3=new RuleSpanish(603, "ye", "", 1,-1, 0, "NULL");
-        RuleSpanish r4=new RuleSpanish(604, "yo", "", 1,-1, 0, "NULL");
-        RuleSpanish r5=new RuleSpanish(605, "yá", "", 1,-1, 0, "NULL");
-        RuleSpanish r6=new RuleSpanish(606, "yé", "", 1,-1, 0, "NULL");
-        RuleSpanish r7=new RuleSpanish(607, "yó", "", 1,-1, 0, "NULL");
-        RuleSpanish r8=new RuleSpanish(608, "eo", "", 1,-1, 0, "NULL");
-        RuleSpanish r9=new RuleSpanish(609, "ea", "", 1,-1, 0, "NULL");
-        RuleSpanish r10=new RuleSpanish(610, "io", "",1,-1, 0, "NULL");
-        RuleSpanish r11=new RuleSpanish(611, "ia", "",1,-1, 0, "NULL");
-        RuleSpanish r12=new RuleSpanish(612, "ón", "",1,-1, 0, "NULL");
-        RuleSpanish r13=new RuleSpanish(613, "a", "", 0,-1, 0, "NULL");
-        RuleSpanish r14=new RuleSpanish(614, "e", "", 0,-1, 0, "NULL");
-        RuleSpanish r15=new RuleSpanish(615, "i", "", 0,-1, 0, "NULL");
-        RuleSpanish r16=new RuleSpanish(616, "o", "", 0,-1, 0, "NULL");
-        RuleSpanish r17=new RuleSpanish(617, "u", "", 0,-1, 0, "NULL");
-        RuleSpanish r18=new RuleSpanish(618, "á", "", 0,-1, 0, "NULL");
-        RuleSpanish r19=new RuleSpanish(619, "é", "", 0,-1, 0, "NULL");
-        RuleSpanish r20=new RuleSpanish(620, "í", "", 0,-1, 0, "NULL");
-        RuleSpanish r21=new RuleSpanish(621, "ó", "", 0,-1, 0, "NULL");
-        RuleSpanish r22=new RuleSpanish(622, "ú", "", 0,-1, 0, "NULL");
-        RuleSpanish r23=new RuleSpanish(623, "e", "", 0,-1, 0, "NULL");
-        RuleSpanish r24=new RuleSpanish(624, "é", "", 0,-1, 0, "NULL");
+    private void inicializaReglas6() {
+        RuleSpanish r1 = new RuleSpanish(601, "isi", "i", 2, 0, 0, "NULL");
+        RuleSpanish r2 = new RuleSpanish(602, "ya", "", 1, -1, 0, "NULL");
+        RuleSpanish r3 = new RuleSpanish(603, "ye", "", 1, -1, 0, "NULL");
+        RuleSpanish r4 = new RuleSpanish(604, "yo", "", 1, -1, 0, "NULL");
+        RuleSpanish r5 = new RuleSpanish(605, "yá", "", 1, -1, 0, "NULL");
+        RuleSpanish r6 = new RuleSpanish(606, "yé", "", 1, -1, 0, "NULL");
+        RuleSpanish r7 = new RuleSpanish(607, "yó", "", 1, -1, 0, "NULL");
+        RuleSpanish r8 = new RuleSpanish(608, "eo", "", 1, -1, 0, "NULL");
+        RuleSpanish r9 = new RuleSpanish(609, "ea", "", 1, -1, 0, "NULL");
+        RuleSpanish r10 = new RuleSpanish(610, "io", "", 1, -1, 0, "NULL");
+        RuleSpanish r11 = new RuleSpanish(611, "ia", "", 1, -1, 0, "NULL");
+        RuleSpanish r12 = new RuleSpanish(612, "ón", "", 1, -1, 0, "NULL");
+        RuleSpanish r13 = new RuleSpanish(613, "a", "", 0, -1, 0, "NULL");
+        RuleSpanish r14 = new RuleSpanish(614, "e", "", 0, -1, 0, "NULL");
+        RuleSpanish r15 = new RuleSpanish(615, "i", "", 0, -1, 0, "NULL");
+        RuleSpanish r16 = new RuleSpanish(616, "o", "", 0, -1, 0, "NULL");
+        RuleSpanish r17 = new RuleSpanish(617, "u", "", 0, -1, 0, "NULL");
+        RuleSpanish r18 = new RuleSpanish(618, "á", "", 0, -1, 0, "NULL");
+        RuleSpanish r19 = new RuleSpanish(619, "é", "", 0, -1, 0, "NULL");
+        RuleSpanish r20 = new RuleSpanish(620, "í", "", 0, -1, 0, "NULL");
+        RuleSpanish r21 = new RuleSpanish(621, "ó", "", 0, -1, 0, "NULL");
+        RuleSpanish r22 = new RuleSpanish(622, "ú", "", 0, -1, 0, "NULL");
+        RuleSpanish r23 = new RuleSpanish(623, "e", "", 0, -1, 0, "NULL");
+        RuleSpanish r24 = new RuleSpanish(624, "é", "", 0, -1, 0, "NULL");
         listaReglas6.addElement(r1);
         listaReglas6.addElement(r2);
         listaReglas6.addElement(r3);
@@ -424,16 +416,16 @@ public class SpanishStemmer implements IStemmer {
      * @param caracter
      * @return boolean.
      */
-    private boolean isalpha(char c)
-    {
+    private boolean isalpha(char c) {
         if ((c >= '0' && c <= '9') ||
-            (c >= 'a' && c <= 'z') ||
-            (c >= 'A' && c <= 'Z') ||
-            (c=='ñ') || (c=='Ñ'))
-//          || (c >= 192 && c <= 255))
+                (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') ||
+                (c == 'ñ') || (c == 'Ñ')) //          || (c >= 192 && c <= 255))
+        {
             return true;
-        else
+        } else {
             return false;
+        }
     }
 
     /**
@@ -441,9 +433,8 @@ public class SpanishStemmer implements IStemmer {
      * @param caracter.
      * @return boolean. Indica si el caracter dado es vocal.
      */
-    private boolean esVocal(char c)
-    {
-        return (('a'==(c)||'e'==(c)||'i'==(c)||'o'==(c)||'u'==(c)||'á'==(c)||'é'==(c)||'í'==(c)||'ó'==(c)||'ú'==(c)));
+    private boolean esVocal(char c) {
+        return (('a' == (c) || 'e' == (c) || 'i' == (c) || 'o' == (c) || 'u' == (c) || 'á' == (c) || 'é' == (c) || 'í' == (c) || 'ó' == (c) || 'ú' == (c)));
     }
 
     /**
@@ -451,219 +442,194 @@ public class SpanishStemmer implements IStemmer {
      * @param caracter.
      * @return boolean. Indica si el caracter dado es vocal.
      */
-    private boolean esVocal_wxy(char c)
-    {
-        return (('a'==(c)||'e'==(c)||'i'==(c)||'o'==(c)||'u'==(c)||'á'==(c)||'é'==(c)||'í'==(c)||'ó'==(c)||'ú'==(c)||'w'==(c)||'x'==(c)||'y'==(c)));
+    private boolean esVocal_wxy(char c) {
+        return (('a' == (c) || 'e' == (c) || 'i' == (c) || 'o' == (c) || 'u' == (c) || 'á' == (c) || 'é' == (c) || 'í' == (c) || 'ó' == (c) || 'ú' == (c) || 'w' == (c) || 'x' == (c) || 'y' == (c)));
     }
+
     /**
      * Dice si un carácter es vocal ó y.
      * @param caracter.
      * @return boolean. Indica si el caracter dado es vocal.
      */
-    private boolean esVocal_y(char c)
-    {
-        return (('a'==(c)||'e'==(c)||'i'==(c)||'o'==(c)||'u'==(c)||'á'==(c)||'é'==(c)||'í'==(c)||'ó'==(c)||'ú'==(c)||'y'==(c)));
+    private boolean esVocal_y(char c) {
+        return (('a' == (c) || 'e' == (c) || 'i' == (c) || 'o' == (c) || 'u' == (c) || 'á' == (c) || 'é' == (c) || 'í' == (c) || 'ó' == (c) || 'ú' == (c) || 'y' == (c)));
     }
+
     /**
      * Método que calcula el numero de veces que se produce un cambio de Vocal a Consonante
-     * @param String palabra. Palabra de la que se quiere conocer su longitud.
-     * @return Longitud de la palabra
+     * @param String word. Palabra de la que se quiere conocer su longitud.
+     * @return Longitud de la word
      */
-    private int longPalabra()
-    {
-        int resultado=0;
-        int estado=0;
-        int pos=0;
-        char car=' ';
+    private int longPalabra() {
+        int resultado = 0;
+        int estado = 0;
+        int pos = 0;
+        char car = ' ';
 
-        while(pos < palabra.length())
-        {
-            car=palabra.charAt(pos);
-            switch(estado)
-            {
+        while (pos < word.length()) {
+            car = word.charAt(pos);
+            switch (estado) {
                 case 0:
-                    if (esVocal(car))
-                        estado=1;
-                    else
-                        estado=2;
+                    if (esVocal(car)) {
+                        estado = 1;
+                    } else {
+                        estado = 2;
+                    }
                     break;
                 case 1:
-                    if (esVocal(car))
-                        estado=1;
-                    else
-                        estado=2;
-                    if (estado==2)
-                        resultado=resultado+1;
+                    if (esVocal(car)) {
+                        estado = 1;
+                    } else {
+                        estado = 2;
+                    }
+                    if (estado == 2) {
+                        resultado = resultado + 1;
+                    }
                     break;
                 case 2:
-                    if (esVocal(car) || car == 'y')
-                        estado=1;
-                    else
-                        estado=2;
+                    if (esVocal(car) || car == 'y') {
+                        estado = 1;
+                    } else {
+                        estado = 2;
+                    }
                     break;
             }
-            pos=pos+1;
+            pos = pos + 1;
         }
         return resultado;
     }
 
-
     /**
-     * Método que dice si la palabra contiene una vocal.
+     * Método que dice si la word contiene una vocal.
      * @param String. Palabra
      * @return boolean.
      */
-      private boolean contieneVocal()
-      {
-         for (int i=0 ; i < palabra.length(); i++ )
-            if ( i > 0 )
-            {
-               if (esVocal_y(palabra.charAt(i)))
-                  return true;
+    private boolean contieneVocal() {
+        for (int i = 0; i < word.length(); i++) {
+            if (i > 0) {
+                if (esVocal_y(word.charAt(i))) {
+                    return true;
+                }
             }
-         return false;
-      }
+        }
+        return false;
+    }
 
     /**
-     * Devuelve true si la palabra termina en CVC (Consonante Vocal Consonante)
-     * @param String palabra
+     * Devuelve true si la word termina en CVC (Consonante Vocal Consonante)
+     * @param String word
      * @return boolean
      */
-
-     private boolean terminaEnCVC()
-     {
+    private boolean terminaEnCVC() {
         int longitud;
         char ultimo;
         char penultimo;
         char antepenultimo;
 
-        longitud=palabra.length();
-        if (longitud < 3)
+        longitud = word.length();
+        if (longitud < 3) {
             return false;
-        else
-        {
-            ultimo=palabra.charAt(longitud-1);
-            penultimo=palabra.charAt(longitud-2);
-            antepenultimo=palabra.charAt(longitud-3);
+        } else {
+            ultimo = word.charAt(longitud - 1);
+            penultimo = word.charAt(longitud - 2);
+            antepenultimo = word.charAt(longitud - 3);
             return (!esVocal_wxy(ultimo) && esVocal_y(penultimo) && !esVocal(antepenultimo));
         }
-     }
+    }
 
     /**
      * Método que indica si se debe borrar la última E.
-     * @param String palabra
+     * @param String word
      * @return boolean
      */
-     private boolean eliminaE()
-     {
-        return((longPalabra() == 1) && !terminaEnCVC());
-     }
+    private boolean eliminaE() {
+        return ((longPalabra() == 1) && !terminaEnCVC());
+    }
 
     /**
      * Comprobamos si se cumple una condición para aplicar la regla.
-     * @param String regla, String palabra
+     * @param String regla, String word
      * @return boolean. Indica si se cumple la regla.
      */
-    private boolean seCumpleRegla(String regla)
-    {
-        boolean seCumple=false;
-        if(regla.equals("ContieneVocal"))
-        {
-            seCumple=(contieneVocal());
-        }
-        else if (regla.equals("eliminaE"))
-        {
-            seCumple=(eliminaE());
-        }
-        else if (regla.equals("NULL"))
-        {
-            seCumple=true;
+    private boolean seCumpleRegla(String regla) {
+        boolean seCumple = false;
+        if (regla.equals("ContieneVocal")) {
+            seCumple = (contieneVocal());
+        } else if (regla.equals("eliminaE")) {
+            seCumple = (eliminaE());
+        } else if (regla.equals("NULL")) {
+            seCumple = true;
         }
         return seCumple;
     }
 
     /**
-     * Sustituye el final de la palabra aplicando todas las reglas en cadena
-     * @param String palabra, Lista de Reglas
+     * Sustituye el final de la word aplicando todas las reglas en cadena
+     * @param String word, Lista de Reglas
      * @return int. Ultima regla aplicada
      */
-     private int sustituirFinal(Vector reglas)
-     {
-        int idRegla=0;
-        Enumeration listaReglas=reglas.elements();
+    private int sustituirFinal(Vector reglas) {
+        int idRegla = 0;
+        Enumeration listaReglas = reglas.elements();
         RuleSpanish regl;
-        String tmp=new String("");
-        String ending=new String("");
-        int ini_ending=0;
-        while(listaReglas.hasMoreElements())
-        {
+        String tmp = new String("");
+        String ending = new String("");
+        int ini_ending = 0;
+        while (listaReglas.hasMoreElements()) {
             //Cargamos la nueva regla en regl
-            regl=(RuleSpanish)listaReglas.nextElement();
+            regl = (RuleSpanish) listaReglas.nextElement();
             //Asociamos el identificador de la regla a idRegla
-            idRegla=regl.obtenerId();
-            //end apunta a la ultima posicion de la raizPalabra
-            ini_ending=end-regl.obtenerOldOffset();
-            if(ini_ending>0)
-                ending=palabra.substring(ini_ending-1,palabra.length());
-            if(!ending.equals(""))
-            {
-                if (ending.equals(regl.obtenerOldEnd()))
-                {
-                    tmp=ending;
-                    if(regl.obtenerMinRootSize() < longPalabra())
-                    {
-                        if (seCumpleRegla(regl.obtenerCondicion()))
-                        {
+            idRegla = regl.obtenerId();
+            //end apunta a la ultima posicion de la wordRoot
+            ini_ending = end - regl.obtenerOldOffset();
+            if (ini_ending > 0) {
+                ending = word.substring(ini_ending - 1, word.length());
+            }
+            if (!ending.equals("")) {
+                if (ending.equals(regl.obtenerOldEnd())) {
+                    tmp = ending;
+                    if (regl.obtenerMinRootSize() < longPalabra()) {
+                        if (seCumpleRegla(regl.obtenerCondicion())) {
                             //Sustituimos la terminacion antigua por la nueva.
-                            palabra=palabra.substring(0,ini_ending-1)+regl.obtenerNewEnd();
-                            end=ini_ending+regl.obtenerNewOffset();
+                            word = word.substring(0, ini_ending - 1) + regl.obtenerNewEnd();
+                            end = ini_ending + regl.obtenerNewOffset();
                             break;
                         }
                     }
-                    ending=tmp;
+                    ending = tmp;
                 }
             }
         }
         return idRegla;
-     }
+    }
 
-     /**
-     * Calcula la raiz de una palabra.
-     * @param palabra que usamos para extraer su raíz.
-     * @return raiz de la palabra
+    /**
+     * Calcula la extactRoot de una word.
+     * @param word que usamos para extraer su raíz.
+     * @return extactRoot de la word
      */
-     public String raiz(String palabraRecibida)
-     {
+    public String extactRoot(String receivedWord) {
         int idRegla;
-        char car=' ';
-        if(palabraRecibida.equals(""))
+        word = receivedWord;
+        /*   for(int pos=0;pos<word.length();pos++)
         {
-             System.out.println("Extractor de raíces.");
-             System.out.println("");
-             System.out.println("   palabra");
-             System.out.println("       Palabra de la que se quiere extraer su raíz.");
+        car=word.charAt(pos);
+        if (!isalpha(car))
+        if(!(car=='á' || car=='é' || car=='í' || car=='ó' || car=='ú'))
+        {
+        System.out.println(word);
+        return word;
         }
-        palabra=palabraRecibida;
-     /*   for(int pos=0;pos<palabra.length();pos++)
-        {
-            car=palabra.charAt(pos);
-            if (!isalpha(car))
-                if(!(car=='á' || car=='é' || car=='í' || car=='ó' || car=='ú'))
-                {
-		    System.out.println(palabra);
-                    return palabra;
-                }
         }*/
-        end=palabra.length();//Contiene la posicion del último caracter de la palabra
-        palabra=palabra.toLowerCase();
-        idRegla=sustituirFinal(listaReglas1);
-        idRegla=sustituirFinal(listaReglas2);
-        idRegla=sustituirFinal(listaReglas3);
-        idRegla=sustituirFinal(listaReglas4);
-        idRegla=sustituirFinal(listaReglas5);
-        idRegla=sustituirFinal(listaReglas6);
-        raizPalabra=palabra;
-        return raizPalabra;
-     }
-
+        end = word.length();//Contiene la posicion del último caracter de la word
+        word = word.toLowerCase();
+        idRegla = sustituirFinal(listaReglas1);
+        idRegla = sustituirFinal(listaReglas2);
+        idRegla = sustituirFinal(listaReglas3);
+        idRegla = sustituirFinal(listaReglas4);
+        idRegla = sustituirFinal(listaReglas5);
+        idRegla = sustituirFinal(listaReglas6);
+        wordRoot = word;
+        return wordRoot;
+    }
 }
