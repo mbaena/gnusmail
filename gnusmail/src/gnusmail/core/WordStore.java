@@ -47,7 +47,6 @@ public class WordStore {
 
     private final int MAX_MESSAGES_PER_FOLDER = 50;
     TermFrequencyManager termFrequencyManager;
-    public final static String tokenPattern = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
     public final static String configFolder = System.getProperty("user.home") + "/.gnusmail/";
     public final static File WORDS_FILE = new File(configFolder + "/wordlist.data");
     public final static File STOPWORDS_FILE_EN = new File(configFolder + "/english-stopwords.data");
