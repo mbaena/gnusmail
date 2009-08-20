@@ -563,9 +563,9 @@ public class EnglishStemmer implements IStemmer {
         i = 0;
     }
 
-    public String raiz(String palabraRecibida) {
-       char caracteres[] = palabraRecibida.toCharArray();
-       int longitud = palabraRecibida.length();
+    public String extactRoot(String word) {
+       char caracteres[] = word.toCharArray();
+       int longitud = word.length();
        add(caracteres, longitud);
        stem();
        return new String(caracteres);

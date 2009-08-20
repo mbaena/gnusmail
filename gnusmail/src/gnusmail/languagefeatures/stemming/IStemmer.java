@@ -9,5 +9,5 @@ package gnusmail.languagefeatures.stemming;
  * @author jmcarmona
  */
 public interface IStemmer {
-    public String raiz(String palabraRecibida);
+    public String extactRoot(String receivedWord);
 }
