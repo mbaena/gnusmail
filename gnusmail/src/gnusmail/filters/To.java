@@ -18,12 +18,9 @@ public final class To extends Filter {
 	}
 	
 	public String applyTo(MessageInfo mess) {
-		//String res = csvmng.getValue(this.getNombreFiltro(), mess);
-        try {
-            return  mess.getFrom();
+		try {
+            return  mess.getTo();
 		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
 			return "?";
 		}
 	}
