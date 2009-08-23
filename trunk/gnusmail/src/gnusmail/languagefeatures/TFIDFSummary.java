@@ -12,70 +12,101 @@ import java.security.InvalidParameterException;
  */
 public class TFIDFSummary implements Comparable {
 
-    String term;
-    int numberOfDocuments;
-    int termFrequency;
+	String term;
+	int numberOfDocuments;
+	int termFrequency;
+	long totalNumberOfWordsInThisFolder;
+	int totalNumberOfDocumentsInThisFolder;
 
-    public int getNumberOfDocuments() {
-        return numberOfDocuments;
-    }
+	public int getTotalNumberOfDocumentsInThisFolder() {
+		return totalNumberOfDocumentsInThisFolder;
+	}
 
-    public void setNumberOfDocuments(int numberOfDocuments) {
-        this.numberOfDocuments = numberOfDocuments;
-    }
+	public void setTotalNumberOfDocumentsInThisFolder(int totalNumberOfDocumentsInThisFolder) {
+		this.totalNumberOfDocumentsInThisFolder = totalNumberOfDocumentsInThisFolder;
+	}
 
-    public String getTerm() {
-        return term;
-    }
+	public long getTotalNumberOfWordsInThisFolder() {
+		return totalNumberOfWordsInThisFolder;
+	}
 
-    public void setTerm(String term) {
-        this.term = term;
-    }
+	public void setTotalNumberOfWordsInThisFolder(long totalNumberOfWordsInThisFolder) {
+		this.totalNumberOfWordsInThisFolder = totalNumberOfWordsInThisFolder;
+	}
 
-    public int getTermFrequency() {
-        return termFrequency;
-    }
+	public int getNumberOfDocumentsWithThisTerm() {
+		return numberOfDocuments;
+	}
 
-    public void setTermFrequency(int termFrequency) {
-        this.termFrequency = termFrequency;
-    }
+	public void setNumberOfDocumentsWithThisTerm(int numberOfDocuments) {
+		this.numberOfDocuments = numberOfDocuments;
+	}
 
-    public void addNewAppearances(int number) {
-        if (number >= 1) {
-            termFrequency += number;
-        }
-    }
+	public String getTerm() {
+		return term;
+	}
 
-    public void addNewDocumentAppearance() {
-        numberOfDocuments++;
-    }
+	public void setTerm(String term) {
+		this.term = term;
+	}
 
-    public double getTFIDFScore() {
-        if (getNumberOfDocuments() == 0) {
-            return 0.0;
-        } else {
-            return (1.0 * getTermFrequency()) / (1.0 * getNumberOfDocuments());
-        }
-    }
+	public int getTermFrequency() {
+		return termFrequency;
+	}
 
-    public int compareTo(Object o) {
-        if (!(o instanceof TFIDFSummary)) {
-            throw new InvalidParameterException();
-        } else {
-            TFIDFSummary other = (TFIDFSummary) o;
-            if (getTFIDFScore() < other.getTFIDFScore()) {
-                return -1;
-            } else if (getTFIDFScore() > other.getTFIDFScore()) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-    }
+	public void setTermFrequency(int termFrequency) {
+		this.termFrequency = termFrequency;
+	}
 
-    @Override
-    public String toString() {
-        return this.term + " <" + this.getTFIDFScore() + "> " +
-                this.getNumberOfDocuments() + " " + this.getTermFrequency();
-    }
+	public void addNewAppearances(int number) {
+		if (number >= 1) {
+			termFrequency += number;
+		}
+	}
+
+	public void addNewDocumentAppearance() {
+		numberOfDocuments++;
+	}
+
+	/**
+	 * This method retrieves the tf-idf score of the current term. 
+	 */
+	public double getTFIDFScore() {
+		return getTFScore() * getIDFScore();
+	}
+
+	/**
+	 * Term Frecuency, normalized by the number of words in this folder:
+	 * @return
+	 */
+	public double getTFScore() {
+		return (1.0 * getTermFrequency()) /
+				(1.0 * getTotalNumberOfWordsInThisFolder());
+	}
+
+	public double getIDFScore() {
+		return Math.log((1.0 * getTotalNumberOfDocumentsInThisFolder()) /
+				(1*0 * getNumberOfDocumentsWithThisTerm() + 1));
+	}
+
+	public int compareTo(Object o) {
+		if (!(o instanceof TFIDFSummary)) {
+			throw new InvalidParameterException();
+		} else {
+			TFIDFSummary other = (TFIDFSummary) o;
+			if (getTFIDFScore() < other.getTFIDFScore()) {
+				return -1;
+			} else if (getTFIDFScore() > other.getTFIDFScore()) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+	}
+
+	@Override
+	public String toString() {
+		return this.term + " <" + this.getTFIDFScore() + "> " +
+				this.getNumberOfDocumentsWithThisTerm() + " " + this.getTermFrequency();
+	}
 }
