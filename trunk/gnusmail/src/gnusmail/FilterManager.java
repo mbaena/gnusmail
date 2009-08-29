@@ -21,12 +21,12 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
-
 /**
  * TODO
  * @author jmcarmona
  */
 public class FilterManager {
+
 	CSVClass csvmanager;
 
 	public FilterManager() {
@@ -70,7 +70,7 @@ public class FilterManager {
 		Folder[] folders;
 		System.out.println("Extracting information from messages...");
 		try {
-			folders = myConnection.getCarpetas();
+			folders = myConnection.getFolders();
 
 			for (int i = 0; i < folders.length; i++) {
 				if (!folders[i].getFullName().contains(".Sent")) {
@@ -95,12 +95,12 @@ public class FilterManager {
 	 * @param limit
 	 * @param messagesToRetrieve
 	 */
-    public void saveAttributesForInitialModel(Connection connection, int limit,
+	public void saveAttributesForInitialModel(Connection connection, int limit,
 			int messagesToRetrieve) {
 		MessageReader reader = new MessageReader(connection, limit);
 		String[] atributos;
 		Iterator<Message> iterator = reader.iterator();
-	    int messagesRetrieved = 0;
+		int messagesRetrieved = 0;
 		while (iterator.hasNext() && messagesRetrieved <= messagesToRetrieve) {
 			messagesRetrieved++;
 			MessageInfo msgInfo = new MessageInfo(iterator.next());
@@ -157,7 +157,7 @@ public class FilterManager {
 		inst.setDataset(dataSet);
 
 		int i = 0;
-		for (String filtro: filtros) {
+		for (String filtro : filtros) {
 			// Este bucle toma el nombre del filtro, eliminando
 			// la cadena "genusmail.filters." del pricipio
 			StringTokenizer str = new StringTokenizer(filtro, ".");
@@ -187,8 +187,10 @@ public class FilterManager {
 	 * abiertas.
 	 */
 	public static String[] getMessageAttributes(MessageInfo msj) throws MessagingException {
-		if (!msj.getFolder().isOpen()) {
-			msj.getFolder().open(Folder.READ_ONLY);
+		if (msj.getFolder() != null) { //The folder can be null when the message is read from console
+			if (!msj.getFolder().isOpen()) {
+				msj.getFolder().open(Folder.READ_ONLY);
+			}
 		}
 		System.out.println("   Analyzing " + msj.getMessageId());
 		// res es un vector q contendrá el contenido de todos los atributos
@@ -238,7 +240,9 @@ public class FilterManager {
 
 		// Interesa devolver un array de String, no un Vector
 		String[] sres = new String[res.size()];
-		msj.getFolder().close(false);
+		if (msj.getFolder() != null) {
+			msj.getFolder().close(false);
+		}
 		return res.toArray(sres);
 
 

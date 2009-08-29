@@ -173,7 +173,7 @@ public class ClassifierManager {
 		ObjectInputStream fie = new ObjectInputStream(fe);
 		model = (Classifier) fie.readObject();
 
-		System.out.println("\nClassyfying...\n");
+		System.out.println("\nClassifying...\n");
 		//distributionForInstance: da la predicción...
 		double[] res = model.distributionForInstance(inst);
 		Attribute att = dataSet.attribute("Folder");
@@ -203,7 +203,6 @@ public class ClassifierManager {
 			r.close();
 			Instance inst = filterManager.makeInstance(msg, dataSet);
 			Classifier model;
-			//System.out.println(inst);
 
 			FileInputStream fe = new FileInputStream(ConfigurationManager.MODEL_FILE);
 			ObjectInputStream fie = new ObjectInputStream(fe);
