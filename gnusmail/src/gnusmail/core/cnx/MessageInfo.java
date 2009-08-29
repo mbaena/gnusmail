@@ -56,7 +56,7 @@ public class MessageInfo implements Comparable {
                     try {
                     result = (String)mp.getBodyPart(i).getContent();
                     } catch (Exception e) {
-                        System.out.println("Excepcion cogiendo cuerpo de correo");
+						System.out.println("Exception (message body)");
                     }
             }
             result = "";
@@ -222,22 +222,22 @@ public class MessageInfo implements Comparable {
     }
     
     /** Metodo que imprime el mensaje en el OutputStream pasado como argumento */
-    public void imprimir(OutputStream os) {
+    public void print(OutputStream os) {
     	try {
 			message.writeTo(os);			
 		} catch (Exception e) {
-			System.out.println("ERROR: Imposible imprimir mensaje!!");
+			System.out.println("ERROR: Impossible to print message!!");
 			//e.printStackTrace();
 		}    	
         	
     }
     
     /** Metodo que añade al mensaje una cabecera llamada nombre y q contenga contenido */
-    public void crearCabecera(String nombre, String contenido) {
+    public void createHeader(String nombre, String contenido) {
     	try {
 			message.addHeader(nombre, contenido);
 		} catch (MessagingException e) {
-			System.out.println("Imposible añadir nueva cabecera");
+			System.out.println("Impossible to add new header");
 			//e.printStackTrace();
 		}
     	

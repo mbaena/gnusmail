@@ -279,7 +279,7 @@ public class Connection {
 		}
 	}
 
-	public Folder[] getCarpetas() throws MessagingException {
+	public Folder[] getFolders() throws MessagingException {
 		if (isLoggedIn()) {
 			System.out.println("Is logged in");
 		} else {
