@@ -44,7 +44,7 @@ public class MainManager {
 				System.out.println("Unable to connect to the requested host!");
 			}
 			if (connection.getFolder() != null) {
-				connection.mostrar_mens();
+				connection.show_mens();
 			}
 		} else {
 			if (connection == null) {
@@ -97,7 +97,7 @@ public class MainManager {
 
 	public void openMail(int mail_id) {
 		try {
-			connection.showAttributes(mail_id);
+			connection.leerCorreo(mail_id);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

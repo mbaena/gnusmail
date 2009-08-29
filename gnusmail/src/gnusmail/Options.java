@@ -1,12 +1,15 @@
 package gnusmail;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import gnusmail.core.ConfigurationManager;
 
-
 public class Options {
-    private MainManager mainManager;
+
+	private MainManager mainManager;
 	private String url;
 	private int showAttributes;
 	private boolean attributeExtraction;
@@ -17,80 +20,82 @@ public class Options {
 	private int openMail;
 	private boolean listMails;
 	private int listMailsLimit;
-    private boolean extractWords;
-    private boolean updateModelWithMail;
-	
+	private boolean extractWords;
+	private boolean updateModelWithMail;
+
 	public Options() {
-        this.url = null;
-        this.showAttributes = -1;
-        this.attributeExtraction = false;
-        this.modelTraining = false;
-        this.listFolders = false;
-        this.listMails = false;
-        this.listMailsLimit = 0;
-        this.listMailsInFolder = false;
-        this.mailClassification = false;
-        this.openMail = -1;
-        this.extractWords = false;
-        this.updateModelWithMail = false;
+		this.url = null;
+		this.showAttributes = -1;
+		this.attributeExtraction = false;
+		this.modelTraining = false;
+		this.listFolders = false;
+		this.listMails = false;
+		this.listMailsLimit = 0;
+		this.listMailsInFolder = false;
+		this.mailClassification = false;
+		this.openMail = -1;
+		this.extractWords = false;
+		this.updateModelWithMail = false;
 	}
-	
+
 	public void run() {
-		if (url != null ) {
-			mainManager = new MainManager(url); 
+		if (url != null) {
+			mainManager = new MainManager(url);
 		} else {
 			mainManager = new MainManager();
 		}
-        if (this.showAttributes >= 0) {
-        	mainManager.showAttibutes(this.showAttributes);        	
-        }
-        if (this.attributeExtraction) {
-        	mainManager.extractAttributes();
-        }
-        if (this.modelTraining) {
-        	mainManager.trainModel();
-        }
-        if (this.listFolders) {
-        	mainManager.listFolders();
-        }
-        if (this.listMails) {
-        	mainManager.listMails(this.listMailsLimit);
-        }
-        if (this.listMailsInFolder) {
-        	mainManager.mailsInFolder();
-        }
-        if (this.extractWords) {
-             mainManager.extractFrequentWords();
-        }
+		if (this.showAttributes >= 0) {
+			mainManager.showAttibutes(this.showAttributes);
+		}
+		if (this.attributeExtraction) {
+			mainManager.extractAttributes();
+		}
+		if (this.modelTraining) {
+			mainManager.trainModel();
+		}
+		if (this.listFolders) {
+			mainManager.listFolders();
+		}
+		if (this.listMails) {
+			mainManager.listMails(this.listMailsLimit);
+		}
+		if (this.listMailsInFolder) {
+			mainManager.mailsInFolder();
+		}
+		if (this.extractWords) {
+			mainManager.extractFrequentWords();
+		}
 
-        if (this.updateModelWithMail) {
-             MimeMessage msg;
+		if (this.updateModelWithMail) {
+			MimeMessage msg;
 			try {
 				msg = new MimeMessage(null, System.in); // std. input
-                mainManager.updateModelWithMail(msg);
+				System.out.println("La carpeta es " + msg.getFolder());
+				mainManager.updateModelWithMail(msg);
 			} catch (MessagingException e) {
 				e.printStackTrace();
 			}
-        }
+		}
 
-        if (this.mailClassification) {
-            MimeMessage msg;
+		if (this.mailClassification) {
+			MimeMessage msg;
 			try {
 				msg = new MimeMessage(null, System.in); // std. input
-	        	mainManager.classifyMail(msg);
+				mainManager.classifyMail(msg);
 			} catch (MessagingException e) {
 				e.printStackTrace();
-			} 
-        }
-        if (this.openMail > 0) {
-        	mainManager.openMail(this.openMail);
-        }
-        mainManager.close();
+			}
+		}
+		if (this.openMail > 0) {
+	//		mainManager = new MainManager("imaps://jmcarmona:@albireo.lcc.uma.es/INBOX.Drafts");
+			mainManager.openMail(this.openMail);
+		}
+		mainManager.close();
 
 	}
 
 	public void setURL(String arg) {
-    	this.url = arg;
+		this.url = arg;
 	}
 
 	public void setShowAttributes(int mail_id) {
@@ -102,28 +107,28 @@ public class Options {
 	}
 
 	public void setModelTraining(boolean b) {
-		this.modelTraining = b;	
+		this.modelTraining = b;
 	}
 
 	public void setListFolders(boolean b) {
-		this.listFolders = b;	
+		this.listFolders = b;
 	}
 
 	public void setListMailsInFolder(boolean b) {
-		this.listMailsInFolder = b;		
+		this.listMailsInFolder = b;
 	}
 
 	public void setMailClassification(boolean b) {
-		this.mailClassification = b;		
+		this.mailClassification = b;
 	}
 
 	public void setProperties(String clave, String valor) {
-        ConfigurationManager.añadirPropiedad("genusmail.filters." + clave, valor);
-        ConfigurationManager.grabarFichero();
+		ConfigurationManager.añadirPropiedad("genusmail.filters." + clave, valor);
+		ConfigurationManager.grabarFichero();
 	}
 
 	public void setOpenMail(int mail_id) {
-		this.openMail = mail_id;		
+		this.openMail = mail_id;
 	}
 
 	public void setListMails(boolean b, int limit) {
@@ -131,15 +136,15 @@ public class Options {
 		this.listMails = b;
 	}
 
-    public boolean isExtractWords() {
-        return extractWords;
-    }
+	public boolean isExtractWords() {
+		return extractWords;
+	}
 
-    public void setExtractWords(boolean extractWords) {
-        this.extractWords = extractWords;
-    }
+	public void setExtractWords(boolean extractWords) {
+		this.extractWords = extractWords;
+	}
 
-    public void setUpdateModelWithMail() {
-        this.updateModelWithMail = true;
-    }
+	public void setUpdateModelWithMail() {
+		this.updateModelWithMail = true;
+	}
 }

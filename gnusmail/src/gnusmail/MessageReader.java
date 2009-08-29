@@ -4,6 +4,8 @@ import gnusmail.core.cnx.Connection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -51,11 +53,16 @@ public class MessageReader implements Iterable<Message> {
             long total_msgs = 0;
             Folder[] folders = null;
             try {
-                folders = connection.getCarpetas();
+                folders = connection.getFolders();
             } catch (MessagingException e) {
                 e.printStackTrace();
             }
             for (Folder folder : folders) {
+				try {
+					System.out.println(" " + folder.getURLName());
+				} catch (MessagingException ex) {
+					Logger.getLogger(MessageReader.class.getName()).log(Level.SEVERE, null, ex);
+				}
                 if (!folder.getName().contains("INBOX.Sent") && !folder.getName().contains("antiguos")) {
                     try {
                         if (!folder.isOpen()) {
