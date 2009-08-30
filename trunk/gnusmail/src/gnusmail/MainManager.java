@@ -1,7 +1,7 @@
 package gnusmail;
 
 import gnusmail.core.ConfigurationManager;
-import gnusmail.core.WordStore;
+import gnusmail.core.WordsStore;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
 import javax.mail.Message;
@@ -97,7 +97,7 @@ public class MainManager {
 
 	public void openMail(int mail_id) {
 		try {
-			connection.leerCorreo(mail_id);
+			connection.readMail(mail_id);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -117,7 +117,7 @@ public class MainManager {
 	}
 
 	public void extractFrequentWords() {
-		WordStore wordStore = new WordStore();
+		WordsStore wordStore = new WordsStore();
 		wordStore.readWordsList(connection);
 	}
 
@@ -145,7 +145,7 @@ public class MainManager {
 
 	public void classifyMail(MimeMessage msg) {
 		try {
-			classifierManager.MessageInfo(msg);
+			classifierManager.classifyMail(msg);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

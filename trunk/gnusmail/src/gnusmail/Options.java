@@ -1,11 +1,9 @@
 package gnusmail;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import gnusmail.core.ConfigurationManager;
+import javax.mail.Folder;
 
 public class Options {
 
@@ -69,8 +67,8 @@ public class Options {
 		if (this.updateModelWithMail) {
 			MimeMessage msg;
 			try {
+				System.out.println("Ready to Read Message:");
 				msg = new MimeMessage(null, System.in); // std. input
-				System.out.println("La carpeta es " + msg.getFolder());
 				mainManager.updateModelWithMail(msg);
 			} catch (MessagingException e) {
 				e.printStackTrace();
@@ -80,14 +78,22 @@ public class Options {
 		if (this.mailClassification) {
 			MimeMessage msg;
 			try {
+				System.out.println("Ready to Read Message:");
 				msg = new MimeMessage(null, System.in); // std. input
+				System.out.println("Mirando el header folder " + msg.getHeader("Folder")[0]);
+				Folder folder = msg.getFolder();
+				if (folder != null) {
+					System.out.println("Read folder is " + msg.getFolder().getName());
+				} else {
+					System.out.println("Era null el folder, Mensch");
+				}
 				mainManager.classifyMail(msg);
 			} catch (MessagingException e) {
 				e.printStackTrace();
 			}
 		}
 		if (this.openMail > 0) {
-	//		mainManager = new MainManager("imaps://jmcarmona:@albireo.lcc.uma.es/INBOX.Drafts");
+			//		mainManager = new MainManager("imaps://jmcarmona:@albireo.lcc.uma.es/INBOX.Drafts");
 			mainManager.openMail(this.openMail);
 		}
 		mainManager.close();

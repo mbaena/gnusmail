@@ -106,7 +106,7 @@ public class Main {
 			} //switch
 			System.out.println("Running options...");
 			options.run();
-			printMenu();
+			/*printMenu();
 			System.out.println("Entre nuevo comando...");
 			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 			String inputLine = in.readLine();
@@ -114,7 +114,7 @@ public class Main {
 			c = args[0].charAt(0);
 			if (args.length > 1) {
 				arg = args[1];
-			}
+			}*/
 		}//while
 	}
 
