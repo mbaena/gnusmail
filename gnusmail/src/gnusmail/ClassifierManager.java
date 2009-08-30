@@ -56,7 +56,7 @@ public class ClassifierManager {
 		BufferedReader r = null;
 		dataSet = null;
 		try {
-			//Hace falta tener un dataset.arff
+			//It's necessary to have a dataset.arff
 			r = new BufferedReader(new FileReader(ConfigurationManager.DATASET_FILE));
 			dataSet = new Instances(r, 0); // Only the headers are needed
 			dataSet.setClass(dataSet.attribute("Folder"));
@@ -68,7 +68,7 @@ public class ClassifierManager {
 				model = (Classifier) fie.readObject();
 			} catch (FileNotFoundException e) {
 			}
-			NaiveBayesUpdateable updateableModel = (NaiveBayesUpdateable) model;
+			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
 			MessageReader reader = new MessageReader(connection, limit);
 			for (Message msg : reader) {
 				try {
@@ -146,7 +146,7 @@ public class ClassifierManager {
 		}
 	}
 
-	public void MessageInfo(MimeMessage mimeMessage) throws Exception {
+	public void classifyMail(MimeMessage mimeMessage) throws Exception {
 		MessageInfo msg = new MessageInfo(mimeMessage);
 		Reader r = new BufferedReader(new FileReader(ConfigurationManager.DATASET_FILE));
 		dataSet = new Instances(r, 0); // Sólo necesitamos las cabeceras de los atributos
@@ -154,16 +154,9 @@ public class ClassifierManager {
 		r.close();
 
 		Instance inst = filterManager.makeInstance(msg, dataSet);
-		/*dataSet.add(inst);
-
-		Writer w = new BufferedWriter(new FileWriter(FICH_DATASET));
-		Instances h = new Instances(dataSet,0);
-		w.write(h.toString());
-		w.write("\n");
-		w.close();*/
 
 		Classifier model;
-		//System.out.println(inst);
+		System.out.println(inst);
 
 		if (!ConfigurationManager.MODEL_FILE.exists()) {
 			trainModel();
@@ -174,7 +167,6 @@ public class ClassifierManager {
 		model = (Classifier) fie.readObject();
 
 		System.out.println("\nClassifying...\n");
-		//distributionForInstance: da la predicción...
 		double[] res = model.distributionForInstance(inst);
 		Attribute att = dataSet.attribute("Folder");
 
@@ -189,14 +181,13 @@ public class ClassifierManager {
 			}
 		}
 		System.out.println("\nThe most probable folder is: " + att.value(biggest_index));
-	//msg.crearCabecera("Genusmail", att.value(indice_mayor));
-	//msg.imprimir(System.out);
 	}
 
 	void updateModelWithMessage(MimeMessage mimeMessage) {
 		Reader r = null;
 		try {
 			MessageInfo msg = new MessageInfo(mimeMessage);
+			System.out.println("Updating model with message, which folder is " + msg.getFolderAsString());
 			r = new BufferedReader(new FileReader(ConfigurationManager.DATASET_FILE));
 			dataSet = new Instances(r, 0); // Sólo necesitamos las cabeceras de los atributos
 			dataSet.setClass(dataSet.attribute("Folder"));
@@ -214,6 +205,7 @@ public class ClassifierManager {
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(updateableModel);
 			fis.close();
+			System.out.println("Model updated");
 		} catch (Exception ex) {
 			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		} finally {
