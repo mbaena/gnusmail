@@ -17,7 +17,7 @@ public final class Folder extends Filter {
 	@Override
 	public String applyTo(MessageInfo mess) {
 		// TODO Auto-generated method stub
-		if (mess.getFolder() == null) {
+		/*if (mess.getFolder() == null) {
 			return "?";
 		}
 		try {
@@ -35,6 +35,7 @@ public final class Folder extends Filter {
 		} catch (MessagingException ex) {
 			Logger.getLogger(Folder.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		return (String) mess.getFolder().toString();
+		return (String) mess.getFolder().toString();*/
+		return mess.getFolderAsString();
 	}
 }
