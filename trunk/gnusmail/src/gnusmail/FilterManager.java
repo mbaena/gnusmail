@@ -5,7 +5,7 @@ import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
 import gnusmail.filters.Filter;
-import gnusmail.filters.WordFrequency;
+import gnusmail.filters.WordsFrequency;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -216,11 +216,11 @@ public class FilterManager {
 		}
 
 		for (Filter filter : filters) {
-			if (filter instanceof WordFrequency) {
-				List<String> words = WordFrequency.getWordsToAnalyze();
+			if (filter instanceof WordsFrequency) {
+				List<String> words = WordsFrequency.getWordsToAnalyze();
 				try {
 					for (String word : words) {
-						WordFrequency wordsFilter = (WordFrequency) filter;
+						WordsFrequency wordsFilter = (WordsFrequency) filter;
 						wordsFilter.setWordToCheck(word);
 						String elemento = wordsFilter.applyTo(msj);
 						res.addElement(elemento);
@@ -268,7 +268,7 @@ public class FilterManager {
 		Vector<String> res = new Stack<String>();
 		for (String s : filters) {
 			if (s.contains("WordFrequency")) {
-				for (String word : WordFrequency.getWordsToAnalyze()) {
+				for (String word : WordsFrequency.getWordsToAnalyze()) {
 					res.add(word);
 				}
 			} else {
