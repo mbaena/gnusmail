@@ -24,7 +24,6 @@ public class MessageReader implements Iterable<Message> {
             try {
                 this.date = msg.getReceivedDate();
             } catch (MessagingException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -91,7 +90,6 @@ public class MessageReader implements Iterable<Message> {
                         try {
                             folder.close(false);
                         } catch (MessagingException e) {
-                            // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }

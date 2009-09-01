@@ -3,8 +3,6 @@ package gnusmail;
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 import gnusmail.core.ConfigManager;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 public class Main {
 
@@ -14,13 +12,10 @@ public class Main {
 		longopts[0] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
 		longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
-
 		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgik::r::p::a::c:::l::w::hx", longopts);
-
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
-		System.out.println("BIENVENIDO A GENUSMAIL!!!");
-
+		System.out.println("WELCOME TO GENUSMAIL!!!");
 
 		String arg;
 		int c;
@@ -31,7 +26,6 @@ public class Main {
 			switch (c) {
 				case 0:
 					char car = (char) (new Integer(sb.toString())).intValue();
-					//arg = getopt.getOptarg();
 					if (arg != null) {
 						if (car == 'c') {
 							options.setURL(arg);
@@ -39,31 +33,26 @@ public class Main {
 							options.setShowAttributes(Integer.parseInt(arg));
 						}
 					} else {
-						System.out.println("Opcion no valida." +
-								"\nUse el comando --help (o -h) para ver las operaciones disponibles");
+						System.out.println("Invalid option" +
+								"\nUse command --help (or -h) to see available options");
 					}
 					break;
-				case 'a':	//Muestra x pantalla los atributos de un correo
-					//arg = getopt.getOptarg();
+				case 'a':
 					options.setShowAttributes(Integer.parseInt(arg));
 					break;
 
-				case 'b':	//Extrae atribs de todos los correos del usuario
+				case 'b':
 					options.setAttributeExtraction(true);
 					break;
 
-				case 'c':	//Login
-					System.out.println("Vamos a conectar");
+				case 'c':
 					System.out.println(arg);
-					//arg = getopt.getOptarg();
 					if (arg != null) {
 						options.setURL(arg);
-						System.out.println("Conectados a " + arg);
 					}
 					break;
-				case 'w':	//Extraer lista de palabras frecuentes
+				case 'w':
 					options.setExtractWords(true);
-					System.out.println("SetExtractWords");
 					break;
 				/*case 'd':	//Clasifica el correo n-esimo de la carpeta actual
 				arg =  (g.getOptarg());
@@ -71,72 +60,61 @@ public class Main {
 				MensajeInfo msj= new MensajeInfo(miconexion.getFolder().getMessage(Integer.parseInt(arg)));
 				clasificarCorreo(msj);
 				break;*/
-				case 'e':	//Entrena el modelo
+				case 'e':
 					options.setModelTraining(true);
 					break;
-				case 'f':	//Obtener lista de carpetas
+				case 'f':
 					options.setListFolders(true);
 					break;
-				case 'g':	//Listar Correos de la carpeta actual
+				case 'g':
 					options.setListMailsInFolder(true);
 					break;
-				case 'h':	//Muestra la ayuda
+				case 'h':
 					printMenu();
 					return;
-				case 'i':	//Clasifica el Correo pasado por linea de comandos
+				case 'i':
 					options.setMailClassification(true);
 					break;
-				case 'k': //Modifica el modelo, con el correo (como String) pasado por linea de comandos
-					//arg = (getopt.getOptarg());
+				case 'k':
 					options.setUpdateModelWithMail();
 					break;
-				case 'l':	//Clasifica el Correo pasado por linea de comandos
-					//arg = getopt.getOptarg();
+				case 'l':
 					options.setListMails(true, Integer.parseInt(arg));
 					break;
-				case 'r':	//Abrir Correo
-					//arg = (getopt.getOptarg());
+				case 'r':
 					options.setOpenMail(Integer.parseInt(arg));
 					break;
-
 				case '?':
-					System.out.println("Opcion no valida." +
-							"\nUse el comando --help o -h para ver las operaciones disponibles");
+					System.out.println("Invalid option" +
+							"\nUse command --help (or -h) to see available options");
 					break;
 			} //switch
 			System.out.println("Running options...");
 			options.run();
-			/*printMenu();
-			System.out.println("Entre nuevo comando...");
-			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-			String inputLine = in.readLine();
-			String args[] = inputLine.split(" ");
-			c = args[0].charAt(0);
-			if (args.length > 1) {
-				arg = args[1];
-			}*/
+			c = -1;
 		}//while
+		System.out.println("End of execution");
 	}
 
-	/* Imprime por pantalla el menu de ayuda */
 	private static void printMenu() {
-		System.out.println("Estas son las operaciones a su disposicion:");
+		System.out.println("These are the available options:\n");
 		System.out.println("----------------------------------------------");
-		System.out.println("-h/--help\n	Muestra este menú de ayuda\n");
-		System.out.println("-a/--atrib numCorreo\n	Obtener atributos de un Correo\n");
-		System.out.println("-b	Extrae atributos de todos los correos del usuario y los almacena en\n" +
-				"\tel fichero CSV " + ConfigManager.DATASET_FILE);
-		System.out.println("-c/--connect url\n\tEspecifica una url de conexión:\n " +
-				"\tprotocolo://usuario:contraseña@servidor[/rutaCarpeta.subCarpeta]\n");
+		System.out.println("-h/--help\n	Shows this menu \n");
+		//System.out.println("-a/--atrib numMail\n	Gets the attributes of a message\n");
+		System.out.println("-b	Extracts attributes for every mail and stores them in\n" +
+				"\tthe CSV file " + ConfigManager.DATASET_FILE);
+		//System.out.println("-c/--connect url\n\tSpecifies a connection url: \n " +
+		//		"\tprotocol://user:passwd@server[/folder.subFolder]\n");
 		//System.out.println("-d numCorreo\n	Clasifica con el modelo el correo numCorreo-esimo" +
 		//		" de la carpeta actual\n");
-		System.out.println("-e	Entrena el modelo\n");
-		System.out.println("-f	Obtener lista de carpetas\n");
-		System.out.println("-g	Listar Correos de la carpeta actual\n");
-		System.out.println("-i	Clasifica el correo pasado por la entrada estandar\n");
-		System.out.println("-l[N]\tLista mensajes en todas las carpetas ordenados por fecha de recepcción \n" +
+		System.out.println("-e	Trains the model\n");
+		//System.out.println("-f	Lists folders\n");
+		//System.out.println("-g	Lists messages in actual folder\n");
+		System.out.println("-i	Classifies a mail read from the sdtin\n");
+		System.out.println("-k	Updates the classification model with a mail read from the sdtin\n");
+		System.out.println("-l[N]\tLists messages chronologically \n" +
 				"\t(limitar a N mensajes por carpeta).\n");
-		System.out.println("-r numCorreo\n\tMuestra el contenido del Correo indicado\n");
+		//System.out.println("-r numCorreo\n\tShows message content\n");
 		System.out.println("----------------------------------------------");
 	}
 }
