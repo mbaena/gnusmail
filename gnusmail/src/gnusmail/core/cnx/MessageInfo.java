@@ -220,6 +220,34 @@ public class MessageInfo implements Comparable {
     public Folder getFolder(){
     	return message.getFolder();    	
     }
+
+	/**
+	 * If this MessageInfo is the result of reading a message from console,
+	 * no Folder info will be available, hence getFolder will return null.
+	 * This method returns the name getFolder().getName(), if possible,
+	 * or the contents of a header 'Folder', that will have to be included
+	 * when it's necessary to know the folder (that's when we update the
+	 * classifier model with a mail read from stdinput).
+
+	 * @return
+	 */
+	public String getFolderAsString() {
+		String res = "?";
+		Folder folder = message.getFolder();
+		if (folder != null) res = folder.getName();
+		else {
+			String headerFolder[] = null;
+			try {
+				headerFolder = message.getHeader("Folder");
+			} catch (MessagingException ex) {
+				Logger.getLogger(MessageInfo.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			if (headerFolder != null && headerFolder.length > 0) {
+				res = headerFolder[0];
+			}
+		}
+		return res;
+	}
     
     /** Metodo que imprime el mensaje en el OutputStream pasado como argumento */
     public void print(OutputStream os) {

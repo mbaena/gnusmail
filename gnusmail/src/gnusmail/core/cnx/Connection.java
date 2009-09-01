@@ -1,6 +1,6 @@
 package gnusmail.core.cnx;
 
-import gnusmail.core.ConfigurationManager;
+import gnusmail.core.ConfigManager;
 
 import java.security.Security;
 import java.util.Properties;
@@ -31,10 +31,10 @@ public class Connection {
 
 	public Connection() {
 		System.out.println("Creando conexion...");
-		username = ConfigurationManager.getProperty("username");
-		password = ConfigurationManager.getProperty("password");
-		hostname = ConfigurationManager.getProperty("hostname");
-		protocol = ConfigurationManager.getProperty("protocol");
+		username = ConfigManager.getProperty("username");
+		password = ConfigManager.getProperty("password");
+		hostname = ConfigManager.getProperty("hostname");
+		protocol = ConfigManager.getProperty("protocol");
 		System.out.println(protocol + "://" + username + ":" + "@" + hostname);
 		try {
 			login();
@@ -178,11 +178,11 @@ public class Connection {
 	/** Guarda los datos de conexion del usuario en una linea con formato
 	 *  protocolo, username, password, hostname */
 	private void guardarDatosConexion() {
-		ConfigurationManager.setProperty("username", username);
-		ConfigurationManager.setProperty("password", password);
-		ConfigurationManager.setProperty("hostname", hostname);
-		ConfigurationManager.setProperty("protocol", protocol);
-		ConfigurationManager.grabarFichero();
+		ConfigManager.setProperty("username", username);
+		ConfigManager.setProperty("password", password);
+		ConfigManager.setProperty("hostname", hostname);
+		ConfigManager.setProperty("protocol", protocol);
+		ConfigManager.grabarFichero();
 	}
 
 	/** Logout from the mail host. */
@@ -264,18 +264,31 @@ public class Connection {
 	}
 
 	/** Imprime el contenido del correo, si es texto plano */
-	public void leerCorreo(int n) throws Exception {
+	public void readMail(int n) throws Exception {
 		Folder auxFolder = folder;
+		Folder folders[] = getFolders();
+		auxFolder = folders[0];
+		if (!auxFolder.isOpen()) {
+			auxFolder.open(Folder.READ_ONLY);
+		}
 
-		if (n > 0 && n <= auxFolder.getMessageCount()) {
-			MessageInfo msj = new MessageInfo(auxFolder.getMessage(n));
-
-			System.out.print("------------------------------------------" +
-					"Message Text------------------------------------\n");
-			System.out.println(msj.getBody());
-			System.out.println();
-
+		if (auxFolder == null) {
+			System.out.println("La carpeta era nula, pasando");
 		} else {
+			System.out.println("La carpeta es ahora " + auxFolder.getName());
+			if (n > 0 && n <= auxFolder.getMessageCount()) {
+				MessageInfo msj = new MessageInfo(auxFolder.getMessage(n));
+
+				System.out.print("------------------------------------------" +
+						"Message Text------------------------------------\n");
+				System.out.println(msj.getBody());
+				System.out.println(msj.getFolder());
+				System.out.println("Y ahora, el todo");
+				msj.print(System.out);
+				System.out.println();
+
+			} else {
+			}
 		}
 	}
 
@@ -308,7 +321,6 @@ public class Connection {
 	//return rf.list("*");
 	}
 
-
 	public void openFolder(Folder folder, boolean recurse, String tab) throws MessagingException {
 		System.out.println(tab + "Complet name: " + folder.getFullName());
 		System.out.println(tab + "URL: " + folder.getURLName());
@@ -336,6 +348,7 @@ public class Connection {
 			}//if
 		}//if
 	}//dumpFolder
+
 	/** Mueve el correo msg de la carpeta actual a la carpeta destino */
 	public void moveMail(MessageInfo msg, Folder destino) {
 		Message[] msjs = new Message[1];
