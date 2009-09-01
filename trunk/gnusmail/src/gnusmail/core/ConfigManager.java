@@ -6,7 +6,7 @@
  */
 package gnusmail.core;
 
-import gnusmail.filters.WordFrequency;
+import gnusmail.filters.WordsFrequency;
 import java.util.*;
 import java.io.*;
 import java.util.logging.Level;
@@ -45,7 +45,7 @@ public class ConfigManager {
 				if (!filter.contains("WordFrequency")) {
 					classificationAttributes.add(filter);
 				} else {
-					for (String word : WordFrequency.getWordsToAnalyze()) {
+					for (String word : WordsFrequency.getWordsToAnalyze()) {
 						classificationAttributes.add(word);
 					}
 				}
