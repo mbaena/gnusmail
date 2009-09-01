@@ -6,11 +6,9 @@
  */
 package gnusmail.core;
 
-import gnusmail.filters.WordsFrequency;
+import gnusmail.filters.WordFrequency;
 import java.util.*;
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 class ConsoleEraser extends Thread {
 
@@ -45,7 +43,7 @@ public class ConfigManager {
 				if (!filter.contains("WordFrequency")) {
 					classificationAttributes.add(filter);
 				} else {
-					for (String word : WordsFrequency.getWordsToAnalyze()) {
+					for (String word : WordFrequency.getWordsToAnalyze()) {
 						classificationAttributes.add(word);
 					}
 				}
@@ -71,21 +69,19 @@ public class ConfigManager {
 		 */
 		Properties props = new Properties();
 		try {
-			InputStream f = ConfigManager.class.getClassLoader().getResourceAsStream("gnusmail/" + CONF_FILE);
-			System.out.println("Cargando configuracion de usuario...");
+			InputStream f = ConfigManager.class.getClassLoader().
+					getResourceAsStream("gnusmail/" + CONF_FILE);
 			props.load(f);
 			f.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		String fileName = CONF_FOLDER + CONF_FILE;
 		try {
 			FileInputStream f = new FileInputStream(fileName);
 			props.load(f);
 			f.close();
 		} catch (FileNotFoundException e) {
-
 			File f = new File(fileName);
 			try {
 				File folder = new File(CONF_FOLDER);
@@ -100,16 +96,14 @@ public class ConfigManager {
 
 				e1.printStackTrace();
 			}
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//props.setProperty("password", pass);
 		return props;
 	}
 
-	/* Almacena en el parametro pasado todos 
-	 * los filtros activos al momento de la llamada 
+	/*
+	 * returns an array with the current active filters
 	 */
 	public static String[] getFilters() {
 		String filters = properties.getProperty("filters");
@@ -117,28 +111,23 @@ public class ConfigManager {
 		return filterList;
 	}
 
-	/* Lista por pantalla todas las propiedades y sus valores */
-	public static void listarPropiedades() {
-		/* Imprimimos los pares clave = valor */
+	public static void listProperties() {
 		properties.list(System.out);
 		System.out.println();
 	}
 
-	/* Añade un par propiedad-valor */
-	public static void añadirPropiedad(String clave, String valor) {
-		//System.out.println("Cambiando Properties "+clave+" "+valor+"... ");
+	public static void addProperty(String clave, String valor) {
 		properties.setProperty(clave, valor);
 	}
 
-	public static void grabarFichero() {
+	public static void saveFile() {
 		try {
 			FileOutputStream f = new FileOutputStream(CONF_FOLDER + CONF_FILE);
-			//System.out.println("Grabando fichero de Properties...\n");
 			properties.store(f, "#########################################\n" +
-					"#   Fichero de configuracion\n" +
+					"#   Configuration file\n" +
 					"#########################################");
 		} catch (IOException ioe) {
-			System.out.println("Error al escribir en fichero!!");
+			System.out.println("Error when writing into config file!!");
 		}
 	}
 

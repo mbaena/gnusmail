@@ -1,13 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gnusmail.core;
 
 import gnusmail.Languages.Language;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
-
 import gnusmail.languagefeatures.EmailTokenizer;
 import gnusmail.languagefeatures.LanguageDetection;
 import gnusmail.languagefeatures.TFIDFSummary;
@@ -30,20 +25,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 
 /**
- * Esta clase gestiona un mapa palabras -> numero de apariciones. Se ha creado la 
- * clase WordCount para gestionar el
- * numero de apariciones (y por si en el futuro se emplea algun metodo diferente
- * a simplemente contar el numero de palabras). tfidf,e tc...
+ * This classes manages a map word -> number of instances.
+ * The class WordCount manages the number of instances
  * @author jmcarmona
  */
 public class WordsStore {
 	//Max number of messages to extract information from
-
 	private final int MAX_MESSAGES_PER_FOLDER = 50;
 	TermFrequencyManager termFrequencyManager;
 	public final static String tokenPattern = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
@@ -96,10 +87,8 @@ public class WordsStore {
 	}
 
 	public WordsStore() {
-		//wordCount = new TreeMap<String, WordCount>();
 		termFrequencyManager = new TermFrequencyManager();
 		readStopWordsFile();
-	//ssbAna = new SnowballAnalyzer("Spanish", stopWordsArray);
 	}
 
 	public void writeToFile() {
@@ -140,8 +129,6 @@ public class WordsStore {
 				Logger.getLogger(WordsStore.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-
-
 	}
 
 	/**
@@ -155,9 +142,7 @@ public class WordsStore {
 	private List<MessageInfo> createLastMessagesList(Folder folder, int maxMessagesPerFolder) throws MessagingException {
 		List<MessageInfo> messages = new ArrayList<MessageInfo>();
 		List<MessageInfo> messagesToReturn = new ArrayList<MessageInfo>();
-
 		if (folder.getMessageCount() > 0) {
-
 			for (int i = 1; i <= folder.getMessageCount(); i++) {
 				MessageInfo msj = new MessageInfo(folder.getMessage(i));
 				messages.add(msj);
@@ -200,7 +185,6 @@ public class WordsStore {
 			}
 			//Close the input stream
 			in.close();
-
 			stopWords = new TreeMap<Language, List<String>>();
 			stopWords.put(Language.SPANISH, wordsEs);
 			stopWords.put(Language.ENGLISH, wordsEn);
@@ -211,24 +195,17 @@ public class WordsStore {
 
 	public void readWordsList(Connection myConnection) {
 		Folder[] folders;
-		System.out.println("Extrayendo informacion de palabras de los correos...");
 		try {
 			folders = myConnection.getFolders();
 
 			for (int i = 0; i < folders.length; i++) {
 				if (!folders[i].getFullName().contains(".Sent")) {
-					System.out.println("Extrayendo informacion de palabres de  " + folders[i].getFullName());
 					readWordsListForFolder(folders[i]);
-				} else {
-					System.out.println("No es necesario extraer palabras de " + folders[i].getFullName());
-				}
-
+				} 
 			}
-			System.out.println("Extraida la info de las palabras");
 			writeToFile();
 
 		} catch (MessagingException e) {
-			System.out.println("Imposible obtener Carpetas de usuario");
 			e.printStackTrace();
 		} catch (Exception e) {
 			System.out.println();
@@ -240,10 +217,8 @@ public class WordsStore {
 		if (folder != null) {
 			try {
 				if (!folder.isOpen()) {
-					System.out.println("leer ListaPalabrasCarpeta : abrir buzon");
 					folder.open(javax.mail.Folder.READ_WRITE);
 				}
-				System.out.println("Numero de palabras del buzon: " + folder.getMessageCount());
 				List<MessageInfo> lastMessagesInFolder = createLastMessagesList(folder, MAX_MESSAGES_PER_FOLDER);
 				for (MessageInfo msj : lastMessagesInFolder) {
 					addTokenizedString(msj, folder.getName());
@@ -254,7 +229,6 @@ public class WordsStore {
 					folder.close(false); //Cerramos el buzon
 				}
 			} catch (MessagingException e) {
-				System.out.println("Folder " + folder.getFullName() + " no encontrado al leer palabras");
 				e.printStackTrace();
 			}
 		}//if
