@@ -1,6 +1,6 @@
 package gnusmail;
 
-import gnusmail.core.CSVClass;
+import gnusmail.core.CSVManager;
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
@@ -36,12 +36,12 @@ import weka.core.converters.CSVLoader;
 public class ClassifierManager {
 
 	static Instances dataSet;
-	static CSVClass csvmanager;
+	static CSVManager csvmanager;
 	private FilterManager filterManager;
 
 	public ClassifierManager() {
 		try {
-			csvmanager = new CSVClass();
+			csvmanager = new CSVManager();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -104,7 +104,7 @@ public class ClassifierManager {
 		System.out.println("Training model...");
 		CSVLoader csvdata = new CSVLoader();
 		try {
-			csvdata.setSource(new File(CSVClass.FILE_CSV));
+			csvdata.setSource(new File(CSVManager.FILE_CSV));
 			dataSet = csvdata.getDataSet();
 			dataSet.setClass(dataSet.attribute("Folder"));
 			model.buildClassifier(dataSet);

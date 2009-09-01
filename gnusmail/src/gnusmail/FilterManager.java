@@ -1,6 +1,6 @@
 package gnusmail;
 
-import gnusmail.core.CSVClass;
+import gnusmail.core.CSVManager;
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
@@ -27,11 +27,11 @@ import weka.core.Instances;
  */
 public class FilterManager {
 
-	CSVClass csvmanager;
+	CSVManager csvmanager;
 
 	public FilterManager() {
 		try {
-			csvmanager = new CSVClass();
+			csvmanager = new CSVManager();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
