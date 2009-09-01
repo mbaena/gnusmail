@@ -93,7 +93,6 @@ public class WordsStore {
 
 	public void writeToFile() {
 		FileWriter outFile = null;
-		System.out.println("Guardando palabras");
 		Set<String> wordsToWrite = new TreeSet<String>();
 
 		try {
@@ -102,8 +101,6 @@ public class WordsStore {
 			//For each folder, we store the most frequent non-stopword terms
 			for (String folder : termFrequencyManager.getTfidfByFolder().keySet()) {
 				int index = 0;
-				System.out.println("Folder " + folder + " size " + termFrequencyManager.getTfidfByFolder().
-						get(folder).size());
 				List<TFIDFSummary> tfidSummaries =
 						termFrequencyManager.getTfidfByFolder().get(folder);
 				Collections.sort(tfidSummaries);

@@ -16,7 +16,6 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPSSLStore;
 import com.sun.mail.imap.IMAPStore;
 
-/** Esta clase almacena la informacion del usuario */
 public class Connection {
 
 	private IMAPFolder folder;
@@ -30,7 +29,7 @@ public class Connection {
 	private String mbox = "INBOX";
 
 	public Connection() {
-		System.out.println("Creando conexion...");
+		System.out.println("Creating connection...");
 		username = ConfigManager.getProperty("username");
 		password = ConfigManager.getProperty("password");
 		hostname = ConfigManager.getProperty("hostname");
@@ -63,7 +62,7 @@ public class Connection {
 		}
 		try {
 			login();
-			guardarDatosConexion();
+			saveConnectionData();
 		} catch (MessagingException e) {
 			System.out.println("Connection error");
 			e.printStackTrace();
@@ -175,14 +174,12 @@ public class Connection {
 		}
 	}
 
-	/** Guarda los datos de conexion del usuario en una linea con formato
-	 *  protocolo, username, password, hostname */
-	private void guardarDatosConexion() {
+	private void saveConnectionData() {
 		ConfigManager.setProperty("username", username);
 		ConfigManager.setProperty("password", password);
 		ConfigManager.setProperty("hostname", hostname);
 		ConfigManager.setProperty("protocol", protocol);
-		ConfigManager.grabarFichero();
+		ConfigManager.saveFile();
 	}
 
 	/** Logout from the mail host. */
@@ -208,7 +205,6 @@ public class Connection {
 		}
 	}
 
-	/** Imprime los atributos del correo n */
 	public void showAttributes(int mail_id) throws Exception {
 		Folder buzon = folder;//miconexion.getFolder();
 
@@ -234,7 +230,6 @@ public class Connection {
 		}
 	}
 
-	/** Muestra por pantalla las cabeceras de los correos de la carpeta actual */
 	public void showMessages(String nombre_carpeta) throws Exception {
 		Folder inbox = (getStore()).getFolder(nombre_carpeta);
 		int num_mes = inbox.getMessageCount();
@@ -263,7 +258,6 @@ public class Connection {
 		inbox.close(true);
 	}
 
-	/** Imprime el contenido del correo, si es texto plano */
 	public void readMail(int n) throws Exception {
 		Folder auxFolder = folder;
 		Folder folders[] = getFolders();
@@ -272,10 +266,7 @@ public class Connection {
 			auxFolder.open(Folder.READ_ONLY);
 		}
 
-		if (auxFolder == null) {
-			System.out.println("La carpeta era nula, pasando");
-		} else {
-			System.out.println("La carpeta es ahora " + auxFolder.getName());
+		if (auxFolder != null) {
 			if (n > 0 && n <= auxFolder.getMessageCount()) {
 				MessageInfo msj = new MessageInfo(auxFolder.getMessage(n));
 
@@ -283,37 +274,26 @@ public class Connection {
 						"Message Text------------------------------------\n");
 				System.out.println(msj.getBody());
 				System.out.println(msj.getFolder());
-				System.out.println("Y ahora, el todo");
 				msj.print(System.out);
 				System.out.println();
 
-			} else {
-			}
+			} 
 		}
 	}
 
 	public Folder[] getFolders() throws MessagingException {
-		if (isLoggedIn()) {
-			System.out.println("Is logged in");
-		} else {
+		if (!isLoggedIn()) {
 			login();
-			System.out.println("Not logged in");
 		}
-		Folder f[];
-		f = (store.getFolder("INBOX")).list("*");
-
-		return f;
-
+		return (store.getFolder("INBOX")).list("*");
 	}
 
-	/** Lista por pantalla las carpetas del Store
-	 * @throws MessagingException */
 	public void listFolders() throws MessagingException {
 		Folder rf = folder;
 
 		openFolder(rf, false, "");
 		if ((rf.getType() & Folder.HOLDS_FOLDERS) != 0) {
-			Folder[] f = rf.list();				//Obtiene solo los subdirectorios directos
+			Folder[] f = rf.list();				//Direct subfolders only
 			for (int i = 0; i < f.length; i++) {
 				openFolder(f[i], true, "    ");
 			}
@@ -326,7 +306,7 @@ public class Connection {
 		System.out.println(tab + "URL: " + folder.getURLName());
 		if (true) {
 			if (!folder.isSubscribed()) {
-				System.out.println(tab + "Non Subscritoed");
+				System.out.println(tab + "Not Subscribed");
 			}
 			if ((folder.getType() & Folder.HOLDS_MESSAGES) != 0) {
 				if (folder.hasNewMessages()) {
@@ -349,13 +329,12 @@ public class Connection {
 		}//if
 	}//dumpFolder
 
-	/** Mueve el correo msg de la carpeta actual a la carpeta destino */
-	public void moveMail(MessageInfo msg, Folder destino) {
+	public void moveMail(MessageInfo msg, Folder destination) {
 		Message[] msjs = new Message[1];
 		msjs[0] = msg.message;
 
 		try {
-			folder.copyMessages(msjs, destino);
+			folder.copyMessages(msjs, destination);
 			msg.message.setFlag(Flags.Flag.DELETED, true);
 			folder.expunge();
 		} catch (MessagingException e) {

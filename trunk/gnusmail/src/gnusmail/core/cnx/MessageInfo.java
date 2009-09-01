@@ -8,17 +8,14 @@ import java.util.logging.Logger;
 import javax.mail.*;
 import javax.mail.internet.*;
 
-/** Usada para almacenar informacion del mensaje. */
 public class MessageInfo implements Comparable {
     public Message message;
 
-    /** Metodo que mapea un Message en la clase MensajeInfo */
     public MessageInfo (Message message){
         this.message = message;
 
     }
     
-    /** Devuelve el campo Message-Id */
     public String getMessageId() {//throws MessagingException {
     	String[] res;
         try {
@@ -29,7 +26,6 @@ public class MessageInfo implements Comparable {
         return res[0];
     }
     
-    /** Devuelve el campo Bcc: */
     public String getBcc() throws MessagingException {
     	String res;
     	try {
@@ -41,11 +37,9 @@ public class MessageInfo implements Comparable {
         return res;
     }
     
-    /** Devuelve el cuerpo del mensaje (si es solo texto). */
     public String getBody() throws MessagingException, IOException {
         Object content = message.getContent();
         String result = "";
-        
         if (message.isMimeType("text/plain")) {
             result = (String)content;
         } else if (message.isMimeType("multipart/alternative")) {
@@ -70,7 +64,6 @@ public class MessageInfo implements Comparable {
         return result;
     }
     
-    /** Devuelve el campo Cc: */
     public String getCc() {
     	String res;
     	try {
@@ -82,8 +75,7 @@ public class MessageInfo implements Comparable {
         return res;
     }
     
-    /** Devuelve la fecha de envio del mensaje 
-		(o la de recepcion si la de envio es null. */
+    /** Returs sent date (of, if it's null, reception date */
     public String getDateAsStr() throws MessagingException {
         Date date;
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yy");
@@ -95,8 +87,6 @@ public class MessageInfo implements Comparable {
             return "";
      }
 
-    /** Devuelve la fecha de envio del mensaje
-		(o la de recepcion si la de envio es null. */
     public Date getDate() throws MessagingException {
         Date date;
         if ((date = message.getSentDate()) != null)
@@ -107,12 +97,10 @@ public class MessageInfo implements Comparable {
             return null;
      }
        
-    /** Devuelve el campo From: */
     public String getFrom() throws MessagingException {
         return formatAddresses(message.getFrom());
     }
 
-    /** Devuelve la/s direccion/es de ReplyTo: */
     public String getReplyTo() throws MessagingException {
 	Address[] a = message.getReplyTo();
 	if (a.length > 0)
@@ -121,17 +109,14 @@ public class MessageInfo implements Comparable {
 	    return "";
     }
     
-    /** Devuelve el objeto javax.mail.Message */
     public Message getMessage() {
         return message;
     }
     
-    /** Devuelve el numero de mensaje */
     public int getNum() {
         return ((message.getMessageNumber()));
     }
     
-    /** Devuelve el campo received date */
     public String getReceivedDate() throws MessagingException {
         if (hasReceivedDate())
             return (message.getReceivedDate().toString());
@@ -139,7 +124,6 @@ public class MessageInfo implements Comparable {
             return "";
     }
     
-    /** Devuelve el campo Sentdate */
     public String getSentDate() throws MessagingException {
         if (hasSentDate())
             return (message.getSentDate().toString()); 
@@ -147,7 +131,6 @@ public class MessageInfo implements Comparable {
             return "";
     }
     
-    /** Devuelve el campo Subject: */
     public String getSubject() throws MessagingException {
         if (hasSubject())
             return message.getSubject();
@@ -155,12 +138,10 @@ public class MessageInfo implements Comparable {
             return "";
     }
     
-    /** Devuelve el campo To: */
     public String getTo() throws MessagingException {
         return formatAddresses( message.getRecipients(Message.RecipientType.TO));
     }
     
-    /** Metodo que comprueba si el mensaje tiene attachments. */
     public boolean hasAttachments() throws IOException, MessagingException {
         boolean hasAttachments = false;
         if (message.isMimeType("multipart/*")) {
@@ -171,52 +152,42 @@ public class MessageInfo implements Comparable {
         return hasAttachments;
     }
     
-    /** Metodo que comprueba si el mensaje tiene campo Bcc: */
     public boolean hasBcc() throws MessagingException {
         return (message.getRecipients(Message.RecipientType.BCC) != null);
     }
     
-    /** Metodo que comprueba si el mensaje tiene campo Cc: */
     public boolean hasCc() throws MessagingException {
         return (message.getRecipients(Message.RecipientType.CC) != null);
     }
     
-    /** Metodo que comprueba si el mensaje tiene algun campo date */
     public boolean hasDate() throws MessagingException {
         return (hasSentDate() || hasReceivedDate());
     }
     
-    /** Metodo que comprueba si el mensaje tiene un campo From: */
     public boolean hasFrom() throws MessagingException {
         return (message.getFrom() != null);
     }
     
-    /** Metodo que comprueba si el mensaje tiene el tipo mime deseado */
     public boolean hasMimeType(String mimeType) throws MessagingException {
         return message.isMimeType(mimeType);
     }
     
-    /** Metodo que comprueba si el mensaje tiene el campo received date */
     public boolean hasReceivedDate() throws MessagingException {
         return (message.getReceivedDate() != null);
     }
     
-    /** Metodo que comprueba si el mensaje tiene campo sent date */
     public boolean hasSentDate() throws MessagingException {
         return (message.getSentDate() != null);
     }
     
-    /** Metodo que comprueba if el mensaje tiene campo subject */
     public boolean hasSubject() throws MessagingException {
         return (message.getSubject() != null);
     }
     
-    /** Metodo que comprueba si el mensaje tiene un campo To: */
     public boolean hasTo() throws MessagingException {
         return (message.getRecipients(Message.RecipientType.TO) != null);
     }
     
-    /** Metodo que devuelve la carpeta q contiene el mensaje */
     public Folder getFolder(){
     	return message.getFolder();    	
     }
@@ -249,18 +220,16 @@ public class MessageInfo implements Comparable {
 		return res;
 	}
     
-    /** Metodo que imprime el mensaje en el OutputStream pasado como argumento */
     public void print(OutputStream os) {
     	try {
 			message.writeTo(os);			
 		} catch (Exception e) {
 			System.out.println("ERROR: Impossible to print message!!");
-			//e.printStackTrace();
+			e.printStackTrace();
 		}    	
         	
     }
     
-    /** Metodo que añade al mensaje una cabecera llamada nombre y q contenga contenido */
     public void createHeader(String nombre, String contenido) {
     	try {
 			message.addHeader(nombre, contenido);
@@ -271,7 +240,6 @@ public class MessageInfo implements Comparable {
     	
     }
     
-    /** Metodo interno para formatear las direcciones del msg header */
     private String formatAddresses(Address[] addrs) {
         if (addrs == null)
             return "";
@@ -282,7 +250,6 @@ public class MessageInfo implements Comparable {
         return strBuf.toString();
     }
 
-    /** Metodo interno que devuelve una cadena formateada para mostrar un msg header */
     private String getDisplayAddress(Address a) {
         String pers = null;
         String addr = null;
