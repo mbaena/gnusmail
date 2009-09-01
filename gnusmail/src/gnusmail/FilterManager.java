@@ -1,7 +1,7 @@
 package gnusmail;
 
 import gnusmail.core.CSVClass;
-import gnusmail.core.ConfigurationManager;
+import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
 import gnusmail.filters.Filter;
@@ -51,7 +51,7 @@ public class FilterManager {
 				for (int i = 1; i <= folder.getMessageCount(); i++) {
 					MessageInfo msj = new MessageInfo(folder.getMessage(i));
 					attributes = getMessageAttributes(msj);
-					String[] filters = ConfigurationManager.getFilters();
+					String[] filters = ConfigManager.getFilters();
 					csvmanager.addRegistro(attributes, expandFilters(filters));
 				}// for
 
@@ -106,7 +106,7 @@ public class FilterManager {
 			MessageInfo msgInfo = new MessageInfo(iterator.next());
 			try {
 				atributos = getMessageAttributes(msgInfo);
-				String[] filtros = ConfigurationManager.getFilters();
+				String[] filtros = ConfigManager.getFilters();
 				csvmanager.addRegistro(atributos, expandFilters(filtros));
 			} catch (IOException ex) {
 				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -125,7 +125,7 @@ public class FilterManager {
 				System.out.println("Attributes from: " + msgInfo.getMessageId() + " " + msgInfo.getDateAsStr());
 				atributos = getMessageAttributes(msgInfo);
 				// el Vector filtros contiene todos los filtros activos
-				String[] filtros = ConfigurationManager.getFilters();
+				String[] filtros = ConfigManager.getFilters();
 				/* Y los escribimos en el fichero CSV */
 				csvmanager.addRegistro(atributos, expandFilters(filtros));
 			} catch (IOException ex) {
@@ -153,7 +153,7 @@ public class FilterManager {
 			Instances dataSet) throws Exception {
 		String[] atribs = getMessageAttributes(msg);
 		Instance inst = new Instance(atribs.length);
-		List<String> filtros = ConfigurationManager.getClassificationAttributes();
+		List<String> filtros = ConfigManager.getClassificationAttributes();
 		inst.setDataset(dataSet);
 
 		int i = 0;
@@ -198,7 +198,7 @@ public class FilterManager {
 		Vector<String> res = new Vector<String>();
 
 		// filtros contiene todos los filtros activos
-		String[] filtersName = ConfigurationManager.getFilters();
+		String[] filtersName = ConfigManager.getFilters();
 		Vector<Filter> filters = new Vector<Filter>();
 		for (String sfiltro : filtersName) {
 			try {

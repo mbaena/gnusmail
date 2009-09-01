@@ -1,0 +1,9 @@
+Intentando commit
+--Esta línea y las que están debajo serán ignoradas--
+
+M    core/ConfigurationManager.java
+M    core/cnx/Connection.java
+M    core/cnx/MessageInfo.java
+D    core/WordStore.java
+AM + core/WordsStore.java
+M    filters/WordFrequency.java
