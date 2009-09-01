@@ -106,7 +106,7 @@ public class MainManager {
 
 	public void extractAttributes() {
 		try {
-			filterManager.saveAttributesInOrder(connection, 100);
+			filterManager.attributes(connection, 100);
 			filterManager.writeToFile();
 		} catch (Exception e1) {
 			filterManager.writeToFile();
