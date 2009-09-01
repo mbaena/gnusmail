@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package gnusmail.core;
 
 /**
@@ -43,9 +38,6 @@ class WordCount implements Comparable<WordCount> {
         hash = 17 * hash + this.count;
         return hash;
     }
-
-    
-
 
     public int getCount() {
         return count;
