@@ -100,24 +100,14 @@ public class ClassifierManager {
 	}
 
 	public void trainModel() {
-		// IMAP fetch command with (BODY[HEADER.FIELDS (DATE)])
 		Classifier model = new NaiveBayesUpdateable();
-		//J48 j48 = new J48();
-		//j48.setBinarySplits(true);
-		//Classifier model = j48;
-		//Classifier model = new weka.classifiers.functions.RBFNetwork();
-
 		System.out.println("Training model...");
-
-
 		CSVLoader csvdata = new CSVLoader();
 		try {
-			File f = new File(CSVClass.FILE_CSV);
 			csvdata.setSource(new File(CSVClass.FILE_CSV));
 			dataSet = csvdata.getDataSet();
 			dataSet.setClass(dataSet.attribute("Folder"));
 			model.buildClassifier(dataSet);
-
 		} catch (Exception e) {
 			return;
 		}
@@ -127,21 +117,17 @@ public class ClassifierManager {
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(model);
 			fis.close();
-
-
 			Writer w = new BufferedWriter(new FileWriter(ConfigManager.DATASET_FILE));
 			Instances h = new Instances(dataSet);
 			w.write(h.toString());
 			w.write("\n");
 			w.close();
-
 		} catch (FileNotFoundException e) {
 			System.out.println("File " +
 					ConfigManager.MODEL_FILE.getAbsolutePath() +
 					" not found");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -149,19 +135,15 @@ public class ClassifierManager {
 	public void classifyMail(MimeMessage mimeMessage) throws Exception {
 		MessageInfo msg = new MessageInfo(mimeMessage);
 		Reader r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
-		dataSet = new Instances(r, 0); // Sólo necesitamos las cabeceras de los atributos
+		dataSet = new Instances(r, 0); // Only the headers are necessary
 		dataSet.setClass(dataSet.attribute("Folder"));
 		r.close();
-
 		Instance inst = filterManager.makeInstance(msg, dataSet);
-
 		Classifier model;
 		System.out.println(inst);
-
 		if (!ConfigManager.MODEL_FILE.exists()) {
 			trainModel();
 		}
-
 		FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
 		ObjectInputStream fie = new ObjectInputStream(fe);
 		model = (Classifier) fie.readObject();
@@ -169,7 +151,6 @@ public class ClassifierManager {
 		System.out.println("\nClassifying...\n");
 		double[] res = model.distributionForInstance(inst);
 		Attribute att = dataSet.attribute("Folder");
-
 		double biggest = 0;
 		int biggest_index = 0;
 		for (int i = 0; i < res.length; i++) {
@@ -180,6 +161,7 @@ public class ClassifierManager {
 				biggest = res[i];
 			}
 		}
+		System.out.println("------------------------------");
 		System.out.println("\nThe most probable folder is: " + att.value(biggest_index));
 	}
 
@@ -189,18 +171,16 @@ public class ClassifierManager {
 			MessageInfo msg = new MessageInfo(mimeMessage);
 			System.out.println("Updating model with message, which folder is " + msg.getFolderAsString());
 			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
-			dataSet = new Instances(r, 0); // Sólo necesitamos las cabeceras de los atributos
+			dataSet = new Instances(r, 0); // Only the headers are necessary
 			dataSet.setClass(dataSet.attribute("Folder"));
 			r.close();
 			Instance inst = filterManager.makeInstance(msg, dataSet);
 			Classifier model;
-
 			FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
 			ObjectInputStream fie = new ObjectInputStream(fe);
 			model = (Classifier) fie.readObject();
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
 			updateableModel.updateClassifier(inst);
-
 			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(updateableModel);

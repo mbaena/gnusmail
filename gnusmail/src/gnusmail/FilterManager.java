@@ -5,7 +5,7 @@ import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
 import gnusmail.filters.Filter;
-import gnusmail.filters.WordsFrequency;
+import gnusmail.filters.WordFrequency;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +52,7 @@ public class FilterManager {
 					MessageInfo msj = new MessageInfo(folder.getMessage(i));
 					attributes = getMessageAttributes(msj);
 					String[] filters = ConfigManager.getFilters();
-					csvmanager.addRegistro(attributes, expandFilters(filters));
+					csvmanager.addCSVRegister(attributes, expandFilters(filters));
 				}// for
 
 			} catch (MessagingException e) {
@@ -107,7 +107,7 @@ public class FilterManager {
 			try {
 				atributos = getMessageAttributes(msgInfo);
 				String[] filtros = ConfigManager.getFilters();
-				csvmanager.addRegistro(atributos, expandFilters(filtros));
+				csvmanager.addCSVRegister(atributos, expandFilters(filtros));
 			} catch (IOException ex) {
 				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (MessagingException ex) {
@@ -116,18 +116,15 @@ public class FilterManager {
 		}
 	}
 
-	public void saveAttributesInOrder(Connection connection, int limit) {
+	public void attributes(Connection connection, int limit) {
 		MessageReader reader = new MessageReader(connection, limit);
 		String[] atributos;
 		for (Message msg : reader) {
 			MessageInfo msgInfo = new MessageInfo(msg);
 			try {
-				System.out.println("Attributes from: " + msgInfo.getMessageId() + " " + msgInfo.getDateAsStr());
 				atributos = getMessageAttributes(msgInfo);
-				// el Vector filtros contiene todos los filtros activos
-				String[] filtros = ConfigManager.getFilters();
-				/* Y los escribimos en el fichero CSV */
-				csvmanager.addRegistro(atributos, expandFilters(filtros));
+				String[] filters = ConfigManager.getFilters();
+				csvmanager.addCSVRegister(atributos, expandFilters(filters));
 			} catch (IOException ex) {
 				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (MessagingException ex) {
@@ -158,8 +155,7 @@ public class FilterManager {
 
 		int i = 0;
 		for (String filtro : filtros) {
-			// Este bucle toma el nombre del filtro, eliminando
-			// la cadena "genusmail.filters." del pricipio
+			// gnusmail.filters.X -> X
 			StringTokenizer str = new StringTokenizer(filtro, ".");
 			String p = "";
 			int max = str.countTokens();
@@ -178,13 +174,11 @@ public class FilterManager {
 	}
 
 	/**
-	 * TODO: move this method anywhere else!!
-	 * Extrae los atributos del correo de la carpeta actual (según los filtros
-	 * activos en el Properties)
-	 * TODO: se abre y se cierra conexiones a las carpetas por cada correo. Esto se hace
-	 * porque si el numero posible de conexiones es limitado, y si leemos los
-	 * emails por orden de fecha, no podemos controlar cuantas conexiones tenemos
-	 * abiertas.
+	 *  Extracts Attributes for a given message.
+	 *  A connection is opened and closed for each mail, as the number of
+	 *  open folders is limited (and we cannot predict it, since we are
+	 * iterating over the mails chronologically):w
+	 *
 	 */
 	public static String[] getMessageAttributes(MessageInfo msj) throws MessagingException {
 		if (msj.getFolder() != null) { //The folder can be null when the message is read from console
@@ -193,34 +187,28 @@ public class FilterManager {
 			}
 		}
 		System.out.println("   Analyzing " + msj.getMessageId());
-		// res es un vector q contendrá el contenido de todos los atributos
-		// activos
 		Vector<String> res = new Vector<String>();
 
-		// filtros contiene todos los filtros activos
 		String[] filtersName = ConfigManager.getFilters();
 		Vector<Filter> filters = new Vector<Filter>();
 		for (String sfiltro : filtersName) {
 			try {
 				filters.add((Filter) Class.forName(sfiltro).newInstance());
 			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 
 		for (Filter filter : filters) {
-			if (filter instanceof WordsFrequency) {
-				List<String> words = WordsFrequency.getWordsToAnalyze();
+			if (filter instanceof WordFrequency) {
+				List<String> words = WordFrequency.getWordsToAnalyze();
 				try {
 					for (String word : words) {
-						WordsFrequency wordsFilter = (WordsFrequency) filter;
+						WordFrequency wordsFilter = (WordFrequency) filter;
 						wordsFilter.setWordToCheck(word);
 						String elemento = wordsFilter.applyTo(msj);
 						res.addElement(elemento);
@@ -238,7 +226,6 @@ public class FilterManager {
 			}
 		}
 
-		// Interesa devolver un array de String, no un Vector
 		String[] sres = new String[res.size()];
 		if (msj.getFolder() != null) {
 			msj.getFolder().close(false);
@@ -252,13 +239,12 @@ public class FilterManager {
 		try {
 			csvmanager.writeToFile();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * Esta clase rellena las palabras que se van a mirar en caso de tener el
+	 * This method fills the word to check by the filter WordFrequency
 	 * filtro WordFrecuency
 	 * TODO move this method anywhere else!!
 	 * @param filtros
@@ -268,7 +254,7 @@ public class FilterManager {
 		Vector<String> res = new Stack<String>();
 		for (String s : filters) {
 			if (s.contains("WordFrequency")) {
-				for (String word : WordsFrequency.getWordsToAnalyze()) {
+				for (String word : WordFrequency.getWordsToAnalyze()) {
 					res.add(word);
 				}
 			} else {
