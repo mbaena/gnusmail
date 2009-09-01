@@ -29,7 +29,7 @@ import javax.mail.MessagingException;
  *
  * @author jmcarmona
  */
-public class WordsFrequency extends Filter {
+public class WordFrequency extends Filter {
 
     String palabraAMirar;
     Set<String> stringsEsteDocumento;
@@ -37,7 +37,7 @@ public class WordsFrequency extends Filter {
     static List<String> palabrasAAnalizar;
 
 
-    public WordsFrequency() {
+    public WordFrequency() {
         wordStore = new WordsStore();
     }
     
@@ -89,9 +89,9 @@ public class WordsFrequency extends Filter {
                 return "False";
             }
         } catch (MessagingException ex) {
-            Logger.getLogger(WordsFrequency.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WordFrequency.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(WordsFrequency.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WordFrequency.class.getName()).log(Level.SEVERE, null, ex);
         }
         return res;
     }
