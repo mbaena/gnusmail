@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gnusmail.languagefeatures;
 
 import java.util.LinkedList;
@@ -10,7 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Esta clase mantiene una lista de sumarios tfidf por carpeta
+ * This class mantains a list of tfidf summaries by folder
  * @author jmcarmona
  */
 public class TermFrequencyManager {

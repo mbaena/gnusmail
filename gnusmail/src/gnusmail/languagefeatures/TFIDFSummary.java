@@ -1,13 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gnusmail.languagefeatures;
 
 import java.security.InvalidParameterException;
 
 /**
- * Un sumario de cuántas veces aparece un término, y en cuantos documentos diferentes
+ * A summary of how many times does a term appear, and in how many different documents
  * @author jmcarmona
  */
 public class TFIDFSummary implements Comparable {
