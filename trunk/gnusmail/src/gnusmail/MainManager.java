@@ -1,6 +1,6 @@
 package gnusmail;
 
-import gnusmail.core.ConfigurationManager;
+import gnusmail.core.ConfigManager;
 import gnusmail.core.WordsStore;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
@@ -161,7 +161,7 @@ public class MainManager {
 	 */
 	public void updateModelWithMail(MimeMessage msg) {
 		try {
-			if (!ConfigurationManager.MODEL_FILE.exists()) {
+			if (!ConfigManager.MODEL_FILE.exists()) {
 				initiallyTrainModel();
 			}
 			classifierManager.updateModelWithMessage(msg);

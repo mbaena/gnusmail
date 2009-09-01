@@ -1,7 +1,7 @@
 package gnusmail;
 
 import gnusmail.core.CSVClass;
-import gnusmail.core.ConfigurationManager;
+import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
 import java.io.BufferedReader;
@@ -57,13 +57,13 @@ public class ClassifierManager {
 		dataSet = null;
 		try {
 			//It's necessary to have a dataset.arff
-			r = new BufferedReader(new FileReader(ConfigurationManager.DATASET_FILE));
+			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
 			dataSet = new Instances(r, 0); // Only the headers are needed
 			dataSet.setClass(dataSet.attribute("Folder"));
 			r.close();
 			Classifier model = null;
 			try {
-				FileInputStream fe = new FileInputStream(ConfigurationManager.MODEL_FILE);
+				FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
 				ObjectInputStream fie = new ObjectInputStream(fe);
 				model = (Classifier) fie.readObject();
 			} catch (FileNotFoundException e) {
@@ -81,7 +81,7 @@ public class ClassifierManager {
 					Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
-			FileOutputStream f = new FileOutputStream(ConfigurationManager.MODEL_FILE);
+			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(updateableModel);
 			fis.close();
@@ -123,13 +123,13 @@ public class ClassifierManager {
 		}
 		System.out.println(model);
 		try {
-			FileOutputStream f = new FileOutputStream(ConfigurationManager.MODEL_FILE);
+			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(model);
 			fis.close();
 
 
-			Writer w = new BufferedWriter(new FileWriter(ConfigurationManager.DATASET_FILE));
+			Writer w = new BufferedWriter(new FileWriter(ConfigManager.DATASET_FILE));
 			Instances h = new Instances(dataSet);
 			w.write(h.toString());
 			w.write("\n");
@@ -137,7 +137,7 @@ public class ClassifierManager {
 
 		} catch (FileNotFoundException e) {
 			System.out.println("File " +
-					ConfigurationManager.MODEL_FILE.getAbsolutePath() +
+					ConfigManager.MODEL_FILE.getAbsolutePath() +
 					" not found");
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -148,7 +148,7 @@ public class ClassifierManager {
 
 	public void classifyMail(MimeMessage mimeMessage) throws Exception {
 		MessageInfo msg = new MessageInfo(mimeMessage);
-		Reader r = new BufferedReader(new FileReader(ConfigurationManager.DATASET_FILE));
+		Reader r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
 		dataSet = new Instances(r, 0); // Sólo necesitamos las cabeceras de los atributos
 		dataSet.setClass(dataSet.attribute("Folder"));
 		r.close();
@@ -158,11 +158,11 @@ public class ClassifierManager {
 		Classifier model;
 		System.out.println(inst);
 
-		if (!ConfigurationManager.MODEL_FILE.exists()) {
+		if (!ConfigManager.MODEL_FILE.exists()) {
 			trainModel();
 		}
 
-		FileInputStream fe = new FileInputStream(ConfigurationManager.MODEL_FILE);
+		FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
 		ObjectInputStream fie = new ObjectInputStream(fe);
 		model = (Classifier) fie.readObject();
 
@@ -188,20 +188,20 @@ public class ClassifierManager {
 		try {
 			MessageInfo msg = new MessageInfo(mimeMessage);
 			System.out.println("Updating model with message, which folder is " + msg.getFolderAsString());
-			r = new BufferedReader(new FileReader(ConfigurationManager.DATASET_FILE));
+			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
 			dataSet = new Instances(r, 0); // Sólo necesitamos las cabeceras de los atributos
 			dataSet.setClass(dataSet.attribute("Folder"));
 			r.close();
 			Instance inst = filterManager.makeInstance(msg, dataSet);
 			Classifier model;
 
-			FileInputStream fe = new FileInputStream(ConfigurationManager.MODEL_FILE);
+			FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
 			ObjectInputStream fie = new ObjectInputStream(fe);
 			model = (Classifier) fie.readObject();
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
 			updateableModel.updateClassifier(inst);
 
-			FileOutputStream f = new FileOutputStream(ConfigurationManager.MODEL_FILE);
+			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(updateableModel);
 			fis.close();

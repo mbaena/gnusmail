@@ -2,7 +2,7 @@ package gnusmail;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import gnusmail.core.ConfigurationManager;
+import gnusmail.core.ConfigManager;
 import javax.mail.Folder;
 
 public class Options {
@@ -129,8 +129,8 @@ public class Options {
 	}
 
 	public void setProperties(String clave, String valor) {
-		ConfigurationManager.añadirPropiedad("genusmail.filters." + clave, valor);
-		ConfigurationManager.grabarFichero();
+		ConfigManager.añadirPropiedad("genusmail.filters." + clave, valor);
+		ConfigManager.grabarFichero();
 	}
 
 	public void setOpenMail(int mail_id) {

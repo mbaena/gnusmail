@@ -2,7 +2,7 @@ package gnusmail;
 
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
-import gnusmail.core.ConfigurationManager;
+import gnusmail.core.ConfigManager;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -125,7 +125,7 @@ public class Main {
 		System.out.println("-h/--help\n	Muestra este menú de ayuda\n");
 		System.out.println("-a/--atrib numCorreo\n	Obtener atributos de un Correo\n");
 		System.out.println("-b	Extrae atributos de todos los correos del usuario y los almacena en\n" +
-				"\tel fichero CSV " + ConfigurationManager.DATASET_FILE);
+				"\tel fichero CSV " + ConfigManager.DATASET_FILE);
 		System.out.println("-c/--connect url\n\tEspecifica una url de conexión:\n " +
 				"\tprotocolo://usuario:contraseña@servidor[/rutaCarpeta.subCarpeta]\n");
 		//System.out.println("-d numCorreo\n	Clasifica con el modelo el correo numCorreo-esimo" +
