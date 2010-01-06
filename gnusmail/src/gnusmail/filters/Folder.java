@@ -1,10 +1,7 @@
 package gnusmail.filters;
 
 import gnusmail.core.cnx.MessageInfo;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.mail.MessagingException;
+
 
 public final class Folder extends Filter {
 

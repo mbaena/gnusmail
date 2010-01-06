@@ -2,7 +2,7 @@ package gnusmail.core.cnx;
 
 import gnusmail.core.ConfigManager;
 
-import java.security.Security;
+import java.security.GeneralSecurityException;
 import java.util.Properties;
 
 import javax.mail.Flags;
@@ -15,6 +15,7 @@ import javax.mail.URLName;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPSSLStore;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.util.MailSSLSocketFactory;
 
 public class Connection {
 
@@ -37,6 +38,7 @@ public class Connection {
 		System.out.println(protocol + "://" + username + ":" + "@" + hostname);
 		try {
 			login();
+			folder = (IMAPFolder) store.getFolder(mbox);
 		} catch (MessagingException e) {
 			System.out.println("Connection Error");
 			e.printStackTrace();
@@ -51,6 +53,13 @@ public class Connection {
 		this.password = url.getPassword();
 		this.protocol = url.getProtocol();
 		try {
+			login();
+			saveConnectionData();
+		} catch (MessagingException e) {
+			System.out.println("Connection error");
+			e.printStackTrace();
+		}
+		try {
 			if (url.getFile() == null) {
 				folder = (IMAPFolder) store.getFolder(mbox);
 			} else {
@@ -59,13 +68,6 @@ public class Connection {
 		} catch (Exception e) {
 			folder = null;
 			System.out.println("\nFolder '" + url.getFile() + "' not found!!!");
-		}
-		try {
-			login();
-			saveConnectionData();
-		} catch (MessagingException e) {
-			System.out.println("Connection error");
-			e.printStackTrace();
 		}
 	}
 
@@ -144,18 +146,22 @@ public class Connection {
 		if (session == null) {
 			Properties props = null;
 			try {
-				// configure the jvm to use thte jsse security
-				Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
-				Security.setProperty("ssl.SocketFactory.provider", "gnusmail.core.cnx.DummySSLSocketFactory");
-
+				
 				props = System.getProperties();
-
-				props.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-
-				props.setProperty("mail.imap.socketFactory.fallback", "true");
+				MailSSLSocketFactory sf = new MailSSLSocketFactory();
+				sf.setTrustAllHosts(true);
+				// or
+				// sf.setTrustedHosts(new String[] { "my-server" });
+				props.put("mail.imaps.ssl.enable", "true");
+				// also use following for additional safety
+				//props.put("mail.smtp.ssl.checkserveridentity", "true");
+				props.put("mail.imaps.ssl.socketFactory", sf);
 
 			} catch (SecurityException sex) {
 				props = new Properties();
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			session = Session.getInstance(props);
 
@@ -184,7 +190,7 @@ public class Connection {
 
 	/** Logout from the mail host. */
 	public void logout() throws MessagingException {
-		if (folder != null) {
+		if (folder != null && folder.isOpen()) {
 			folder.close(true);
 		}
 		store.close();

@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import javax.mail.*;
 import javax.mail.internet.*;
 
-public class MessageInfo implements Comparable {
+public class MessageInfo implements Comparable<MessageInfo> {
     public Message message;
 
     public MessageInfo (Message message){
@@ -262,19 +262,27 @@ public class MessageInfo implements Comparable {
         return addr;
     }
 
-    public int compareTo(Object o) {
+    public int compareTo(MessageInfo o) {
         int res = 0;
-
-        if (o instanceof MessageInfo) {
-            MessageInfo mi = (MessageInfo) o;
-            try {
-                res = getDate().compareTo(mi.getDate());
-            } catch (MessagingException ex) {
-                Logger.getLogger(MessageInfo.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        MessageInfo mi = (MessageInfo) o;
+        try {
+            res = getDate().compareTo(mi.getDate());
+        } catch (MessagingException ex) {
+            Logger.getLogger(MessageInfo.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         return res;
     }
+
+	public int size() throws MessagingException {
+		return message.getSize();
+	}
+
+	public int numberOfAttachments() throws MessagingException, IOException {
+        if (message.isMimeType("multipart/*")) {
+    	    Multipart mp = (Multipart)message.getContent();
+    	    return mp.getCount();
+        }
+        return 1;
+	}
 
 }
