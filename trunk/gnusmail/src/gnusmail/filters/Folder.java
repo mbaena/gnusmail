@@ -1,7 +1,10 @@
 package gnusmail.filters;
 
 import gnusmail.core.cnx.MessageInfo;
-
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.mail.MessagingException;
 
 public final class Folder extends Filter {
 
@@ -33,6 +36,7 @@ public final class Folder extends Filter {
 			Logger.getLogger(Folder.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return (String) mess.getFolder().toString();*/
-		return mess.getFolderAsString();
+		String folder = mess.getFolderAsString();
+		return folder;
 	}
 }
