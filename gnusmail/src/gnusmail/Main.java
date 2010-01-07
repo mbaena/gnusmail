@@ -12,7 +12,7 @@ public class Main {
 		longopts[0] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
 		longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
-		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgik::r::p::a::c:::l::w::hx", longopts);
+		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgikm::r::p::a::c:::l::w::hx", longopts);
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
 		System.out.println("WELCOME TO GENUSMAIL!!!");
@@ -81,6 +81,9 @@ public class Main {
 				case 'l':
 					options.setListMails(true, Integer.parseInt(arg));
 					break;
+				case 'm':
+					options.setMoaTraining(true);
+					break;					
 				case 'r':
 					options.setOpenMail(Integer.parseInt(arg));
 					break;

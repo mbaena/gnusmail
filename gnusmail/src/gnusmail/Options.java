@@ -20,12 +20,14 @@ public class Options {
 	private int listMailsLimit;
 	private boolean extractWords;
 	private boolean updateModelWithMail;
+	private boolean moaTraining;
 
 	public Options() {
 		this.url = null;
 		this.showAttributes = -1;
 		this.attributeExtraction = false;
 		this.modelTraining = false;
+		this.moaTraining = false;
 		this.listFolders = false;
 		this.listMails = false;
 		this.listMailsLimit = 0;
@@ -50,6 +52,9 @@ public class Options {
 		}
 		if (this.modelTraining) {
 			mainManager.trainModel();
+		}
+		if (this.moaTraining) {
+			mainManager.evaluateWithMOA();
 		}
 		if (this.listFolders) {
 			mainManager.listFolders();
@@ -114,6 +119,10 @@ public class Options {
 
 	public void setModelTraining(boolean b) {
 		this.modelTraining = b;
+	}
+	
+	public void setMoaTraining(boolean b) {
+		this.moaTraining = b;
 	}
 
 	public void setListFolders(boolean b) {
