@@ -14,7 +14,7 @@ public class CSVManager {
 	LabeledCSVParser lcp;
 	String[][] allValues;
 	String[] headers;
-	int numRegisters = 0;
+	int numRegisters;
 	public final static String FILE_CSV = System.getProperty("user.home") +
 			"/.gnusmail/atributos.csv";
 
@@ -110,6 +110,7 @@ public class CSVManager {
 	}
 
 	public void writeToFile() throws IOException {
+		System.out.println("Imprimiendo atributos a " + FILE_CSV);
 		FileWriter fw = new FileWriter(FILE_CSV);
 		writer = new CSVPrinter(fw, false, true);
 		writer.setAlwaysQuote(true);

@@ -1,8 +1,11 @@
 package gnusmail.core;
 
 import gnusmail.Languages.Language;
+import gnusmail.Options;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
+import gnusmail.filesystem.FSFoldersReader;
+import gnusmail.filesystem.MessageFromFileReader;
 import gnusmail.languagefeatures.EmailTokenizer;
 import gnusmail.languagefeatures.LanguageDetection;
 import gnusmail.languagefeatures.TFIDFSummary;
@@ -26,6 +29,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
 /**
@@ -35,6 +39,7 @@ import javax.mail.MessagingException;
  */
 public class WordsStore {
 	//Max number of messages to extract information from
+
 	private final int MAX_MESSAGES_PER_FOLDER = 50;
 	TermFrequencyManager termFrequencyManager;
 	public final static String tokenPattern = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
@@ -42,9 +47,9 @@ public class WordsStore {
 	public final static File WORDS_FILE = new File(configFolder + "/wordlist.data");
 	public final static File STOPWORDS_FILE_EN = new File(configFolder + "/english-stopwords.data");
 	public final static File STOPWORDS_FILE_ES = new File(configFolder + "/spanish-stopwords.data");
-	public final static double PROP_DOCUMENTS = 0.25;
-	public final static int MIN_DOCUMENTS = 5;
-	public final static int MAX_NUM_ATTRIBUTES = 20;
+	public final static double PROP_DOCUMENTS = 0.45;
+	public final static int MIN_DOCUMENTS = 3;
+	public final static int MAX_NUM_ATTRIBUTES = 200;
 	int numAnalyzedDocuments = 0;
 	Map<Language, List<String>> stopWords;
 
@@ -54,9 +59,9 @@ public class WordsStore {
 		try {
 			body = str.getBody() + " " + str.getSubject();
 		} catch (MessagingException ex) {
-			Logger.getLogger(WordsStore.class.getName()).log(Level.SEVERE, null, ex);
+			System.out.println("MessagingException: couldn't add " + str);
 		} catch (IOException ex) {
-			Logger.getLogger(WordsStore.class.getName()).log(Level.SEVERE, null, ex);
+			System.out.println("IOException: couldn't add " + str);
 		}
 		Language lang = new LanguageDetection().detectLanguage(body);
 		EmailTokenizer et = new EmailTokenizer(body);
@@ -191,17 +196,24 @@ public class WordsStore {
 	}
 
 	public void readWordsList(Connection myConnection) {
+		if (Options.getInstance().isReadMailsFromFileSystem()) {
+			readWordsListFromFS();
+		} else {
+			readWordsListFromConnection(myConnection);
+		}
+	}
+
+	public void readWordsListFromConnection(Connection myConnection) {
 		Folder[] folders;
 		try {
 			folders = myConnection.getFolders();
 
 			for (int i = 0; i < folders.length; i++) {
 				if (!folders[i].getFullName().contains(".Sent")) {
-					readWordsListForFolder(folders[i]);
-				} 
+					readWordsListForIMAPFolder(folders[i]);
+				}
 			}
 			writeToFile();
-
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -210,7 +222,7 @@ public class WordsStore {
 		}
 	}
 
-	public void readWordsListForFolder(Folder folder) {
+	public void readWordsListForIMAPFolder(Folder folder) {
 		if (folder != null) {
 			try {
 				if (!folder.isOpen()) {
@@ -229,5 +241,25 @@ public class WordsStore {
 				e.printStackTrace();
 			}
 		}//if
+	}
+
+	private void readWordsListFromFS() {
+		FSFoldersReader fReader = new FSFoldersReader(ConfigManager.CONF_FOLDER +
+				"maildir/beck-s");
+		for (File folder : fReader) {
+			readWordsListFromFSFolder(folder);
+		}
+		writeToFile();
+	}
+
+	private void readWordsListFromFSFolder(File folder) {
+		MessageFromFileReader mReader = new MessageFromFileReader(folder.getAbsolutePath(), false);
+		int numberOfMessages = 0;
+		for (Message mes : mReader) {
+			addTokenizedString(new MessageInfo(mes), folder.getName());
+			numberOfMessages++;
+		}
+		termFrequencyManager.updateWordCountPorFolder(folder.getName());
+		termFrequencyManager.setNumberOfDocumentsByFolder(folder.getName(), numberOfMessages);
 	}
 }
