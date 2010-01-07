@@ -117,7 +117,6 @@ public class MessageReader implements Iterable<Message> {
 					}
 					openFolders.add(folder);
 					folder.open(javax.mail.Folder.READ_ONLY);
-					System.out.println("Folders mide " + openFolders.size());
 				}
 				if (number < folder.getMessageCount()) {
 					Message nextMsg = folder.getMessage(number + 1);
