@@ -15,18 +15,32 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
+
+import moa.core.InstancesHeader;
+import moa.core.Measurement;
+import moa.core.ObjectRepository;
+import moa.core.TimingUtils;
+import moa.evaluation.ClassificationPerformanceEvaluator;
+import moa.evaluation.EWMAClassificationPerformanceEvaluator;
+import moa.evaluation.LearningCurve;
+import moa.evaluation.LearningEvaluation;
+import moa.evaluation.WindowClassificationPerformanceEvaluator;
+import moa.streams.InstanceStream;
+import moa.tasks.TaskMonitor;
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.core.converters.CSVLoader;
 
 /**
@@ -97,6 +111,74 @@ public class ClassifierManager {
 			}
 		}
 
+	}
+	
+	public void EvaluatePrecuential(Connection connection, int limit) {
+		BufferedReader r = null;
+		
+		try {
+			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
+			dataSet = new Instances(r, 0); // Only the headers are needed
+			dataSet.setClass(dataSet.attribute("Folder"));
+			r.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		String moaClassifierClassName = ConfigManager.getProperty("moaClassifierClassName");
+		String moaPrecuentialEvaluatorClassName = ConfigManager.getProperty("moaPrecuentialEvaluatorClassName");
+
+		moa.classifiers.Classifier learner=null;
+		ClassificationPerformanceEvaluator evaluator=null;
+		try {
+			learner = (moa.classifiers.Classifier) Class.forName(moaClassifierClassName).newInstance();
+			evaluator = (ClassificationPerformanceEvaluator) Class.forName(moaPrecuentialEvaluatorClassName).newInstance();
+			if (evaluator instanceof WindowClassificationPerformanceEvaluator) {
+				((WindowClassificationPerformanceEvaluator) evaluator).setWindowWidth(Integer.parseInt(ConfigManager.getProperty("windowWidth")));
+			}
+			if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
+				((EWMAClassificationPerformanceEvaluator) evaluator).setalpha(Double.parseDouble(ConfigManager.getProperty("alphaOption")));
+			}
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	
+		InstancesHeader instancesHeader = new InstancesHeader(dataSet);
+		learner.setModelContext(instancesHeader);
+
+		MessageReader reader = new MessageReader(connection, limit);
+		for (Message msg : reader) {
+			try {
+				MessageInfo msgInfo = new MessageInfo(msg);
+				//if (!msg.getFolder().isOpen()) msg.getFolder().open(Folder.READ_ONLY);
+				Instance trainInst = filterManager.makeInstance(msgInfo, dataSet);
+				Instance testInst = (Instance) trainInst.copy();
+				int trueClass = (int) trainInst.classValue();
+				testInst.setClassMissing();
+				double[] prediction = learner.getVotesForInstance(testInst);		
+				evaluator.addClassificationAttempt(trueClass, prediction, testInst
+						.weight());
+				for (Measurement measurement : evaluator.getPerformanceMeasurements()) {
+					System.out.print(measurement.getValue() + "\t");
+				}
+				System.out.println();
+				learner.trainOnInstance(trainInst);
+
+				//msg.getFolder().close(false);
+			} catch (Exception ex) {
+				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}			
 	}
 
 	public void trainModel() {

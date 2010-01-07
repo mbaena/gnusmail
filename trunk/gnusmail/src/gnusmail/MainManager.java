@@ -106,7 +106,7 @@ public class MainManager {
 
 	public void extractAttributes() {
 		try {
-			filterManager.attributes(connection, 100);
+			filterManager.attributes(connection, 1);
 			filterManager.writeToFile();
 		} catch (Exception e1) {
 			filterManager.writeToFile();
@@ -180,5 +180,10 @@ public class MainManager {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public void evaluateWithMOA() {
+		filterManager.saveAttributesForInitialModel(connection, 100, 1);		
+		classifierManager.EvaluatePrecuential(connection, 4);
 	}
 }
