@@ -1,158 +1,165 @@
 package gnusmail;
 
 import gnusmail.core.cnx.Connection;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
 public class MessageReader implements Iterable<Message> {
-    //Used to keep track of partially unprocessed folders. When a folder
-    //is totally processed, it's connection can be closed
-    //Map<String, Integer> mailsToReadFromFolders;
+	//Used to keep track of partially unprocessed folders. When a folder
+	//is totally processed, it's connection can be closed
+	//Map<String, Integer> mailsToReadFromFolders;
 
-    private class ComparableMessage implements Comparable<ComparableMessage> {
-        private Message message;
-        private Date date;
+	private class ComparableMessage implements Comparable<ComparableMessage> {
 
-        public ComparableMessage(Message msg) {
-            this.message = msg;
-            try {
-                this.date = msg.getReceivedDate();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
+		private Message message;
+		private Date date;
 
-        public Message getMessage() {
-            return message;
-        }
+		public ComparableMessage(Message msg) {
+			this.message = msg;
+			try {
+				this.date = msg.getReceivedDate();
+			} catch (MessagingException e) {
+				e.printStackTrace();
+			}
+		}
 
-        @Override
-        public int compareTo(ComparableMessage o) {
-            return this.date.compareTo(o.date);
-        }
+		public Message getMessage() {
+			return message;
+		}
 
-        public Folder getFolder() {
-            return message.getFolder();
-        }
-    }
+		@Override
+		public int compareTo(ComparableMessage o) {
+			return this.date.compareTo(o.date);
+		}
 
-    private class LimitedMessageReaderIterator implements Iterator<Message> {
+		public Folder getFolder() {
+			return message.getFolder();
+		}
+	}
 
-        TreeSet<ComparableMessage> message_list;
-        int numberOfNexts = 0;
+	private class LimitedMessageReaderIterator implements Iterator<Message> {
 
-        public LimitedMessageReaderIterator(Connection connection, int limit) {
-            message_list = new TreeSet<ComparableMessage>();
-            long total_msgs = 0;
-            Folder[] folders = null;
-            try {
-                folders = connection.getFolders();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-            for (Folder folder : folders) {
-				try {
-					System.out.println(" " + folder.getURLName());
-				} catch (MessagingException ex) {
-					Logger.getLogger(MessageReader.class.getName()).log(Level.SEVERE, null, ex);
+		int limOpenFolders = 15;
+		List<Folder> openFolders = new ArrayList<Folder>();
+		TreeSet<ComparableMessage> message_list;
+		int numberOfNexts = 0;
+
+		public LimitedMessageReaderIterator(Connection connection, int limit) {
+			message_list = new TreeSet<ComparableMessage>();
+			long total_msgs = 0;
+			Folder[] folders = null;
+			try {
+				folders = connection.getFolders();
+			} catch (MessagingException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Transversing folders");
+			for (Folder folder : folders) {
+				if (!folder.getName().contains("INBOX.Sent") && !folder.getName().contains("antiguos")) {
+					try {
+						if (!folder.isOpen()) {
+							folder.open(javax.mail.Folder.READ_ONLY);
+						}
+						int msg_count = folder.getMessageCount();
+						total_msgs += msg_count;
+						if (msg_count <= 0) {
+							continue;
+						}
+						int first_msg = msg_count - limit + 1;
+						if (limit > 0 && first_msg < 1) {
+							first_msg = 1;
+						} else if (limit <= 0) {
+							first_msg = 1;
+						}
+						Message msg = folder.getMessage(first_msg);
+						ComparableMessage comparableMsg = new ComparableMessage(msg);
+						message_list.add(comparableMsg);
+					} catch (MessagingException e) {
+						e.printStackTrace();
+					} finally {
+						try {
+							folder.close(false);
+						} catch (MessagingException e) {
+							e.printStackTrace();
+						}
+					}
 				}
-                if (!folder.getName().contains("INBOX.Sent") && !folder.getName().contains("antiguos")) {
-                    try {
-                        if (!folder.isOpen()) {
-                            folder.open(javax.mail.Folder.READ_ONLY);
-                        }
-                        System.out.println(folder.getFullName());
-                        int msg_count = folder.getMessageCount();
-                        total_msgs += msg_count;
-                        if (msg_count <= 0) {
-                            continue;
-                        }
-                        int first_msg = msg_count - limit + 1;
-                        if (limit > 0 && first_msg < 1) {
-                            first_msg = 1;
-                        } else if (limit <= 0) {
-                            first_msg = 1;
-                        }
-                        Message msg = folder.getMessage(first_msg);
-                        ComparableMessage comparableMsg = new ComparableMessage(msg);
-                        message_list.add(comparableMsg);
+			}
+			System.out.println("End of transversing folders");
+		}
 
-                    } catch (MessagingException e) {
-                        e.printStackTrace();
+		@Override
+		public boolean hasNext() {
+			return !message_list.isEmpty();
+		}
 
-                    } finally {
-                        try {
-                            folder.close(false);
-                        } catch (MessagingException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-            System.out.println("Total: " + total_msgs);
-        }
+		@Override
+		public Message next() {
+			numberOfNexts++;
+			System.out.println("---------- Seen messages " + numberOfNexts);
+			ComparableMessage comparableMsg = message_list.pollFirst();
+			Message msg = comparableMsg.getMessage();
+			Folder folder = msg.getFolder();
+			int number = msg.getMessageNumber();
+			try {
+				if (!folder.isOpen()) {
+					if (openFolders.size() == limOpenFolders) {
+						if (openFolders.get(0).isOpen()) {
+							openFolders.get(0).close(false);
+						}
+						openFolders.remove(0);
+					}
+					openFolders.add(folder);
+					folder.open(javax.mail.Folder.READ_ONLY);
+					System.out.println("Folders mide " + openFolders.size());
+				}
+				if (number < folder.getMessageCount()) {
+					Message nextMsg = folder.getMessage(number + 1);
+					ComparableMessage nextComparableMsg = new ComparableMessage(nextMsg);
+					message_list.add(nextComparableMsg);
+				}
+			} catch (MessagingException e) {
+				e.printStackTrace();
+			} finally {
+				/*try {
+				folder.close(false);
+				} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				}*/
+			}
+			return msg;
+		}
 
-        @Override
-        public boolean hasNext() {
-            return !message_list.isEmpty();
-        }
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
+	private Connection connection;
+	private int limit;
 
-        @Override
-        public Message next() {
-            numberOfNexts++;
-            System.out.println("---------- Seen messages " + numberOfNexts);
-            ComparableMessage comparableMsg = message_list.pollFirst();
-            Message msg = comparableMsg.getMessage();
-            Folder folder = msg.getFolder();
-            int number = msg.getMessageNumber();
-            try {
-                if (!folder.isOpen()) {
-                    folder.open(javax.mail.Folder.READ_ONLY);
-                }
-                if (number < folder.getMessageCount()) {
 
-                    Message nextMsg = folder.getMessage(number + 1);
-                    ComparableMessage nextComparableMsg = new ComparableMessage(nextMsg);
-                    message_list.add(nextComparableMsg);
+	public MessageReader() {
 
-                }
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    folder.close(false);
-                } catch (MessagingException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-            return msg;
-        }
+	}
 
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
-    private Connection connection;
-    private int limit;
+	public MessageReader(Connection connection, int limit) {
+		this.connection = connection;
+		this.limit = limit;
+	}
 
-    public MessageReader(Connection connection, int limit) {
-        this.connection = connection;
-        this.limit = limit;
-    }
-
-    @Override
-    public Iterator<Message> iterator() {
-        Iterator<Message> iterator;
-        iterator = new LimitedMessageReaderIterator(connection, limit);
-        return iterator;
-    }
+	@Override
+	public Iterator<Message> iterator() {
+		Iterator<Message> iterator;
+		iterator = new LimitedMessageReaderIterator(connection, limit);
+		return iterator;
+	}
 }
 

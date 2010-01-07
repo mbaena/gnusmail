@@ -6,7 +6,6 @@ import gnusmail.core.ConfigManager;
 import javax.mail.Folder;
 
 public class Options {
-
 	private MainManager mainManager;
 	private String url;
 	private int showAttributes;
@@ -20,14 +19,22 @@ public class Options {
 	private int listMailsLimit;
 	private boolean extractWords;
 	private boolean updateModelWithMail;
-	private boolean moaTraining;
+	private boolean readMailsFromFileSystem;
+	private static Options instance;
+       private boolean moaTraining;
 
-	public Options() {
+	public static Options getInstance() {
+		if (instance == null) {
+			instance = new Options();
+		}
+		return instance;
+	}
+
+	private Options() {
 		this.url = null;
 		this.showAttributes = -1;
 		this.attributeExtraction = false;
 		this.modelTraining = false;
-		this.moaTraining = false;
 		this.listFolders = false;
 		this.listMails = false;
 		this.listMailsLimit = 0;
@@ -36,13 +43,21 @@ public class Options {
 		this.openMail = -1;
 		this.extractWords = false;
 		this.updateModelWithMail = false;
+		this.readMailsFromFileSystem = false;
+	        this.moaTraining = false;
 	}
 
 	public void run() {
-		if (url != null) {
+		System.out.println("Read Mails from file system: " + readMailsFromFileSystem);
+		if (url != null && !Options.getInstance().isReadMailsFromFileSystem()) {
+			System.out.println("Case 1");
 			mainManager = new MainManager(url);
 		} else {
+			System.out.println("Case 2");
 			mainManager = new MainManager();
+		}
+		if (this.readMailsFromFileSystem) {
+			mainManager.setReadMailsFromFile(true);
 		}
 		if (this.showAttributes >= 0) {
 			mainManager.showAttibutes(this.showAttributes);
@@ -53,9 +68,11 @@ public class Options {
 		if (this.modelTraining) {
 			mainManager.trainModel();
 		}
+
 		if (this.moaTraining) {
 			mainManager.evaluateWithMOA();
 		}
+
 		if (this.listFolders) {
 			mainManager.listFolders();
 		}
@@ -68,6 +85,7 @@ public class Options {
 		if (this.extractWords) {
 			mainManager.extractFrequentWords();
 		}
+
 
 		if (this.updateModelWithMail) {
 			MimeMessage msg;
@@ -105,6 +123,15 @@ public class Options {
 
 	}
 
+	public boolean isReadMailsFromFileSystem() {
+		return readMailsFromFileSystem;
+	}
+
+	public void setReadMailsFromFileSystem(boolean readMailsFromFileSystem) {
+		System.out.println("Options: Set Read Mail From FS: " + readMailsFromFileSystem);
+		this.readMailsFromFileSystem = readMailsFromFileSystem;
+	}
+
 	public void setURL(String arg) {
 		this.url = arg;
 	}
@@ -117,12 +144,12 @@ public class Options {
 		this.attributeExtraction = b;
 	}
 
-	public void setModelTraining(boolean b) {
-		this.modelTraining = b;
-	}
-	
 	public void setMoaTraining(boolean b) {
 		this.moaTraining = b;
+	}
+
+	public void setModelTraining(boolean b) {
+		this.modelTraining = b;
 	}
 
 	public void setListFolders(boolean b) {

@@ -9,20 +9,33 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 public class MainManager {
+
 	private Connection connection;
 	private ClassifierManager classifierManager;
 	private FilterManager filterManager;
 	private String url;
+	private boolean readMailsFromFile = false;
 
 	public MainManager(String url) {
-		try {
-			connect(url);
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (!Options.getInstance().isReadMailsFromFileSystem()) {
+			try {
+				connect(url);
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		classifierManager = new ClassifierManager();
 		filterManager = new FilterManager();
+	}
+
+	public boolean isReadMailsFromFile() {
+		return readMailsFromFile;
+	}
+
+	public void setReadMailsFromFile(boolean readMailsFromFile) {
+		System.out.println("Main Manager: set read mail from file " + readMailsFromFile);
+		this.readMailsFromFile = readMailsFromFile;
 	}
 
 	public MainManager() {
@@ -74,7 +87,9 @@ public class MainManager {
 	public void listMails(int limit) {
 		Iterable<Message> reader;
 		reader = new MessageReader(connection, limit);
+		System.out.println("List mails");
 		for (Message msg : reader) {
+			System.out.println("New message in reader");
 			MessageInfo msgInfo = new MessageInfo(msg);
 			try {
 				System.out.println(msgInfo.getReceivedDate() + " " + msgInfo.getSubject());
@@ -106,7 +121,7 @@ public class MainManager {
 
 	public void extractAttributes() {
 		try {
-			filterManager.attributes(connection, 1);
+			filterManager.extractAttributes(connection, 1);
 			filterManager.writeToFile();
 		} catch (Exception e1) {
 			filterManager.writeToFile();
@@ -128,7 +143,7 @@ public class MainManager {
 	 */
 	private void initiallyTrainModel() {
 		System.out.println("TrainModel");
-		filterManager.saveAttributesForInitialModel(connection, 100, 5);
+		filterManager.saveAttributesForInitialModel(connection, 5, 100);
 		classifierManager.trainModel();
 
 	}
@@ -139,8 +154,14 @@ public class MainManager {
 	 * using each message to update the model
 	 */
 	public void trainModel() {
+		//initiallyTrainModel();
+		classifierManager.trainModel();
+		//classifierManager.incrementallyTrainModelFromMailServer(connection, 1000);
+	}
+
+	public void trainModelFromFile() {
 		initiallyTrainModel();
-		classifierManager.incrementallyTrainModel(connection, 1000);
+		classifierManager.incrementallyTrainModelFromDataSet();
 	}
 
 	public void classifyMail(MimeMessage msg) {
