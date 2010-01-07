@@ -119,6 +119,7 @@ public class TermFrequencyManager {
 			for (TFIDFSummary tfidf : tfidfByFolder.get(folder)) {
 				tfidf.setTotalNumberOfWordsInThisFolder(numberOfWordsByFolder.get(folder));
 			}
+			System.out.println("Word count succesfully update for " + folder);
 		} else {
 			System.out.println("Warning: coulnd't update words from " + folder);
 		}
