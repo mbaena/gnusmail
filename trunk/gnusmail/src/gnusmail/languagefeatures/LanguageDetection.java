@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package gnusmail.languagefeatures;
 
 import gnusmail.Languages.Language;
@@ -18,54 +13,57 @@ import java.util.TreeMap;
  * @author jmcarmona
  */
 public class LanguageDetection {
-    //Global object containing the stopwords for every language
-    private static final Language DEFAULT_LANGUAGE = Language.SPANISH;
-    static Map<Language, List<String>> frequentWordsByLanguage;
-    /**
-     * This method inspect the string passed as input,
-     * and returns a Language object representing the asserted language
-     * @param string
-     * @return
-     */
-    public Language detectLanguage(String string) {
-        Language langToReturn = null;
-         if (frequentWordsByLanguage == null) {
-            fillFrequentWordsList();
-        }
-        Map<Language,Integer> coincidencesByLanguage = new TreeMap<Language, Integer>();
-        for (Language lang : frequentWordsByLanguage.keySet()) {
-            coincidencesByLanguage.put(lang,numberOfCoincidences(string,
-                    frequentWordsByLanguage.get(lang)));
-        }
-        int maxNumberOfCoindidences=0;
-        for (Language langAux : coincidencesByLanguage.keySet()) {
-            if (coincidencesByLanguage.get(langAux) > maxNumberOfCoindidences) {
-                langToReturn = langAux;
-                maxNumberOfCoindidences = coincidencesByLanguage.get(langAux);
-            }
-        }
+	//Global object containing the stopwords for every language
 
-        //If no language was found, we return a default value;
-        if (langToReturn == null) {
-            langToReturn = DEFAULT_LANGUAGE;
-        }
-        return langToReturn;
-    }
+	private static final Language DEFAULT_LANGUAGE = Language.SPANISH;
+	static Map<Language, List<String>> frequentWordsByLanguage;
 
-     private void fillFrequentWordsList() {
-        frequentWordsByLanguage = StopWordsProvider.getInstance().getStopwordsMap();
-    }
+	/**
+	 * This method inspect the string passed as input,
+	 * and returns a Language object representing the asserted language
+	 * @param string
+	 * @return
+	 */
+	public Language detectLanguage(String string) {
+		Language langToReturn = null;
+		if (frequentWordsByLanguage == null) {
+			fillFrequentWordsList();
+		}
+		Map<Language, Integer> coincidencesByLanguage = new TreeMap<Language, Integer>();
+		for (Language lang : frequentWordsByLanguage.keySet()) {
+			coincidencesByLanguage.put(lang, numberOfCoincidences(string,
+					frequentWordsByLanguage.get(lang)));
+		}
+		int maxNumberOfCoindidences = 0;
+		for (Language langAux : coincidencesByLanguage.keySet()) {
+			if (coincidencesByLanguage.get(langAux) > maxNumberOfCoindidences) {
+				langToReturn = langAux;
+				maxNumberOfCoindidences = coincidencesByLanguage.get(langAux);
+			}
+		}
 
-    private int numberOfCoincidences(String body, List<String> words) {
-        body = body.toLowerCase();
-        int coincidences = 0;
-        StringTokenizer st = new StringTokenizer(body); //TODO delimiters
-        while (st.hasMoreTokens()) {
-            if (words.contains(st.nextElement())) {
-                coincidences++;
-            }
-        }
-        return coincidences;
-    }
+		//If no language was found, we return a default value;
+		if (langToReturn == null) {
+			langToReturn = DEFAULT_LANGUAGE;
+		}
+		return langToReturn;
+	}
 
+	private void fillFrequentWordsList() {
+		frequentWordsByLanguage = StopWordsProvider.getInstance().getStopwordsMap();
+	}
+
+	private int numberOfCoincidences(String body, List<String> words) {
+		int coincidences = 0;
+		if (body != null) {
+			body = body.toLowerCase();
+			StringTokenizer st = new StringTokenizer(body); //TODO delimiters
+			while (st.hasMoreTokens()) {
+				if (words.contains(st.nextElement())) {
+					coincidences++;
+				}
+			}
+		}
+		return coincidences;
+	}
 }
