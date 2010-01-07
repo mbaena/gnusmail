@@ -4,6 +4,7 @@ import gnusmail.core.CSVManager;
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
+import gnusmail.filesystem.MessageFromFileReader;
 import gnusmail.filters.Filter;
 import gnusmail.filters.WordFrequency;
 import java.io.IOException;
@@ -28,6 +29,14 @@ import weka.core.Instances;
 public class FilterManager {
 
 	CSVManager csvmanager;
+
+	public CSVManager getCsvmanager() {
+		return csvmanager;
+	}
+
+	public void setCsvmanager(CSVManager csvmanager) {
+		this.csvmanager = csvmanager;
+	}
 
 	public FilterManager() {
 		try {
@@ -56,7 +65,6 @@ public class FilterManager {
 				}// for
 
 			} catch (MessagingException e) {
-				System.out.println("Folder " + folder.getFullName() + " not found");
 				e.printStackTrace();
 			} catch (IOException e) {
 				System.out.println("Writing Error");
@@ -68,7 +76,6 @@ public class FilterManager {
 
 	public void saveAttributes(Connection myConnection) {
 		Folder[] folders;
-		System.out.println("Extracting information from messages...");
 		try {
 			folders = myConnection.getFolders();
 
@@ -97,7 +104,8 @@ public class FilterManager {
 	 */
 	public void saveAttributesForInitialModel(Connection connection, int limit,
 			int messagesToRetrieve) {
-		MessageReader reader = new MessageReader(connection, limit);
+		MessageReader reader = createReader(connection, limit);
+		//MessageReader reader = new MessageReader(connection, limit);
 		String[] atributos;
 		Iterator<Message> iterator = reader.iterator();
 		int messagesRetrieved = 0;
@@ -114,13 +122,24 @@ public class FilterManager {
 				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		try {
+			csvmanager.writeToFile();
+		} catch (IOException ex) {
+			Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
-	public void attributes(Connection connection, int limit) {
-		MessageReader reader = new MessageReader(connection, limit);
+	public void extractAttributes(Connection connection, int limit) {
+		MessageReader reader = createReader(connection, limit);
+		//MessageReader reader = new MessageReader(connection, limit);
 		String[] atributos;
 		for (Message msg : reader) {
 			MessageInfo msgInfo = new MessageInfo(msg);
+			try {
+				System.out.println(msgInfo.getSubject());
+			} catch (MessagingException ex) {
+				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
+			}
 			try {
 				atributos = getMessageAttributes(msgInfo);
 				String[] filters = ConfigManager.getFilters();
@@ -131,6 +150,7 @@ public class FilterManager {
 				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		writeToFile();
 	}
 
 	/**
@@ -186,7 +206,6 @@ public class FilterManager {
 				msj.getFolder().open(Folder.READ_ONLY);
 			}
 		}
-		System.out.println("   Analyzing " + msj.getMessageId());
 		Vector<String> res = new Vector<String>();
 
 		String[] filtersName = ConfigManager.getFilters();
@@ -262,5 +281,14 @@ public class FilterManager {
 			}
 		}
 		return res;
+	}
+
+	private MessageReader createReader(Connection connection, int limit) {
+		boolean readFromFS = Options.getInstance().isReadMailsFromFileSystem();
+		if (!readFromFS) {
+			return new MessageReader(connection, limit);
+		} else {
+			return new MessageFromFileReader(ConfigManager.CONF_FOLDER + "maildir/");
+		}
 	}
 }

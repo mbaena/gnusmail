@@ -15,9 +15,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
@@ -25,22 +25,15 @@ import javax.mail.internet.MimeMessage;
 
 import moa.core.InstancesHeader;
 import moa.core.Measurement;
-import moa.core.ObjectRepository;
-import moa.core.TimingUtils;
 import moa.evaluation.ClassificationPerformanceEvaluator;
 import moa.evaluation.EWMAClassificationPerformanceEvaluator;
-import moa.evaluation.LearningCurve;
-import moa.evaluation.LearningEvaluation;
 import moa.evaluation.WindowClassificationPerformanceEvaluator;
-import moa.streams.InstanceStream;
-import moa.tasks.TaskMonitor;
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Utils;
 import weka.core.converters.CSVLoader;
 
 /**
@@ -99,6 +92,11 @@ public class ClassifierManager {
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(updateableModel);
 			fis.close();
+			Writer w = new BufferedWriter(new FileWriter(ConfigManager.DATASET_FILE));
+			Instances h = new Instances(dataSet);
+			w.write(h.toString());
+			w.write("\n");
+			w.close();
 		} catch (ClassNotFoundException ex) {
 			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
@@ -111,6 +109,48 @@ public class ClassifierManager {
 			}
 		}
 
+	}
+
+	/**
+	 * Like incrementallyTrainModelFromMailServer, but reading from a CSV file
+	 */
+
+	public void incrementallyTrainModelFromDataSet() {
+		Classifier model = new NaiveBayesUpdateable();
+		System.out.println("Training model...");
+		CSVLoader csvdata = new CSVLoader();
+		try {
+			csvdata.setSource(new File(CSVManager.FILE_CSV));
+			dataSet = csvdata.getDataSet();
+			dataSet.setClass(dataSet.attribute("Folder"));
+			UpdateableClassifier updateableClassifier = (UpdateableClassifier) model;
+			for (Enumeration instances = dataSet.enumerateInstances(); instances.hasMoreElements();) {
+				Instance instance = (Instance) instances.nextElement();
+				updateableClassifier.updateClassifier(instance);
+			}
+			model.buildClassifier(dataSet);
+		} catch (Exception e) {
+			return;
+		}
+		System.out.println("El modelo es: " + model);
+		try {
+			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
+			ObjectOutputStream fis = new ObjectOutputStream(f);
+			fis.writeObject(model);
+			fis.close();
+			Writer w = new BufferedWriter(new FileWriter(ConfigManager.DATASET_FILE));
+			Instances h = new Instances(dataSet);
+			w.write(h.toString());
+			w.write("\n");
+			w.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File " +
+					ConfigManager.MODEL_FILE.getAbsolutePath() +
+					" not found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void EvaluatePrecuential(Connection connection, int limit) {

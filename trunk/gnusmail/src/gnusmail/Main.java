@@ -12,14 +12,14 @@ public class Main {
 		longopts[0] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
 		longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
-		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgikm::r::p::a::c:::l::w::hx", longopts);
+		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgikzm::r::p::a::c:::l::w::hx", longopts);
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
 		System.out.println("WELCOME TO GENUSMAIL!!!");
 
 		String arg;
 		int c;
-		Options options = new Options();
+		Options options = Options.getInstance();
 		c = getopt.getopt();
 		arg = getopt.getOptarg();
 		while (c != -1) {
@@ -87,14 +87,19 @@ public class Main {
 				case 'r':
 					options.setOpenMail(Integer.parseInt(arg));
 					break;
+				case 'z':
+					options.setReadMailsFromFileSystem(true);
+					System.out.println("Mails will be read from filesystem...");
+					break;
 				case '?':
 					System.out.println("Invalid option" +
 							"\nUse command --help (or -h) to see available options");
 					break;
 			} //switch
+			c = getopt.getopt();
+			arg = getopt.getOptarg();
 			System.out.println("Running options...");
 			options.run();
-			c = -1;
 		}//while
 		System.out.println("End of execution");
 	}
@@ -115,6 +120,7 @@ public class Main {
 		//System.out.println("-g	Lists messages in actual folder\n");
 		System.out.println("-i	Classifies a mail read from the sdtin\n");
 		System.out.println("-k	Updates the classification model with a mail read from the sdtin\n");
+		System.out.println("-z	Reads mail from filesystem (~/.gnusmail/maildir) instead of IMAP connection \n");
 		System.out.println("-l[N]\tLists messages chronologically \n" +
 				"\t(limitar a N mensajes por carpeta).\n");
 		//System.out.println("-r numCorreo\n\tShows message content\n");
