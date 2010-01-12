@@ -67,6 +67,7 @@ public class MainManager {
 	}
 
 	public void showAttibutes(int mail_id) {
+		System.out.println("MainManager.Show attributes");
 		try {
 			connection.showAttributes(mail_id);
 		} catch (Exception e) {
@@ -76,6 +77,7 @@ public class MainManager {
 	}
 
 	public void listFolders() {
+		System.out.println("MainManager.List folders");
 		try {
 			connection.listFolders();
 		} catch (MessagingException e) {
@@ -120,6 +122,7 @@ public class MainManager {
 	}
 
 	public void extractAttributes() {
+		System.out.println("Mainmanager.extract attributes");
 		try {
 			filterManager.extractAttributes(connection, 1);
 			filterManager.writeToFile();
@@ -132,6 +135,7 @@ public class MainManager {
 	}
 
 	public void extractFrequentWords() {
+		System.out.println("Mainmanager.extract frequent words");
 		WordsStore wordStore = new WordsStore();
 		wordStore.readWordsList(connection);
 	}
@@ -142,7 +146,7 @@ public class MainManager {
 	 * emails, in chronological order
 	 */
 	private void initiallyTrainModel() {
-		System.out.println("TrainModel");
+		System.out.println("TrainModel (init)");
 		filterManager.saveAttributesForInitialModel(connection, 5, 100);
 		classifierManager.trainModel();
 
@@ -154,12 +158,14 @@ public class MainManager {
 	 * using each message to update the model
 	 */
 	public void trainModel() {
+		System.out.println("TrainModel ");
 		//initiallyTrainModel();
 		classifierManager.trainModel();
 		//classifierManager.incrementallyTrainModelFromMailServer(connection, 1000);
 	}
 
 	public void trainModelFromFile() {
+		System.out.println("TrainModel from file");
 		initiallyTrainModel();
 		classifierManager.incrementallyTrainModelFromDataSet();
 	}
@@ -204,6 +210,7 @@ public class MainManager {
 	}
 
 	public void evaluateWithMOA() {
+		System.out.println("Evaluate with moa");
 		filterManager.saveAttributesForInitialModel(connection, 100, 1);		
 		classifierManager.EvaluatePrecuential(connection, 4);
 	}
