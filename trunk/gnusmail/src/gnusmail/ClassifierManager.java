@@ -17,7 +17,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
@@ -76,14 +78,14 @@ public class ClassifierManager {
 			} catch (FileNotFoundException e) {
 			}
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
-			MessageReader reader = new MessageReader(connection, limit);
+			MessageReader reader = new MessageReaderFactory().createReader(connection, limit);
 			for (Message msg : reader) {
 				try {
 					MessageInfo msgInfo = new MessageInfo(msg);
 					//if (!msg.getFolder().isOpen()) msg.getFolder().open(Folder.READ_ONLY);
 					Instance inst = filterManager.makeInstance(msgInfo, dataSet);
 					updateableModel.updateClassifier(inst);
-				//msg.getFolder().close(false);
+					//msg.getFolder().close(false);
 				} catch (Exception ex) {
 					Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -114,7 +116,6 @@ public class ClassifierManager {
 	/**
 	 * Like incrementallyTrainModelFromMailServer, but reading from a CSV file
 	 */
-
 	public void incrementallyTrainModelFromDataSet() {
 		Classifier model = new NaiveBayesUpdateable();
 		System.out.println("Training model...");
@@ -152,10 +153,10 @@ public class ClassifierManager {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void EvaluatePrecuential(Connection connection, int limit) {
 		BufferedReader r = null;
-		
+
 		try {
 			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
 			dataSet = new Instances(r, 0); // Only the headers are needed
@@ -171,8 +172,8 @@ public class ClassifierManager {
 		String moaClassifierClassName = ConfigManager.getProperty("moaClassifierClassName");
 		String moaPrecuentialEvaluatorClassName = ConfigManager.getProperty("moaPrecuentialEvaluatorClassName");
 
-		moa.classifiers.Classifier learner=null;
-		ClassificationPerformanceEvaluator evaluator=null;
+		moa.classifiers.Classifier learner = null;
+		ClassificationPerformanceEvaluator evaluator = null;
 		try {
 			learner = (moa.classifiers.Classifier) Class.forName(moaClassifierClassName).newInstance();
 			evaluator = (ClassificationPerformanceEvaluator) Class.forName(moaPrecuentialEvaluatorClassName).newInstance();
@@ -191,34 +192,47 @@ public class ClassifierManager {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}		
-	
+		}
+
 		InstancesHeader instancesHeader = new InstancesHeader(dataSet);
 		learner.setModelContext(instancesHeader);
 
-		MessageReader reader = new MessageReader(connection, limit);
+		MessageReader reader = new MessageReaderFactory().createReader(connection, limit);
+		List<Double> tasas = new ArrayList<Double>();
+		System.out.println("Evaluate prec. Empieza bucle");
 		for (Message msg : reader) {
 			try {
 				MessageInfo msgInfo = new MessageInfo(msg);
 				//if (!msg.getFolder().isOpen()) msg.getFolder().open(Folder.READ_ONLY);
+				System.out.println("Folder: " + msgInfo.getFolderAsString());
 				Instance trainInst = filterManager.makeInstance(msgInfo, dataSet);
 				Instance testInst = (Instance) trainInst.copy();
 				int trueClass = (int) trainInst.classValue();
 				testInst.setClassMissing();
-				double[] prediction = learner.getVotesForInstance(testInst);		
-				evaluator.addClassificationAttempt(trueClass, prediction, testInst
-						.weight());
+				double[] prediction = learner.getVotesForInstance(testInst);
+				String predStr = "[";
+				for (double d : prediction) {
+					predStr += d + ",";
+				}
+				System.out.println(trueClass + " " + predStr + "]");
+				evaluator.addClassificationAttempt(trueClass, prediction, testInst.weight());
 				for (Measurement measurement : evaluator.getPerformanceMeasurements()) {
-					System.out.print(measurement.getValue() + "\t");
+					System.out.print(measurement.getName() + ": Tasa: " + measurement.getValue() + "\t");
+					if (measurement.getName().contains("correct")) {
+						tasas.add(measurement.getValue());
+					}
 				}
 				System.out.println();
 				learner.trainOnInstance(trainInst);
+
+				imprimirTasasErrorAFichero(tasas);
+
 
 				//msg.getFolder().close(false);
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
-		}			
+		}
 	}
 
 	public void trainModel() {
@@ -233,7 +247,7 @@ public class ClassifierManager {
 		} catch (Exception e) {
 			return;
 		}
-		System.out.println(model);
+		//System.out.println(model);
 		try {
 			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
 			ObjectOutputStream fis = new ObjectOutputStream(f);
@@ -318,4 +332,19 @@ public class ClassifierManager {
 			}
 		}
 	}
+
+	private void imprimirTasasErrorAFichero(List<Double> tasas) {
+		try {
+			// Create file
+			FileWriter fstream = new FileWriter("tases");
+			BufferedWriter out = new BufferedWriter(fstream);
+			for (double d : tasas)
+			out.write(d + "\n");
+			//Close the output stream
+			out.close();
+		} catch (Exception e) {//Catch exception if any
+			System.err.println("No se pueden imprimir tasas");
+		}
+	}
 }
+

@@ -32,6 +32,7 @@ public class ConfigManager {
 	public final static String CONF_FILE = "gnusmail.properties";
 	public final static File MODEL_FILE = new File(CONF_FOLDER + "model.bin");
 	public final static File DATASET_FILE = new File(CONF_FOLDER + "dataset.arff");
+	public final static File MAILDIR = new File(CONF_FOLDER + "maildir/kean-s");
 	private static Properties properties = loadProperties();
 	private static List<String> classificationAttributes;
 

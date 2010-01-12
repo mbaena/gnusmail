@@ -28,9 +28,10 @@ public class EmailTokenizer {
 	}
 
 	public List<Token> tokenize() {
+		int limit = 1000;
 		if (body != null) {
 			StringTokenizer st = new StringTokenizer(body, tokenPattern);
-			while (st.hasMoreElements()) {
+			while (st.hasMoreElements() && tokens.size() < limit) {
 				Token token = new Token(st.nextToken());
 				if (lang != null) {
 					token.setLanguage(lang);

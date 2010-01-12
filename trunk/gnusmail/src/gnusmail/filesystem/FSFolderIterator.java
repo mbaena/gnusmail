@@ -40,7 +40,7 @@ public class FSFolderIterator extends FolderMessagesIterator {
 			File[] listOfFiles = folder.listFiles();
 			for (int i = 0; i < listOfFiles.length; i++) {
 				File auxFile = listOfFiles[i];
-				if (auxFile.isDirectory()) {
+				if (auxFile.isDirectory() && !forbidden(auxFile.getAbsolutePath())) {
 					foldersToBeOpened.add(auxFile);
 				}
 			}
@@ -48,6 +48,12 @@ public class FSFolderIterator extends FolderMessagesIterator {
 			System.out.println("Imposible expandir");
 		}
 
+	}
+
+	private boolean forbidden(String absolutePath) {
+		boolean isSent =  absolutePath.toLowerCase().contains("sent");
+		boolean isDeleted =  absolutePath.toLowerCase().contains("deleted");
+		return isSent  || isDeleted;
 	}
 
 }

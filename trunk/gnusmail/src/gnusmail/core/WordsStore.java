@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,15 +81,19 @@ public class WordsStore {
 			}
 
 		}
+			Date d1 = new Date();
 		for (String word : wordCount.keySet()) {
 			termFrequencyManager.addTermAppearancesInDocumentForFolder(word,
 					wordCount.get(word).getCount(),
 					folderName);
 			termFrequencyManager.addNewDocumentForWord(word, folderName);
 		}
+			Date d2 = new Date();
 		//We update the number of words for this folder
 		termFrequencyManager.addNumberOfWordsPerFolder(folderName, numberOfTokens);
+			Date d3 = new Date();
 		numAnalyzedDocuments++;
+		System.out.println((d2.getTime() - d1.getTime()) + " " + (d3.getTime() - d2.getTime()) + " " + wordCount.size() + " "+ tokens.size());
 	}
 
 	public WordsStore() {
@@ -244,20 +249,31 @@ public class WordsStore {
 	}
 
 	private void readWordsListFromFS() {
-		FSFoldersReader fReader = new FSFoldersReader(ConfigManager.CONF_FOLDER +
-				"maildir/beck-s");
+		System.out.println("Read words list from FS");
+		FSFoldersReader fReader = new FSFoldersReader(ConfigManager.MAILDIR.getAbsolutePath());
 		for (File folder : fReader) {
+			System.out.println("Read words list from fs: " + folder.getAbsolutePath());
 			readWordsListFromFSFolder(folder);
 		}
+		System.out.println("Write to file...");
 		writeToFile();
+		System.out.println("Written to file...");
 	}
 
 	private void readWordsListFromFSFolder(File folder) {
 		MessageFromFileReader mReader = new MessageFromFileReader(folder.getAbsolutePath(), false);
 		int numberOfMessages = 0;
+		System.out.println("Folder : " + folder.getAbsolutePath());
 		for (Message mes : mReader) {
+			Date d = new Date();
 			addTokenizedString(new MessageInfo(mes), folder.getName());
+			Date d2 = new Date();
 			numberOfMessages++;
+			if (numberOfMessages % 10 == 0) {
+				System.out.println(folder.getAbsolutePath() + " Number of messages " + numberOfMessages);
+				System.out.println("Dura " + (d2.getTime() - d.getTime()));
+			}
+			if (numberOfMessages == 50) break;
 		}
 		termFrequencyManager.updateWordCountPorFolder(folder.getName());
 		termFrequencyManager.setNumberOfDocumentsByFolder(folder.getName(), numberOfMessages);

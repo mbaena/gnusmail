@@ -86,7 +86,6 @@ public class FolderMessagesIterator implements Iterator<File> {
 					filesToRetrieve.add(auxFile);
 				} else if (auxFile.isDirectory()) {
 					foldersToBeOpened.add(auxFile);
-					System.out.println("Add folder: " + auxFile.getAbsolutePath());
 				}
 			}
 		} else {

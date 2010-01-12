@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gnusmail.filesystem;
 
 import gnusmail.MessageReader;
-import gnusmail.core.cnx.Connection;
+import gnusmail.SortableMessage;
 import gnusmail.core.cnx.MIMEMessageWithFolder;
 import gnusmail.core.cnx.MessageInfo;
 import java.io.File;
@@ -13,13 +9,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.internet.MimeMessage;
 
 /**
  *
@@ -28,19 +27,37 @@ import javax.mail.internet.MimeMessage;
 public class MessageFromFileReader extends MessageReader implements Iterable<Message> {
 
 	private class MessagesFromFileIterator implements Iterator<Message> {
+		int index = 0;
 		FolderMessagesIterator it;
+		List<SortableMessage> messages = null;
+
+		private void createMessagesList() {
+			System.out.print("Initializing message list...");
+			SortedSet<SortableMessage> sortedMessages = new TreeSet<SortableMessage>();
+			while (it.hasNext()) {
+				File f = it.next();
+				if (f != null) {
+					sortedMessages.add(new SortableMessage(convertFileToMessage(f)));
+				}
+			}
+			this.messages = new ArrayList(sortedMessages);
+			System.out.println("done. We have : " + sortedMessages.size());
+		}
 
 		public MessagesFromFileIterator(String baseFolder, boolean recursive) {
 			FilesReader fr = new FilesReader(baseFolder, recursive);
 			it = (FolderMessagesIterator) fr.iterator();
+			createMessagesList();
 		}
 
 		public boolean hasNext() {
-			boolean res = it.hasNext();
+			//boolean res = it.hasNext();
+			boolean res = index < messages.size();
 			return res;
 		}
 
 		public Message next() {
+			/*
 			Message res = null;
 			File f = it.next();
 			while (f == null && it.hasNext()) {
@@ -49,6 +66,10 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 			if (f != null) {
 				res = convertFileToMessage(f);
 			}
+			return res;
+			 */
+			Message res = messages.get(index).getMesssage();
+			index++;
 			return res;
 		}
 
@@ -72,7 +93,7 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 				Session s = null;
 				is = new FileInputStream(f);
 				m = new MIMEMessageWithFolder(s, is);
-				((MIMEMessageWithFolder)m).setFolderAsStr(parentFolder);
+				((MIMEMessageWithFolder) m).setFolderAsStr(parentFolder);
 			} catch (MessagingException ex) {
 				Logger.getLogger(MessageFromFileReader.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (FileNotFoundException ex) {
@@ -89,7 +110,6 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 	}
 	private String baseFolder;
 	private boolean recursive = false;
-
 
 	public MessageFromFileReader(String baseFolder) {
 		this.baseFolder = baseFolder;

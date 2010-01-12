@@ -1,10 +1,10 @@
 package gnusmail;
 
+import gnusmail.filesystem.MessageFromFileReader;
 import gnusmail.core.CSVManager;
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
-import gnusmail.filesystem.MessageFromFileReader;
 import gnusmail.filters.Filter;
 import gnusmail.filters.WordFrequency;
 import java.io.IOException;
@@ -104,7 +104,7 @@ public class FilterManager {
 	 */
 	public void saveAttributesForInitialModel(Connection connection, int limit,
 			int messagesToRetrieve) {
-		MessageReader reader = createReader(connection, limit);
+		MessageReader reader = new MessageReaderFactory().createReader(connection, limit);
 		//MessageReader reader = new MessageReader(connection, limit);
 		String[] atributos;
 		Iterator<Message> iterator = reader.iterator();
@@ -130,20 +130,18 @@ public class FilterManager {
 	}
 
 	public void extractAttributes(Connection connection, int limit) {
-		MessageReader reader = createReader(connection, limit);
-		//MessageReader reader = new MessageReader(connection, limit);
+		MessageReader reader = new MessageReaderFactory().createReader(connection, limit);
 		String[] atributos;
+		int num = 0;
 		for (Message msg : reader) {
 			MessageInfo msgInfo = new MessageInfo(msg);
-			try {
-				System.out.println(msgInfo.getSubject());
-			} catch (MessagingException ex) {
-				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
-			}
 			try {
 				atributos = getMessageAttributes(msgInfo);
 				String[] filters = ConfigManager.getFilters();
 				csvmanager.addCSVRegister(atributos, expandFilters(filters));
+				num++;
+				if (num % 100 == 0) System.out.println("_Num de mensajes " + num);
+				if (num == 200) break;
 			} catch (IOException ex) {
 				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (MessagingException ex) {
@@ -281,14 +279,5 @@ public class FilterManager {
 			}
 		}
 		return res;
-	}
-
-	private MessageReader createReader(Connection connection, int limit) {
-		boolean readFromFS = Options.getInstance().isReadMailsFromFileSystem();
-		if (!readFromFS) {
-			return new MessageReader(connection, limit);
-		} else {
-			return new MessageFromFileReader(ConfigManager.CONF_FOLDER + "maildir/");
-		}
 	}
 }
