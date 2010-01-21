@@ -72,12 +72,15 @@ public class MessageReader implements Iterable<Message> {
 			Folder[] folders = null;
 			try {
 				folders = connection.getFolders();
+				//folders = cleanFolders(folders);
 			} catch (MessagingException e) {
 				e.printStackTrace();
 			}
 			System.out.println("Transversing folders");
 			for (Folder folder : folders) {
-				if (!folder.getName().contains("INBOX.Sent") && !folder.getName().contains("antiguos")) {
+				if (!folder.getName().toLowerCase().contains("sent") 
+						&& !folder.getName().toLowerCase().contains("antiguos")
+						&& !folder.getName().toLowerCase().contains("trash")) {
 					try {
 						if (!folder.isOpen()) {
 							folder.open(javax.mail.Folder.READ_ONLY);
@@ -105,6 +108,8 @@ public class MessageReader implements Iterable<Message> {
 							e.printStackTrace();
 						}
 					}
+				} else {
+					System.out.println("Desechada: " + folder.getFullName());
 				}
 			}
 			System.out.println("End of transversing folders");
@@ -156,6 +161,7 @@ public class MessageReader implements Iterable<Message> {
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
+
 	}
 	private Connection connection;
 	private int limit;

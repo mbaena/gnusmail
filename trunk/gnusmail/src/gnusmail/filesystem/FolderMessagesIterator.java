@@ -84,7 +84,7 @@ public class FolderMessagesIterator implements Iterator<File> {
 				File auxFile = listOfFiles[i];
 				if (auxFile.isFile() && auxFile != null) {
 					filesToRetrieve.add(auxFile);
-				} else if (auxFile.isDirectory()) {
+				} else if (auxFile.isDirectory() && mustBeOpened(auxFile)) {
 					foldersToBeOpened.add(auxFile);
 				}
 			}
@@ -92,5 +92,19 @@ public class FolderMessagesIterator implements Iterator<File> {
 			System.out.println("Imposible expandir");
 		}
 
+	}
+
+	/**
+	 * This function filters folders with 1 or 2 mails, and topical folders
+	 * @param auxFile
+	 * @return
+	 */
+	private boolean mustBeOpened(File auxFile) {
+		String name = auxFile.getName().toLowerCase();
+		int numOfMails = auxFile.listFiles().length;
+		boolean topical =  name.contains("sent") || name.contains("inbox") ||
+				name.contains("trash") || name.contains("all_documents") ||
+				name.contains("drafts") || name.contains("discussion_threads");
+		return numOfMails > 2 && !topical;
 	}
 }

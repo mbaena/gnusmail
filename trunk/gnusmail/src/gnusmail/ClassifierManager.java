@@ -133,7 +133,6 @@ public class ClassifierManager {
 		} catch (Exception e) {
 			return;
 		}
-		System.out.println("El modelo es: " + model);
 		try {
 			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
 			ObjectOutputStream fis = new ObjectOutputStream(f);
@@ -203,6 +202,11 @@ public class ClassifierManager {
 		for (Message msg : reader) {
 			try {
 				MessageInfo msgInfo = new MessageInfo(msg);
+				/*if (!msgInfo.getFolderAsString().toLowerCase().contains("inbox") &&
+				!msgInfo.getFolderAsString().toLowerCase().contains("deleted") &&
+				!msgInfo.getFolderAsString().toLowerCase().contains("sent")&&
+				!msgInfo.getFolderAsString().toLowerCase().contains("junk")&&
+				!msgInfo.getFolderAsString().toLowerCase().contains("attachment") ) {*/
 				//if (!msg.getFolder().isOpen()) msg.getFolder().open(Folder.READ_ONLY);
 				System.out.println("Folder: " + msgInfo.getFolderAsString());
 				Instance trainInst = filterManager.makeInstance(msgInfo, dataSet);
@@ -229,7 +233,8 @@ public class ClassifierManager {
 
 
 				//msg.getFolder().close(false);
-			} catch (Exception ex) {
+				//	}
+				} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
@@ -338,8 +343,9 @@ public class ClassifierManager {
 			// Create file
 			FileWriter fstream = new FileWriter("tases");
 			BufferedWriter out = new BufferedWriter(fstream);
-			for (double d : tasas)
-			out.write(d + "\n");
+			for (double d : tasas) {
+				out.write(d + "\n");
+			}
 			//Close the output stream
 			out.close();
 		} catch (Exception e) {//Catch exception if any

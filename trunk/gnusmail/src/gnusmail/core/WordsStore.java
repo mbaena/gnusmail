@@ -50,7 +50,7 @@ public class WordsStore {
 	public final static File STOPWORDS_FILE_ES = new File(configFolder + "/spanish-stopwords.data");
 	public final static double PROP_DOCUMENTS = 0.45;
 	public final static int MIN_DOCUMENTS = 3;
-	public final static int MAX_NUM_ATTRIBUTES = 200;
+	public final static int MAX_NUM_ATTRIBUTES = 400;
 	int numAnalyzedDocuments = 0;
 	Map<Language, List<String>> stopWords;
 
@@ -115,7 +115,7 @@ public class WordsStore {
 						termFrequencyManager.getTfidfByFolder().get(folder);
 				Collections.sort(tfidSummaries);
 
-				while (index < 10 && index < tfidSummaries.size()) {
+				while (index < 50 && index < tfidSummaries.size()) {
 					TFIDFSummary ts = tfidSummaries.get(tfidSummaries.size() - 1 - index);
 					System.out.println(ts);
 					wordsToWrite.add(ts.getTerm());

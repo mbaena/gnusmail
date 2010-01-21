@@ -19,7 +19,7 @@ public class DomainOfSender extends Filter {
 
     @Override
     public String getName() {
-       return "Domain of Sender";
+       return "SenderDomain";
     }
 
     @Override
