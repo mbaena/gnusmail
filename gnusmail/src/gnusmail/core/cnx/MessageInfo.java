@@ -240,7 +240,7 @@ public class MessageInfo implements Comparable<MessageInfo> {
 	 */
 	public String getFolderAsStringFromIMAPMAil() {
 		String res = "?";
-		Folder folder = message.getFolder();
+		/*Folder folder = message.getFolder();
 		if (folder != null) {
 			String fullName = folder.getFullName();
 			String fields[] = fullName.split("@");
@@ -267,7 +267,8 @@ public class MessageInfo implements Comparable<MessageInfo> {
 				res = headerFolder[0];
 			}
 		}
-		return res;
+		return res;*/
+		return message.getFolder().getFullName();
 	}
 
 	public void print(OutputStream os) {

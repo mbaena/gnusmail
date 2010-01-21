@@ -6,6 +6,7 @@ import gnusmail.core.ConfigManager;
 import javax.mail.Folder;
 
 public class Options {
+
 	private MainManager mainManager;
 	private String url;
 	private int showAttributes;
@@ -21,7 +22,8 @@ public class Options {
 	private boolean updateModelWithMail;
 	private boolean readMailsFromFileSystem;
 	private static Options instance;
-       private boolean moaTraining;
+	private boolean moaTraining;
+	private boolean studyHeaders;
 
 	public static Options getInstance() {
 		if (instance == null) {
@@ -44,7 +46,8 @@ public class Options {
 		this.extractWords = false;
 		this.updateModelWithMail = false;
 		this.readMailsFromFileSystem = false;
-	        this.moaTraining = false;
+		this.moaTraining = false;
+		studyHeaders = false;
 	}
 
 	public void run() {
@@ -84,6 +87,10 @@ public class Options {
 		}
 		if (this.extractWords) {
 			mainManager.extractFrequentWords();
+		}
+
+		if (this.studyHeaders) {
+			mainManager.studyHeaders();
 		}
 
 
@@ -130,6 +137,10 @@ public class Options {
 	public void setReadMailsFromFileSystem(boolean readMailsFromFileSystem) {
 		System.out.println("Options: Set Read Mail From FS: " + readMailsFromFileSystem);
 		this.readMailsFromFileSystem = readMailsFromFileSystem;
+	}
+
+	public void setStudyHeaders(boolean studyHeaders) {
+		this.studyHeaders = studyHeaders;
 	}
 
 	public void setURL(String arg) {

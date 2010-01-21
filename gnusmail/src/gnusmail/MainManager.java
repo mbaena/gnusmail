@@ -4,6 +4,14 @@ import gnusmail.core.ConfigManager;
 import gnusmail.core.WordsStore;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -211,7 +219,45 @@ public class MainManager {
 
 	public void evaluateWithMOA() {
 		System.out.println("Evaluate with moa");
-		filterManager.saveAttributesForInitialModel(connection, 100, 1);		
-		classifierManager.EvaluatePrecuential(connection, 4);
+		filterManager.saveAttributesForInitialModel(connection, 100, 1);
+		classifierManager.EvaluatePrecuential(connection, 1000);
+	}
+
+	void studyHeaders() {
+		Map<String, Map<String, Integer>> headers = new TreeMap<String, Map<String, Integer>>();
+		MessageReader reader = new MessageReaderFactory().createReader(connection, 1000);
+		List<Double> tasas = new ArrayList<Double>();
+		System.out.println("Analizando correos...");
+		int num = 0;
+		for (Message msg : reader) {
+			num++;
+			try {
+				Enumeration enumer = msg.getAllHeaders();
+				while (enumer.hasMoreElements()) {
+					Header h = (Header) enumer.nextElement();
+					String name = h.getName();
+					String value = h.getValue();
+					if (!headers.containsKey(name)) {
+						headers.put(name, new TreeMap<String, Integer>());
+					}
+					if (!headers.get(name).containsKey(value)) {
+						headers.get(name).put(value, 0);
+					}
+					headers.get(name).put(value, 1 + headers.get(name).get(value));
+				}
+			} catch (MessagingException ex) {
+				Logger.getLogger(MainManager.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		for (String name : headers.keySet()) {
+			Map<String, Integer> mapa = headers.get(name);
+			if (mapa.size() > 0) System.out.println(name + ":");
+			for (String value : mapa.keySet()) {
+
+				if (mapa.get(value) > 10) {
+					System.out.println("\t" + value + " -> " + mapa.get(value));
+				}
+			}
+		}
 	}
 }
