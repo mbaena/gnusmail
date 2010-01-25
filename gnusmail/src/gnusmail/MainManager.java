@@ -217,10 +217,10 @@ public class MainManager {
 		}
 	}
 
-	public void evaluateWithMOA() {
+	public void evaluateWithMOA(String moaClassifier) {
 		System.out.println("Evaluate with moa");
 		filterManager.saveAttributesForInitialModel(connection, 100, 1);
-		classifierManager.EvaluatePrecuential(connection, 1000);
+		classifierManager.EvaluatePrecuential(connection, 1000, moaClassifier);
 	}
 
 	void studyHeaders() {

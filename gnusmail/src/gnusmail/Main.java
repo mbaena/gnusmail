@@ -12,6 +12,7 @@ public class Main {
 		longopts[0] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
 		longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
+		longopts[2] = new LongOpt("moa-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 243);
 		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgikzmn::r::p::a::c:::l::w::hx", longopts);
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
@@ -25,12 +26,15 @@ public class Main {
 		while (c != -1) {
 			switch (c) {
 				case 0:
+					System.out.println("sb: " + sb);
 					char car = (char) (new Integer(sb.toString())).intValue();
 					if (arg != null) {
 						if (car == 'c') {
 							options.setURL(arg);
 						} else if (car == 'a') {
 							options.setShowAttributes(Integer.parseInt(arg));
+						} else if (car == 243) {
+							options.setMoaClassifier(arg);
 						}
 					} else {
 						System.out.println("Invalid option" +
@@ -101,9 +105,9 @@ public class Main {
 			} //switch
 			c = getopt.getopt();
 			arg = getopt.getOptarg();
-			System.out.println("Running options...");
-			options.run();
 		}//while
+		System.out.println("Running options...");
+		options.run();
 		System.out.println("End of execution");
 	}
 
