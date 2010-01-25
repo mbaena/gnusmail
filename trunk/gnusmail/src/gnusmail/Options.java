@@ -24,6 +24,7 @@ public class Options {
 	private static Options instance;
 	private boolean moaTraining;
 	private boolean studyHeaders;
+	private String moaClassifier;
 
 	public static Options getInstance() {
 		if (instance == null) {
@@ -73,7 +74,7 @@ public class Options {
 		}
 
 		if (this.moaTraining) {
-			mainManager.evaluateWithMOA();
+			mainManager.evaluateWithMOA(moaClassifier);
 		}
 
 		if (this.listFolders) {
@@ -135,7 +136,8 @@ public class Options {
 	}
 
 	public void setReadMailsFromFileSystem(boolean readMailsFromFileSystem) {
-		System.out.println("Options: Set Read Mail From FS: " + readMailsFromFileSystem);
+		System.out.println("Options: Set Read Mail From FS: "
+				+ readMailsFromFileSystem);
 		this.readMailsFromFileSystem = readMailsFromFileSystem;
 	}
 
@@ -199,5 +201,9 @@ public class Options {
 
 	public void setUpdateModelWithMail() {
 		this.updateModelWithMail = true;
+	}
+
+	public void setMoaClassifier(String arg) {
+		this.moaClassifier = arg;
 	}
 }

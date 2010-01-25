@@ -157,7 +157,7 @@ public class ClassifierManager {
 		}
 	}
 
-	public void EvaluatePrecuential(Connection connection, int limit) {
+	public void EvaluatePrecuential(Connection connection, int limit, String moaClassifier) {
 		BufferedReader r = null;
 
 		try {
@@ -186,9 +186,12 @@ public class ClassifierManager {
 		}
 		
 		// Learner Factory 
+		if (moaClassifier==null) {
+			moaClassifier = ConfigManager.getProperty("moaClassifier");
+		}
 		ClassOption learnerOption = new  ClassOption("learner", 'l',
 				"Classifier to train.", moa.classifiers.Classifier.class, "NaiveBayes");
-		learnerOption.setValueViaCLIString(ConfigManager.getProperty("moaClassifier"));
+		learnerOption.setValueViaCLIString(moaClassifier);
 		moa.classifiers.Classifier learner = (moa.classifiers.Classifier) learnerOption.materializeObject(null, null);
 		learner.prepareForUse();
 
