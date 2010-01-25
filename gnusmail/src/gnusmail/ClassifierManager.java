@@ -30,6 +30,10 @@ import moa.core.Measurement;
 import moa.evaluation.ClassificationPerformanceEvaluator;
 import moa.evaluation.EWMAClassificationPerformanceEvaluator;
 import moa.evaluation.WindowClassificationPerformanceEvaluator;
+import moa.options.ClassOption;
+import moa.options.Option;
+import moa.options.OptionHandler;
+import moa.options.Options;
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
@@ -168,31 +172,30 @@ public class ClassifierManager {
 			e.printStackTrace();
 		}
 
-		String moaClassifierClassName = ConfigManager.getProperty("moaClassifierClassName");
-		String moaPrecuentialEvaluatorClassName = ConfigManager.getProperty("moaPrecuentialEvaluatorClassName");
-
-		moa.classifiers.Classifier learner = null;
-		ClassificationPerformanceEvaluator evaluator = null;
-		try {
-			learner = (moa.classifiers.Classifier) Class.forName(moaClassifierClassName).newInstance();
-			evaluator = (ClassificationPerformanceEvaluator) Class.forName(moaPrecuentialEvaluatorClassName).newInstance();
-			if (evaluator instanceof WindowClassificationPerformanceEvaluator) {
-				((WindowClassificationPerformanceEvaluator) evaluator).setWindowWidth(Integer.parseInt(ConfigManager.getProperty("windowWidth")));
-			}
-			if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
-				((EWMAClassificationPerformanceEvaluator) evaluator).setalpha(Double.parseDouble(ConfigManager.getProperty("alphaOption")));
-			}
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		// Evaluator Factory
+		ClassOption evaluatorOption = new  ClassOption("evaluator", 'e',
+				"Evaluator to use.", ClassificationPerformanceEvaluator.class, "WindowClassificationPerformanceEvaluator");
+		evaluatorOption.setValueViaCLIString(ConfigManager.getProperty("moaPrecuentialEvaluator"));
+		ClassificationPerformanceEvaluator evaluator = (ClassificationPerformanceEvaluator) evaluatorOption.materializeObject(null, null);
+		//evaluator.prepareForUse(); TODO (in moa)
+		if (evaluator instanceof WindowClassificationPerformanceEvaluator) {
+			((WindowClassificationPerformanceEvaluator) evaluator).setWindowWidth(Integer.parseInt(ConfigManager.getProperty("windowWidth")));
 		}
+		if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
+			((EWMAClassificationPerformanceEvaluator) evaluator).setalpha(Double.parseDouble(ConfigManager.getProperty("alphaOption")));
+		}
+		
+		// Learner Factory 
+		ClassOption learnerOption = new  ClassOption("learner", 'l',
+				"Classifier to train.", moa.classifiers.Classifier.class, "NaiveBayes");
+		learnerOption.setValueViaCLIString(ConfigManager.getProperty("moaClassifier"));
+		moa.classifiers.Classifier learner = (moa.classifiers.Classifier) learnerOption.materializeObject(null, null);
+		learner.prepareForUse();
 
+		System.out.println("\n**MOA**\nLearner: " + learner);
+		System.out.println("\nEvaluator: " + evaluator + "\n**MOA**\n");
+		
+		
 		InstancesHeader instancesHeader = new InstancesHeader(dataSet);
 		learner.setModelContext(instancesHeader);
 
