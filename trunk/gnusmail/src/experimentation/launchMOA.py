@@ -2,6 +2,7 @@
 """
 - En el directorio donde se ejecute este script, debe haber un acceso a weka (un vínculo, p.e.)
 - En ~.gnusmail debe haber un acceso, llamdo maildir, a la carpeta raiz del dataset de enron (ln -s)
+- Se supone que GNUSmailGoogle.jar esta en dist/, si no, crear vinculo o cambiar ruta (createDataSet y evaluateMOA)
 """
 
 import os
