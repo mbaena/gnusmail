@@ -111,6 +111,7 @@ public class FilterManager {
 		int messagesRetrieved = 0;
 		while (iterator.hasNext() && messagesRetrieved <= messagesToRetrieve) {
 			messagesRetrieved++;
+			System.out.println("Messages retrieved " + messagesRetrieved);
 			MessageInfo msgInfo = new MessageInfo(iterator.next());
 			try {
 				atributos = getMessageAttributes(msgInfo);
