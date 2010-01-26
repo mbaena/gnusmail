@@ -66,8 +66,11 @@ public class ClassifierManager {
 	 * the underlying model with each message
 	 */
 	public void incrementallyTrainModel(Connection connection, int limit) {
+		int seenMails = 0;
+		int goodClassifications = 0;
 		BufferedReader r = null;
 		dataSet = null;
+		List<Double> tasas = new ArrayList<Double>();
 		try {
 			//It's necessary to have a dataset.arff
 			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
@@ -88,6 +91,22 @@ public class ClassifierManager {
 					MessageInfo msgInfo = new MessageInfo(msg);
 					//if (!msg.getFolder().isOpen()) msg.getFolder().open(Folder.READ_ONLY);
 					Instance inst = filterManager.makeInstance(msgInfo, dataSet);
+					double predictedClass = model.classifyInstance(inst);
+					double trueClass = inst.classValue();
+					if (predictedClass == trueClass) {
+						goodClassifications++;
+					}
+					seenMails++;
+					double tasa = goodClassifications * 100.0 / seenMails;
+					System.out.println("Tasa de aciertos: " + tasa + "%");
+					tasas.add(tasa);
+
+					String opciones[] = model.getOptions();
+					System.out.println("Opciones");
+					for (String opcion : opciones) {
+						System.out.println(opcion);
+					}
+					System.out.println("/Opciones");
 					updateableModel.updateClassifier(inst);
 					//msg.getFolder().close(false);
 				} catch (Exception ex) {
@@ -103,6 +122,7 @@ public class ClassifierManager {
 			w.write(h.toString());
 			w.write("\n");
 			w.close();
+			imprimirTasasErrorAFichero(tasas);
 		} catch (ClassNotFoundException ex) {
 			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
@@ -132,6 +152,7 @@ public class ClassifierManager {
 			for (Enumeration instances = dataSet.enumerateInstances(); instances.hasMoreElements();) {
 				Instance instance = (Instance) instances.nextElement();
 				updateableClassifier.updateClassifier(instance);
+				String opciones[] = model.getOptions();
 			}
 			model.buildClassifier(dataSet);
 		} catch (Exception e) {
@@ -173,7 +194,7 @@ public class ClassifierManager {
 		}
 
 		// Evaluator Factory
-		ClassOption evaluatorOption = new  ClassOption("evaluator", 'e',
+		ClassOption evaluatorOption = new ClassOption("evaluator", 'e',
 				"Evaluator to use.", ClassificationPerformanceEvaluator.class, "WindowClassificationPerformanceEvaluator");
 		evaluatorOption.setValueViaCLIString(ConfigManager.getProperty("moaPrecuentialEvaluator"));
 		ClassificationPerformanceEvaluator evaluator = (ClassificationPerformanceEvaluator) evaluatorOption.materializeObject(null, null);
@@ -184,12 +205,12 @@ public class ClassifierManager {
 		if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
 			((EWMAClassificationPerformanceEvaluator) evaluator).setalpha(Double.parseDouble(ConfigManager.getProperty("alphaOption")));
 		}
-		
+
 		// Learner Factory 
-		if (moaClassifier==null) {
+		if (moaClassifier == null) {
 			moaClassifier = ConfigManager.getProperty("moaClassifier");
 		}
-		ClassOption learnerOption = new  ClassOption("learner", 'l',
+		ClassOption learnerOption = new ClassOption("learner", 'l',
 				"Classifier to train.", moa.classifiers.Classifier.class, "NaiveBayes");
 		learnerOption.setValueViaCLIString(moaClassifier);
 		moa.classifiers.Classifier learner = (moa.classifiers.Classifier) learnerOption.materializeObject(null, null);
@@ -197,14 +218,23 @@ public class ClassifierManager {
 
 		System.out.println("\n**MOA**\nLearner: " + learner);
 		System.out.println("\nEvaluator: " + evaluator + "\n**MOA**\n");
-		
-		
+
+
 		InstancesHeader instancesHeader = new InstancesHeader(dataSet);
 		learner.setModelContext(instancesHeader);
 
 		MessageReader reader = new MessageReaderFactory().createReader(connection, limit);
 		List<Double> tasas = new ArrayList<Double>();
 		System.out.println("Evaluate prec. Empieza bucle");
+
+		Measurement[] listMs = evaluator.getPerformanceMeasurements();
+		int posCorrect = 0;
+		for (int i = 0; i < listMs.length; i++) {
+			if (listMs[i].getName().contains("correct")) {
+				posCorrect = i;
+			}
+		}
+
 		for (Message msg : reader) {
 			try {
 				MessageInfo msgInfo = new MessageInfo(msg);
@@ -220,30 +250,32 @@ public class ClassifierManager {
 				int trueClass = (int) trainInst.classValue();
 				testInst.setClassMissing();
 				double[] prediction = learner.getVotesForInstance(testInst);
-				String predStr = "[";
-				for (double d : prediction) {
-					predStr += d + ",";
-				}
-				System.out.println(trueClass + " " + predStr + "]");
 				evaluator.addClassificationAttempt(trueClass, prediction, testInst.weight());
-				for (Measurement measurement : evaluator.getPerformanceMeasurements()) {
+				listMs = evaluator.getPerformanceMeasurements();
+				tasas.add(listMs[posCorrect].getValue());
+
+				for (Measurement measurement : listMs) {
 					System.out.print(measurement.getName() + ": Tasa: " + measurement.getValue() + "\t");
-					if (measurement.getName().contains("correct")) {
-						tasas.add(measurement.getValue());
-					}
 				}
+
 				System.out.println();
 				learner.trainOnInstance(trainInst);
+				int size = learner.measureByteSize();
+				System.out.println("El tamaño es " + size);
+				System.out.println(learner);
+				//We pause the execution, in order to explore the model
+
 
 				imprimirTasasErrorAFichero(tasas);
 
 
 				//msg.getFolder().close(false);
 				//	}
-				} catch (Exception ex) {
+			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+
 	}
 
 	public void trainModel() {
@@ -252,13 +284,15 @@ public class ClassifierManager {
 		CSVLoader csvdata = new CSVLoader();
 		try {
 			csvdata.setSource(new File(CSVManager.FILE_CSV));
-			dataSet = csvdata.getDataSet();
+			dataSet =
+					csvdata.getDataSet();
 			dataSet.setClass(dataSet.attribute("Folder"));
 			model.buildClassifier(dataSet);
 		} catch (Exception e) {
 			return;
 		}
-		//System.out.println(model);
+//System.out.println(model);
+
 		try {
 			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
 			ObjectOutputStream fis = new ObjectOutputStream(f);
@@ -277,36 +311,44 @@ public class ClassifierManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 	}
 
 	public void classifyMail(MimeMessage mimeMessage) throws Exception {
 		MessageInfo msg = new MessageInfo(mimeMessage);
 		Reader r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
-		dataSet = new Instances(r, 0); // Only the headers are necessary
+		dataSet =
+				new Instances(r, 0); // Only the headers are necessary
 		dataSet.setClass(dataSet.attribute("Folder"));
 		r.close();
 		Instance inst = filterManager.makeInstance(msg, dataSet);
 		Classifier model;
+
 		System.out.println(inst);
 		if (!ConfigManager.MODEL_FILE.exists()) {
 			trainModel();
 		}
+
 		FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
 		ObjectInputStream fie = new ObjectInputStream(fe);
-		model = (Classifier) fie.readObject();
+		model =
+				(Classifier) fie.readObject();
 
 		System.out.println("\nClassifying...\n");
 		double[] res = model.distributionForInstance(inst);
 		Attribute att = dataSet.attribute("Folder");
 		double biggest = 0;
 		int biggest_index = 0;
-		for (int i = 0; i < res.length; i++) {
+		for (int i = 0; i <
+				res.length; i++) {
 			System.out.println("\nDestination folder will be " + att.value(i) +
 					" with probability: " + res[i]);
 			if (res[i] > biggest) {
 				biggest_index = i;
-				biggest = res[i];
+				biggest =
+						res[i];
 			}
+
 		}
 		System.out.println("------------------------------");
 		System.out.println("\nThe most probable folder is: " + att.value(biggest_index));
@@ -317,15 +359,19 @@ public class ClassifierManager {
 		try {
 			MessageInfo msg = new MessageInfo(mimeMessage);
 			System.out.println("Updating model with message, which folder is " + msg.getFolderAsString());
-			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
-			dataSet = new Instances(r, 0); // Only the headers are necessary
+			r =
+					new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
+			dataSet =
+					new Instances(r, 0); // Only the headers are necessary
 			dataSet.setClass(dataSet.attribute("Folder"));
 			r.close();
 			Instance inst = filterManager.makeInstance(msg, dataSet);
 			Classifier model;
+
 			FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
 			ObjectInputStream fie = new ObjectInputStream(fe);
-			model = (Classifier) fie.readObject();
+			model =
+					(Classifier) fie.readObject();
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
 			updateableModel.updateClassifier(inst);
 			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
@@ -342,6 +388,7 @@ public class ClassifierManager {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+
 	}
 
 	private void imprimirTasasErrorAFichero(List<Double> tasas) {
@@ -352,7 +399,8 @@ public class ClassifierManager {
 			for (double d : tasas) {
 				out.write(d + "\n");
 			}
-			//Close the output stream
+//Close the output stream
+
 			out.close();
 		} catch (Exception e) {//Catch exception if any
 			System.err.println("No se pueden imprimir tasas");

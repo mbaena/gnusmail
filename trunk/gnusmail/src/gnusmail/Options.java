@@ -25,6 +25,7 @@ public class Options {
 	private boolean moaTraining;
 	private boolean studyHeaders;
 	private String moaClassifier;
+	private boolean incrementallyTraining;
 
 	public static Options getInstance() {
 		if (instance == null) {
@@ -48,6 +49,7 @@ public class Options {
 		this.updateModelWithMail = false;
 		this.readMailsFromFileSystem = false;
 		this.moaTraining = false;
+		this.incrementallyTraining = false;
 		studyHeaders = false;
 	}
 
@@ -70,7 +72,11 @@ public class Options {
 			mainManager.extractAttributes();
 		}
 		if (this.modelTraining) {
-			mainManager.trainModel();
+			if (this.incrementallyTraining) {
+				mainManager.incrementallyTrainModel();
+			} else {
+				mainManager.trainModel();
+			}
 		}
 
 		if (this.moaTraining) {
@@ -129,6 +135,14 @@ public class Options {
 		}
 		mainManager.close();
 
+	}
+
+	public boolean isIncrementallyTraining() {
+		return incrementallyTraining;
+	}
+
+	public void setIncrementallyTraining(boolean incrementallyTraining) {
+		this.incrementallyTraining = incrementallyTraining;
 	}
 
 	public boolean isReadMailsFromFileSystem() {

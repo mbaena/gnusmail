@@ -132,7 +132,7 @@ public class MainManager {
 	public void extractAttributes() {
 		System.out.println("Mainmanager.extract attributes");
 		try {
-			filterManager.extractAttributes(connection, 1);
+			filterManager.extractAttributes(connection, 500);
 			filterManager.writeToFile();
 		} catch (Exception e1) {
 			filterManager.writeToFile();
@@ -155,7 +155,7 @@ public class MainManager {
 	 */
 	private void initiallyTrainModel() {
 		System.out.println("TrainModel (init)");
-		filterManager.saveAttributesForInitialModel(connection, 5, 100);
+		filterManager.saveAttributesForInitialModel(connection, 5, 1000);
 		classifierManager.trainModel();
 
 	}
@@ -166,10 +166,13 @@ public class MainManager {
 	 * using each message to update the model
 	 */
 	public void trainModel() {
-		System.out.println("TrainModel ");
-		//initiallyTrainModel();
 		classifierManager.trainModel();
-		//classifierManager.incrementallyTrainModelFromMailServer(connection, 1000);
+	}
+
+	public void incrementallyTrainModel() {
+		initiallyTrainModel();
+		classifierManager.incrementallyTrainModel(null, 1000);
+		System.out.println("Fin");
 	}
 
 	public void trainModelFromFile() {

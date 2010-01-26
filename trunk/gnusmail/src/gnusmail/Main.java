@@ -77,7 +77,8 @@ public class Main {
 					printMenu();
 					return;
 				case 'i':
-					options.setMailClassification(true);
+					//options.setMailClassification(true);
+					options.setIncrementallyTraining(true);
 					break;
 				case 'k':
 					options.setUpdateModelWithMail();
@@ -88,15 +89,15 @@ public class Main {
 				case 'm':
 					options.setMoaTraining(true);
 					break;					
+				case 'n':
+					options.setStudyHeaders(true);
+					break;
 				case 'r':
 					options.setOpenMail(Integer.parseInt(arg));
 					break;
 				case 'z':
 					options.setReadMailsFromFileSystem(true);
 					System.out.println("Mails will be read from filesystem...");
-					break;
-				case 'n':
-					options.setStudyHeaders(true);
 					break;
 				case '?':
 					System.out.println("Invalid option" +
