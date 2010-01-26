@@ -4,6 +4,8 @@ import gnusmail.Languages.Language;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class tokenizes an email, taking into account different separator symbols
@@ -15,9 +17,11 @@ public class EmailTokenizer {
 	List<Token> tokens;
 	Language lang = null;
 	public final static String tokenPattern = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’\\#";
+	//public final static String alphabPattern = "[a-zA-Z]";
+	public final static String alphabPattern = "\\w";
 
 	public EmailTokenizer(String emailBody) {
-		this.body = emailBody;
+		this.body = emailBody.toLowerCase();
 		tokens = new LinkedList<Token>();
 	}
 
@@ -28,15 +32,19 @@ public class EmailTokenizer {
 	}
 
 	public List<Token> tokenize() {
-		int limit = 1000;
+		Pattern patAlph = Pattern.compile(alphabPattern);
+		Matcher m = null;
+		//int limit = 1000;
 		if (body != null) {
 			StringTokenizer st = new StringTokenizer(body, tokenPattern);
-			while (st.hasMoreElements() && tokens.size() < limit) {
+			while (st.hasMoreElements()) {
 				Token token = new Token(st.nextToken());
 				if (lang != null) {
 					token.setLanguage(lang);
 				}
-				if (token.originalForm.length() > 0) {
+				m = patAlph.matcher(token.getLowerCaseForm());
+				boolean isOK = m.find();
+				if (token.originalForm.length() > 0 && isOK) {
 					tokens.add(token);
 				}
 			}

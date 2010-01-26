@@ -25,7 +25,8 @@ public class LanguageDetection {
 	 * @return
 	 */
 	public Language detectLanguage(String string) {
-		Language langToReturn = null;
+		/*Language langToReturn = null;
+
 		if (frequentWordsByLanguage == null) {
 			fillFrequentWordsList();
 		}
@@ -46,7 +47,8 @@ public class LanguageDetection {
 		if (langToReturn == null) {
 			langToReturn = DEFAULT_LANGUAGE;
 		}
-		return langToReturn;
+		return langToReturn;*/
+		return Language.ENGLISH;
 	}
 
 	private void fillFrequentWordsList() {
