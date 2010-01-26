@@ -114,6 +114,7 @@ public class WordFrequency extends Filter {
                 //Read File Line By Line
                 while ((strLine = br.readLine()) != null) {
                     // Print the content on the console
+					if (strLine.length() > 2) //We only use words with 3 or more letters
                     res.add(strLine);
                 }
                 //Close the input stream
