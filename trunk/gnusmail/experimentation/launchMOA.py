@@ -5,7 +5,12 @@
 - Se supone que GNUSmailGoogle.jar esta en dist/, si no, crear vinculo o cambiar ruta (createDataSet y evaluateMOA)
 """
 
-import os
+import os.path
+
+_GNUSMAIL_PATH="dist"
+_GNUSMAIL_JAR=os.path.join(_GNUSMAIL_PATH, "gnusmail.jar")
+_WEKA_JAR=os.path.join(_GNUSMAIL_PATH, "lib", "weka.jar")
+_SIZEOFAG_JAR=os.path.join(_GNUSMAIL_PATH, "lib", "sizeofag.jar")
 
 graficas = []
 
@@ -19,8 +24,8 @@ rm ~/.gnusmail/maildirln ; ln -s ~/.gnusmail/maildir/%s ~/.gnusmail/maildirln
 def createFilteringString(selector, nwords,author):
         output = "dataset" + selector + author + str(nwords) + ".arff"
         return """
-java -cp weka.jar weka.filters.supervised.attribute.AttributeSelection -E \"weka.attributeSelection.%s \" -S "weka.attributeSelection.Ranker -T -3.0E-4 -N %s" -c \"first" -i ~/.gnusmail/dataset.arff -o %s
-        """ % (selector, nwords, output), output
+java -cp %s weka.filters.supervised.attribute.AttributeSelection -E \"weka.attributeSelection.%s \" -S "weka.attributeSelection.Ranker -T -3.0E-4 -N %s" -c \"first" -i ~/.gnusmail/dataset.arff -o %s
+        """ % (_WEKA_JAR, selector, nwords, output), output
 
 def executeOrder(order):
         os.system(order)
@@ -48,8 +53,8 @@ def createDataSet(author):
 	os.system('rm ~/.gnusmail/atributos.csv')
 	os.system('rm ~/.gnusmail/dataset.arff')
 	os.system('rm ~/.gnusmail/model.bin')
-	os.system('java -jar -Xmx5G dist/GNUSMailGoogle.jar -z -b')
-	os.system('java -jar -Xmx5G dist/GNUSMailGoogle.jar -z -e')
+	os.system('java -jar -Xmx5G %s -z -b' % (_GNUSMAIL_JAR))
+	os.system('java -jar -Xmx5G %s -z -e' % (_GNUSMAIL_JAR))
 
 
 def createWordlists(author):
@@ -67,19 +72,20 @@ def createWordlists(author):
 def evaluateMOA(author,numWords,selector, alg):
 	global graficas
 	wordsFile = 'dataset' + selector + author + str(numWords) + '.list'
+	newTasas = 'tasas' + author + alg.replace(" ","").replace("(","").replace(")","")
 	order = """
 cp %s ~/.gnusmail/wordlist.data
 	""" % (wordsFile)
 	os.system(order)
 	createDataSet(author)
-	print('java -javaagent:lib/sizeofag.jar -jar -Xmx5G dist/GNUSMailGoogle.jar -z -m --moa-classifier="%s"' % (alg)) #moaClassifier
-	os.system('java -javaagent:lib/sizeofag.jar -jar -Xmx5G dist/GNUSMailGoogle.jar -z -m --moa-classifier="%s"' % (alg)) #moaClassifier
-	newTasas = 'tasas' + author + alg.replace(" ","").replace("(","").replace(")","")
+	print('java -javaagent:%s -jar -Xmx5G %s -z -m --moa-classifier="%s"' % (_SIZEOFAG_JAR, _GNUSMAIL_JAR, alg)) #moaClassifier
+	os.system('java -javaagent:%s -jar -Xmx5G %s -z -m --moa-classifier="%s"' % (_SIZEOFAG_JAR, _GNUSMAIL_JAR, alg)) #moaClassifier
 	order = """
-mv tases %s
-	""" % (newTasas)
+		mv tases %s
+		""" % (newTasas)
 	graficas.append(newTasas)
 	os.system(order)
+
 
 def getAuthors():
 	return ['kitchen-l', 'lokay-m','sanders-r','beck-s','williams-w3', 'farmer-d', 'kaminski-v']
@@ -116,6 +122,7 @@ for author in getAuthors():
 		for method in getAvailableSelectors():
 			for alg in getMoaAlgorithms():
 				evaluateMOA(author,numWords,method, alg)
-	
 	imprimirgraficas(graficas, author)
 	graficas = []
+
+
