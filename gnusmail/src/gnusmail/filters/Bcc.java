@@ -20,7 +20,9 @@ public final class Bcc extends Filter {
 	public String applyTo(MessageInfo mess){
 		//String res = csvmng.getValue(this.getNombreFiltro(), mess);
 		try {
-			return mess.getBcc();
+			String bcc = mess.getBcc();
+			if (bcc == "") bcc = "None";
+			return bcc;
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
