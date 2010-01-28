@@ -171,7 +171,8 @@ public class MainManager {
 
 	public void incrementallyTrainModel() {
 		initiallyTrainModel();
-		classifierManager.incrementallyTrainModel(null, 1000);
+		MessageReader reader = new MessageReaderFactory().createReader(connection, 1000);	
+		classifierManager.incrementallyTrainModel(reader);
 		System.out.println("Fin");
 	}
 
@@ -223,7 +224,8 @@ public class MainManager {
 	public void evaluateWithMOA(String moaClassifier) {
 		System.out.println("Evaluate with moa");
 		filterManager.saveAttributesForInitialModel(connection, 100, 1);
-		classifierManager.EvaluatePrecuential(connection, 1000, moaClassifier);
+		MessageReader reader = new MessageReaderFactory().createReader(connection, 1000);
+		classifierManager.EvaluatePrecuential(reader, moaClassifier);
 	}
 
 	void studyHeaders() {
