@@ -21,39 +21,42 @@ public class MainManager {
 	private Connection connection;
 	private ClassifierManager classifierManager;
 	private FilterManager filterManager;
-	private String url;
 	private boolean readMailsFromFile = false;
+	private String maildir;
 
-	public MainManager(String url) {
-		if (!Options.getInstance().isReadMailsFromFileSystem()) {
-			try {
-				connect(url);
-			} catch (MessagingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+	public MainManager() {
 		classifierManager = new ClassifierManager();
-		filterManager = new FilterManager();
+		filterManager = new FilterManager();		
+	}
+	
+	public MainManager(String url) {
+		this();
+		try {
+			connect(url);
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public boolean isReadMailsFromFile() {
 		return readMailsFromFile;
 	}
 
-	public void setReadMailsFromFile(boolean readMailsFromFile) {
+	public void setReadMailsFromFile(String maildir) {
 		System.out.println("Main Manager: set read mail from file " + readMailsFromFile);
-		this.readMailsFromFile = readMailsFromFile;
+		this.readMailsFromFile = true;
+		if (maildir == null) {
+			this.maildir = ConfigManager.MAILDIR.getAbsolutePath();
+		} else {
+			this.maildir = maildir;
+		}
 	}
 
-	public MainManager() {
-		this(null);
-	}
 
 	/** Connects to URL
 	 * @throws Exception */
 	private void connect(String url) throws MessagingException {
-		this.url = url;
 		if (url != null) {
 			try {
 				connection = new Connection(url);
@@ -171,7 +174,7 @@ public class MainManager {
 
 	public void incrementallyTrainModel() {
 		initiallyTrainModel();
-		MessageReader reader = new MessageReaderFactory().createReader(connection, 1000);	
+		MessageReader reader = getMessageReader();	
 		classifierManager.incrementallyTrainModel(reader);
 		System.out.println("Fin");
 	}
@@ -222,15 +225,25 @@ public class MainManager {
 	}
 
 	public void evaluateWithMOA(String moaClassifier) {
-		System.out.println("Evaluate with moa");
+		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Evaluate with moa");
+		MessageReader reader = getMessageReader();
 		filterManager.saveAttributesForInitialModel(connection, 100, 1);
-		MessageReader reader = new MessageReaderFactory().createReader(connection, 1000);
 		classifierManager.EvaluatePrecuential(reader, moaClassifier);
+	}
+
+	private MessageReader getMessageReader() {
+		MessageReader reader = null;
+		if (readMailsFromFile) {
+			reader = MessageReaderFactory.createReader(this.maildir);
+		} else {
+			reader = MessageReaderFactory.createReader(connection, 1000);
+		}
+		return reader;
 	}
 
 	void studyHeaders() {
 		Map<String, Map<String, Integer>> headers = new TreeMap<String, Map<String, Integer>>();
-		MessageReader reader = new MessageReaderFactory().createReader(connection, 1000);
+		MessageReader reader = getMessageReader();
 		List<Double> tasas = new ArrayList<Double>();
 		System.out.println("Analizando correos...");
 		int num = 0;
