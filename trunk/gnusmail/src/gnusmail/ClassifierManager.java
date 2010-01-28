@@ -273,17 +273,11 @@ public class ClassifierManager {
 				//String aux = br.readLine();
 				printRateToFile(tasas);
 
-<<<<<<< .mine
-
-=======
->>>>>>> .r134
-				//msg.getFolder().close(false);
-				//	}
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		imprimirTasasErrorAFichero(tasas);
+		//prin(tasas);
 	}
 
 	public void trainModel() {
