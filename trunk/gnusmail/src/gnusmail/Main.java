@@ -7,13 +7,13 @@ import gnusmail.core.ConfigManager;
 public class Main {
 
 	public static void main(String argv[]) throws Exception {
-		LongOpt[] longopts = new LongOpt[3];
+		LongOpt[] longopts = new LongOpt[4];
 		StringBuffer sb = new StringBuffer();
 		longopts[0] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
 		longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
-		longopts[2] = new LongOpt("moa-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 243);
-		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgikzmn::r::p::a::c:::l::w::hx", longopts);
+		longopts[3] = new LongOpt("moa-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 243);
+		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgikz::mn::r::p::a::c:::l::w::hx", longopts);
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
 		System.out.println("WELCOME TO GENUSMAIL!!!");
@@ -96,7 +96,7 @@ public class Main {
 					options.setOpenMail(Integer.parseInt(arg));
 					break;
 				case 'z':
-					options.setReadMailsFromFileSystem(true);
+					options.setReadMailsFromFileSystem(arg);
 					System.out.println("Mails will be read from filesystem...");
 					break;
 				case '?':

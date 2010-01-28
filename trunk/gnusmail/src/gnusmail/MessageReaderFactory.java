@@ -9,13 +9,12 @@ import gnusmail.filesystem.MessageFromFileReader;
  * @author jmcarmona
  */
 public class MessageReaderFactory {
-	public MessageReader createReader(Connection connection, int limit) {
-		boolean readFromFS = Options.getInstance().isReadMailsFromFileSystem();
-		if (!readFromFS) {
-			return new MessageReader(connection, limit);
-		} else {
-			return new MessageFromFileReader(ConfigManager.MAILDIR.getAbsolutePath());
-		}
+	public static MessageReader createReader(Connection connection, int limit) {
+		return new MessageReader(connection, limit);
 	}
 
+	public static MessageReader createReader(String maildir) {
+		return new MessageFromFileReader(maildir);
+	}
+	
 }

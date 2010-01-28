@@ -21,6 +21,7 @@ public class Options {
 	private boolean extractWords;
 	private boolean updateModelWithMail;
 	private boolean readMailsFromFileSystem;
+	private String maildir;
 	private static Options instance;
 	private boolean moaTraining;
 	private boolean studyHeaders;
@@ -46,8 +47,8 @@ public class Options {
 		this.mailClassification = false;
 		this.openMail = -1;
 		this.extractWords = false;
+		this.readMailsFromFileSystem=false;
 		this.updateModelWithMail = false;
-		this.readMailsFromFileSystem = false;
 		this.moaTraining = false;
 		this.incrementallyTraining = false;
 		studyHeaders = false;
@@ -55,7 +56,7 @@ public class Options {
 
 	public void run() {
 		System.out.println("Read Mails from file system: " + readMailsFromFileSystem);
-		if (url != null && !Options.getInstance().isReadMailsFromFileSystem()) {
+		if (!readMailsFromFileSystem) {
 			System.out.println("Case 1");
 			mainManager = new MainManager(url);
 		} else {
@@ -63,7 +64,7 @@ public class Options {
 			mainManager = new MainManager();
 		}
 		if (this.readMailsFromFileSystem) {
-			mainManager.setReadMailsFromFile(true);
+			mainManager.setReadMailsFromFile(this.maildir);
 		}
 		if (this.showAttributes >= 0) {
 			mainManager.showAttibutes(this.showAttributes);
@@ -145,14 +146,11 @@ public class Options {
 		this.incrementallyTraining = incrementallyTraining;
 	}
 
-	public boolean isReadMailsFromFileSystem() {
-		return readMailsFromFileSystem;
-	}
-
-	public void setReadMailsFromFileSystem(boolean readMailsFromFileSystem) {
+	public void setReadMailsFromFileSystem(String maildir) {
 		System.out.println("Options: Set Read Mail From FS: "
 				+ readMailsFromFileSystem);
-		this.readMailsFromFileSystem = readMailsFromFileSystem;
+		this.readMailsFromFileSystem = true;
+		this.maildir = maildir;
 	}
 
 	public void setStudyHeaders(boolean studyHeaders) {
