@@ -51,7 +51,7 @@ public class ClassifierManager {
 	static Instances dataSet;
 	static CSVManager csvmanager;
 	private FilterManager filterManager;
-
+	
 	public ClassifierManager() {
 		try {
 			csvmanager = new CSVManager();
@@ -61,11 +61,12 @@ public class ClassifierManager {
 		filterManager = new FilterManager();
 	}
 
+
 	/**
 	 * This method reads the messages in chronological order, and updates
 	 * the underlying model with each message
 	 */
-	public void incrementallyTrainModel(Connection connection, int limit) {
+	public void incrementallyTrainModel(MessageReader reader) {
 		int seenMails = 0;
 		int goodClassifications = 0;
 		BufferedReader r = null;
@@ -85,7 +86,6 @@ public class ClassifierManager {
 			} catch (FileNotFoundException e) {
 			}
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
-			MessageReader reader = new MessageReaderFactory().createReader(connection, limit);
 			for (Message msg : reader) {
 				try {
 					MessageInfo msgInfo = new MessageInfo(msg);
@@ -178,7 +178,7 @@ public class ClassifierManager {
 		}
 	}
 
-	public void EvaluatePrecuential(Connection connection, int limit, String moaClassifier) {
+	public void EvaluatePrecuential(MessageReader reader, String moaClassifier) {
 		BufferedReader r = null;
 
 		try {
@@ -223,7 +223,6 @@ public class ClassifierManager {
 		InstancesHeader instancesHeader = new InstancesHeader(dataSet);
 		learner.setModelContext(instancesHeader);
 
-		MessageReader reader = new MessageReaderFactory().createReader(connection, limit);
 		List<Double> tasas = new ArrayList<Double>();
 		System.out.println("Evaluate prec. Empieza bucle");
 
@@ -265,17 +264,13 @@ public class ClassifierManager {
 				System.out.println(learner);
 				//We pause the execution, in order to explore the model
 
-
-				imprimirTasasErrorAFichero(tasas);
-
-
 				//msg.getFolder().close(false);
 				//	}
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-
+		imprimirTasasErrorAFichero(tasas);
 	}
 
 	public void trainModel() {
