@@ -27,6 +27,7 @@ public class Options {
 	private boolean studyHeaders;
 	private String moaClassifier;
 	private boolean incrementallyTraining;
+	private String tasasFileName;
 
 	public static Options getInstance() {
 		if (instance == null) {
@@ -57,10 +58,8 @@ public class Options {
 	public void run() {
 		System.out.println("Read Mails from file system: " + readMailsFromFileSystem);
 		if (!readMailsFromFileSystem) {
-			System.out.println("Case 1");
 			mainManager = new MainManager(url);
 		} else {
-			System.out.println("Case 2");
 			mainManager = new MainManager();
 		}
 		if (this.readMailsFromFileSystem) {
@@ -71,6 +70,9 @@ public class Options {
 		}
 		if (this.attributeExtraction) {
 			mainManager.extractAttributes();
+		}
+		if (this.tasasFileName!=null) {
+			mainManager.setTasasFileName(tasasFileName);
 		}
 		if (this.modelTraining) {
 			if (this.incrementallyTraining) {
@@ -167,6 +169,10 @@ public class Options {
 
 	public void setAttributeExtraction(boolean b) {
 		this.attributeExtraction = b;
+	}
+	
+	public void setTasasFileName(String tasasFileName) {
+		this.tasasFileName = tasasFileName;
 	}
 
 	public void setMoaTraining(boolean b) {

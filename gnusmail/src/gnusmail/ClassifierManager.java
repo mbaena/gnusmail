@@ -32,6 +32,9 @@ import moa.evaluation.ClassificationPerformanceEvaluator;
 import moa.evaluation.EWMAClassificationPerformanceEvaluator;
 import moa.evaluation.WindowClassificationPerformanceEvaluator;
 import moa.options.ClassOption;
+import moa.options.Option;
+import moa.options.OptionHandler;
+import moa.options.Options;
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
@@ -63,8 +66,9 @@ public class ClassifierManager {
 	/**
 	 * This method reads the messages in chronological order, and updates
 	 * the underlying model with each message
+	 * @return 
 	 */
-	public void incrementallyTrainModel(MessageReader reader) {
+	public List<Double> incrementallyTrainModel(MessageReader reader) {
 		int seenMails = 0;
 		int goodClassifications = 0;
 		BufferedReader r = null;
@@ -114,7 +118,6 @@ public class ClassifierManager {
 			w.write(h.toString());
 			w.write("\n");
 			w.close();
-			printRateToFile(rates);
 		} catch (ClassNotFoundException ex) {
 			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
@@ -126,7 +129,7 @@ public class ClassifierManager {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-
+		return rates;
 	}
 
 	/**
@@ -170,7 +173,7 @@ public class ClassifierManager {
 		}
 	}
 
-	public void EvaluatePrecuential(MessageReader reader, String moaClassifier) {
+	public List<Double> evaluatePrecuential(MessageReader reader, String moaClassifier) {
 		BufferedReader r = null;
 
 		try {
@@ -271,13 +274,14 @@ public class ClassifierManager {
 				System.out.println("Press a key to continue..."); //We want to see the model
 				//BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 				//String aux = br.readLine();
-				printRateToFile(tasas);
 
+				//msg.getFolder().close(false);
+				//	}
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		//prin(tasas);
+		return tasas;
 	}
 
 	public void trainModel() {
@@ -393,20 +397,5 @@ public class ClassifierManager {
 
 	}
 
-	private void printRateToFile(List<Double> tasas) {
-		try {
-			// Create file
-			FileWriter fstream = new FileWriter("tases");
-			BufferedWriter out = new BufferedWriter(fstream);
-			for (double d : tasas) {
-				out.write(d + "\n");
-			}
-//Close the output stream
-
-			out.close();
-		} catch (Exception e) {//Catch exception if any
-			System.err.println("No se pueden imprimir tasas");
-		}
-	}
 }
 

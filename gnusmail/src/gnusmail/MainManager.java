@@ -4,6 +4,9 @@ import gnusmail.core.ConfigManager;
 import gnusmail.core.WordsStore;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -23,6 +26,7 @@ public class MainManager {
 	private FilterManager filterManager;
 	private boolean readMailsFromFile = false;
 	private String maildir;
+	private String tasasFileName = "tasas";
 
 	public MainManager() {
 		classifierManager = new ClassifierManager();
@@ -135,7 +139,7 @@ public class MainManager {
 	public void extractAttributes() {
 		System.out.println("Mainmanager.extract attributes");
 		try {
-			filterManager.extractAttributes(connection, 500);
+			filterManager.extractAttributes(getMessageReader());
 			filterManager.writeToFile();
 		} catch (Exception e1) {
 			filterManager.writeToFile();
@@ -148,7 +152,7 @@ public class MainManager {
 	public void extractFrequentWords() {
 		System.out.println("Mainmanager.extract frequent words");
 		WordsStore wordStore = new WordsStore();
-		wordStore.readWordsList(connection);
+		wordStore.readWordsList(getMessageReader());
 	}
 
 	/**
@@ -175,7 +179,8 @@ public class MainManager {
 	public void incrementallyTrainModel() {
 		initiallyTrainModel();
 		MessageReader reader = getMessageReader();	
-		classifierManager.incrementallyTrainModel(reader);
+		List<Double> rates = classifierManager.incrementallyTrainModel(reader);
+		printRateToFile(rates, tasasFileName);
 		System.out.println("Fin");
 	}
 
@@ -228,15 +233,32 @@ public class MainManager {
 		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Evaluate with moa");
 		MessageReader reader = getMessageReader();
 		filterManager.saveAttributesForInitialModel(connection, 100, 1);
-		classifierManager.EvaluatePrecuential(reader, moaClassifier);
+		List<Double> rates = classifierManager.evaluatePrecuential(reader, moaClassifier);
+		printRateToFile(rates, tasasFileName);
 	}
 
+	private static void printRateToFile(List<Double> rates, String fileName) {
+		try {
+			// Create file
+			FileWriter fstream = new FileWriter(fileName);
+			BufferedWriter out = new BufferedWriter(fstream);
+			for (double d : rates) {
+				out.write(d + "\n");
+			}
+//Close the output stream
+
+			out.close();
+		} catch (Exception e) {//Catch exception if any
+			System.err.println("No se pueden imprimir tasas");
+		}
+	}
+	
 	private MessageReader getMessageReader() {
 		MessageReader reader = null;
 		if (readMailsFromFile) {
 			reader = MessageReaderFactory.createReader(this.maildir);
 		} else {
-			reader = MessageReaderFactory.createReader(connection, 1000);
+			reader = MessageReaderFactory.createReader(connection, 2);
 		}
 		return reader;
 	}
@@ -277,5 +299,9 @@ public class MainManager {
 				}
 			}
 		}
+	}
+
+	public void setTasasFileName(String tasasFileName) {
+		this.tasasFileName = tasasFileName;
 	}
 }

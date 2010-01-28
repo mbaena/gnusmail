@@ -1,6 +1,7 @@
 package gnusmail.core;
 
 import gnusmail.Languages.Language;
+import gnusmail.MessageReader;
 import gnusmail.Options;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
@@ -200,82 +201,37 @@ public class WordsStore {
 		}
 	}
 
-	public void readWordsList(Connection myConnection) {
-		if (Options.getInstance().isReadMailsFromFileSystem()) {
-			readWordsListFromFS();
-		} else {
-			readWordsListFromConnection(myConnection);
-		}
-	}
-
-	public void readWordsListFromConnection(Connection myConnection) {
-		Folder[] folders;
-		try {
-			folders = myConnection.getFolders();
-
-			for (int i = 0; i < folders.length; i++) {
-				if (!folders[i].getFullName().contains(".Sent")) {
-					readWordsListForIMAPFolder(folders[i]);
-				}
+	public void readWordsList(MessageReader reader) {
+		int numberOfMessages = 0;
+		Map<String, Integer> folderMap = new TreeMap<String, Integer>(); 
+		for (Message msg: reader) {
+			if (numberOfMessages == MAX_MESSAGES_PER_FOLDER) break;
+			MessageInfo msgInfo = new MessageInfo(msg);
+			String folder = msgInfo.getFolderAsString();
+			System.out.println("Folder : " + folder);
+			Date d = new Date();
+			addTokenizedString(msgInfo, folder);
+			Date d2 = new Date();
+			numberOfMessages++;
+			if (numberOfMessages % 10 == 0) {
+				System.out.println(msgInfo.getFolderAsString() + " Number of messages " + numberOfMessages);
+				System.out.println("Dura " + (d2.getTime() - d.getTime()));
 			}
-			writeToFile();
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			System.out.println();
-			e.printStackTrace();
-		}
-	}
-
-	public void readWordsListForIMAPFolder(Folder folder) {
-		if (folder != null) {
 			try {
-				if (!folder.isOpen()) {
-					folder.open(javax.mail.Folder.READ_WRITE);
-				}
-				List<MessageInfo> lastMessagesInFolder = createLastMessagesList(folder, MAX_MESSAGES_PER_FOLDER);
-				for (MessageInfo msj : lastMessagesInFolder) {
-					addTokenizedString(msj, folder.getName());
-				}//for
-				termFrequencyManager.updateWordCountPorFolder(folder.getName());
-				termFrequencyManager.setNumberOfDocumentsByFolder(folder.getName(), lastMessagesInFolder.size());
-				if (folder.isOpen()) {
-					folder.close(false); //Cerramos el buzon
-				}
-			} catch (MessagingException e) {
-				e.printStackTrace();
+				folderMap.put(folder, folderMap.get(folder)+1);
+			} catch (NullPointerException e) {
+				folderMap.put(folder, 1);
 			}
-		}//if
-	}
-
-	private void readWordsListFromFS() {
-		System.out.println("Read words list from FS");
-		FSFoldersReader fReader = new FSFoldersReader(ConfigManager.MAILDIR.getAbsolutePath());
-		for (File folder : fReader) {
-			System.out.println("Read words list from fs: " + folder.getAbsolutePath());
-			readWordsListFromFSFolder(folder);
 		}
+		
+		for (String folder: folderMap.keySet()) {
+			termFrequencyManager.updateWordCountPorFolder(folder);
+			termFrequencyManager.setNumberOfDocumentsByFolder(folder, folderMap.get(folder));
+		}
+		
 		System.out.println("Write to file...");
 		writeToFile();
 		System.out.println("Written to file...");
 	}
 
-	private void readWordsListFromFSFolder(File folder) {
-		MessageFromFileReader mReader = new MessageFromFileReader(folder.getAbsolutePath(), false);
-		int numberOfMessages = 0;
-		System.out.println("Folder : " + folder.getAbsolutePath());
-		for (Message mes : mReader) {
-			Date d = new Date();
-			addTokenizedString(new MessageInfo(mes), folder.getName());
-			Date d2 = new Date();
-			numberOfMessages++;
-			if (numberOfMessages % 10 == 0) {
-				System.out.println(folder.getAbsolutePath() + " Number of messages " + numberOfMessages);
-				System.out.println("Dura " + (d2.getTime() - d.getTime()));
-			}
-			if (numberOfMessages == 50) break;
-		}
-		termFrequencyManager.updateWordCountPorFolder(folder.getName());
-		termFrequencyManager.setNumberOfDocumentsByFolder(folder.getName(), numberOfMessages);
-	}
 }

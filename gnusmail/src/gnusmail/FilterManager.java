@@ -130,8 +130,7 @@ public class FilterManager {
 		}
 	}
 
-	public void extractAttributes(Connection connection, int limit) {
-		MessageReader reader = new MessageReaderFactory().createReader(connection, limit);
+	public void extractAttributes(MessageReader reader) {
 		String[] atributos;
 		int num = 0;
 		for (Message msg : reader) {
@@ -149,7 +148,7 @@ public class FilterManager {
 				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		writeToFile();
+		//writeToFile();
 	}
 
 	/**
