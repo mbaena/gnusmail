@@ -77,12 +77,15 @@ public class FolderMessagesIterator implements Iterator<File> {
 	}
 
 	private void expandFolder(File folder) {
+		int limitMessages = 50; //Used in order to balance
+		int openedMessages = 0;
 		System.out.println("Expand " + folder.getAbsolutePath());
 		if (foldersToBeOpened != null && foldersToBeOpened.size() > 0) {
 			File[] listOfFiles = folder.listFiles();
 			for (int i = 0; i < listOfFiles.length; i++) {
 				File auxFile = listOfFiles[i];
-				if (auxFile.isFile() && auxFile != null) {
+				if (auxFile.isFile() && auxFile != null && openedMessages < limitMessages) {
+					openedMessages++;
 					filesToRetrieve.add(auxFile);
 				} else if (auxFile.isDirectory() && mustBeOpened(auxFile)) {
 					foldersToBeOpened.add(auxFile);
@@ -104,7 +107,7 @@ public class FolderMessagesIterator implements Iterator<File> {
 		int numOfMails = auxFile.listFiles().length;
 		boolean topical =  name.contains("sent") || name.contains("inbox") ||
 				name.contains("trash") || name.contains("all_documents") ||
-				name.contains("drafts") || name.contains("discussion_threads");
+				name.contains("drafts") || name.contains("discussion_threads") || name.contains("deleted");
 		return numOfMails > 2 && !topical;
 	}
 }
