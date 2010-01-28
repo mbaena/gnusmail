@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
@@ -31,9 +32,6 @@ import moa.evaluation.ClassificationPerformanceEvaluator;
 import moa.evaluation.EWMAClassificationPerformanceEvaluator;
 import moa.evaluation.WindowClassificationPerformanceEvaluator;
 import moa.options.ClassOption;
-import moa.options.Option;
-import moa.options.OptionHandler;
-import moa.options.Options;
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
@@ -71,7 +69,7 @@ public class ClassifierManager {
 		int goodClassifications = 0;
 		BufferedReader r = null;
 		dataSet = null;
-		List<Double> tasas = new ArrayList<Double>();
+		List<Double> rates = new ArrayList<Double>();
 		try {
 			//It's necessary to have a dataset.arff
 			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
@@ -97,16 +95,10 @@ public class ClassifierManager {
 						goodClassifications++;
 					}
 					seenMails++;
-					double tasa = goodClassifications * 100.0 / seenMails;
-					System.out.println("Tasa de aciertos: " + tasa + "%");
-					tasas.add(tasa);
+					double rate = goodClassifications * 100.0 / seenMails;
+					System.out.println("Correct answers rate: " + rate + "%");
+					rates.add(rate);
 
-					String opciones[] = model.getOptions();
-					System.out.println("Opciones");
-					for (String opcion : opciones) {
-						System.out.println(opcion);
-					}
-					System.out.println("/Opciones");
 					updateableModel.updateClassifier(inst);
 					//msg.getFolder().close(false);
 				} catch (Exception ex) {
@@ -122,7 +114,7 @@ public class ClassifierManager {
 			w.write(h.toString());
 			w.write("\n");
 			w.close();
-			imprimirTasasErrorAFichero(tasas);
+			printRateToFile(rates);
 		} catch (ClassNotFoundException ex) {
 			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
@@ -216,15 +208,31 @@ public class ClassifierManager {
 		moa.classifiers.Classifier learner = (moa.classifiers.Classifier) learnerOption.materializeObject(null, null);
 		learner.prepareForUse();
 
-		System.out.println("\n**MOA**\nLearner: " + learner);
-		System.out.println("\nEvaluator: " + evaluator + "\n**MOA**\n");
+		try {
+			System.out.println("\n**MOA**\nLearner: " + learner);
+			System.out.println("\nEvaluator: " + evaluator + "\n**MOA**\n");
+			System.out.println("Press a key to continue..."); //We want to see the model
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			String aux = br.readLine();
+		} catch (Exception ex) {
+			System.out.println("Can't print model. Is sizeofag.jar accessible?");
+		}
 
 
 		InstancesHeader instancesHeader = new InstancesHeader(dataSet);
+		System.out.println(instancesHeader);
+		System.out.println("Pulse una tecla para continuar (lo de arriba son las instancias headers");
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		try {
+			String aux = br.readLine();
+		} catch (IOException ex) {
+			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+		}
+
 		learner.setModelContext(instancesHeader);
 
 		List<Double> tasas = new ArrayList<Double>();
-		System.out.println("Evaluate prec. Empieza bucle");
 
 		Measurement[] listMs = evaluator.getPerformanceMeasurements();
 		int posCorrect = 0;
@@ -259,11 +267,16 @@ public class ClassifierManager {
 
 				System.out.println();
 				learner.trainOnInstance(trainInst);
-				int size = learner.measureByteSize();
-				System.out.println("El tamaño es " + size);
 				System.out.println(learner);
-				//We pause the execution, in order to explore the model
+				System.out.println("Press a key to continue..."); //We want to see the model
+				//BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+				//String aux = br.readLine();
+				printRateToFile(tasas);
 
+<<<<<<< .mine
+
+=======
+>>>>>>> .r134
 				//msg.getFolder().close(false);
 				//	}
 			} catch (Exception ex) {
@@ -386,7 +399,7 @@ public class ClassifierManager {
 
 	}
 
-	private void imprimirTasasErrorAFichero(List<Double> tasas) {
+	private void printRateToFile(List<Double> tasas) {
 		try {
 			// Create file
 			FileWriter fstream = new FileWriter("tases");
