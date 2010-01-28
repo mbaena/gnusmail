@@ -13,7 +13,7 @@ public class Main {
 		longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
 		longopts[3] = new LongOpt("moa-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 243);
-		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgikz::mn::r::p::a::c:::l::w::hx", longopts);
+		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgi::kz::m::n::r::p::a::c:::l::w::hx", longopts);
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
 		System.out.println("WELCOME TO GENUSMAIL!!!");
@@ -78,6 +78,7 @@ public class Main {
 					return;
 				case 'i':
 					//options.setMailClassification(true);
+					options.setTasasFileName(arg);					
 					options.setIncrementallyTraining(true);
 					break;
 				case 'k':
@@ -87,6 +88,7 @@ public class Main {
 					options.setListMails(true, Integer.parseInt(arg));
 					break;
 				case 'm':
+					options.setTasasFileName(arg);
 					options.setMoaTraining(true);
 					break;					
 				case 'n':
