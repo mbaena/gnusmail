@@ -12,7 +12,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,9 +29,11 @@ import javax.mail.Session;
 public class MessageFromFileReader extends MessageReader implements Iterable<Message> {
 
 	private class MessagesFromFileIterator implements Iterator<Message> {
+
 		int index = 0;
 		FolderMessagesIterator it;
 		List<SortableMessage> messages = null;
+		Map<String, Integer> cuentasPorCarpeta = new TreeMap<String, Integer>();
 
 		private void createMessagesList() {
 			System.out.print("Initializing message list...");
@@ -37,11 +41,22 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 			while (it.hasNext()) {
 				File f = it.next();
 				if (f != null) {
-					sortedMessages.add(new SortableMessage(convertFileToMessage(f)));
+					Message msg = convertFileToMessage(f);
+					String folder = ((MIMEMessageWithFolder) msg).getFolderAsStr();
+					sortedMessages.add(new SortableMessage(msg));
+					if (!cuentasPorCarpeta.containsKey(folder)) {
+						cuentasPorCarpeta.put(folder, 0);
+					}
+					cuentasPorCarpeta.put(folder, cuentasPorCarpeta.get(folder) + 1);
 				}
 			}
 			this.messages = new ArrayList(sortedMessages);
 			System.out.println("done. We have : " + sortedMessages.size());
+			System.out.println("Imprimiendo cuentas");
+			for (String folder : cuentasPorCarpeta.keySet()) {
+				System.out.println(folder + " -> " + cuentasPorCarpeta.get(folder));
+			}
+			System.out.println("Imprimiendo cuentas: fin");
 		}
 
 		public MessagesFromFileIterator(String baseFolder, boolean recursive) {
@@ -61,15 +76,16 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 			Message res = null;
 			File f = it.next();
 			while (f == null && it.hasNext()) {
-				f = it.next();
+			f = it.next();
 			}
 			if (f != null) {
-				res = convertFileToMessage(f);
+			res = convertFileToMessage(f);
 			}
 			return res;
 			 */
 			Message res = messages.get(index).getMesssage();
 			index++;
+			System.out.println("La carpeta era " + ((MIMEMessageWithFolder)res).getFolderAsStr());
 			return res;
 		}
 
