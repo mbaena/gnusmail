@@ -99,7 +99,7 @@ public class Main {
 					break;
 				case 'z':
 					options.setReadMailsFromFileSystem(arg);
-					System.out.println("Mails will be read from filesystem...");
+					System.out.println("Mails will be read from filesystem..." + arg);
 					break;
 				case '?':
 					System.out.println("Invalid option" +

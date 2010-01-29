@@ -57,7 +57,7 @@ public class FilterManager {
 
 				for (int i = 1; i <= folder.getMessageCount(); i++) {
 					MessageInfo msj = new MessageInfo(folder.getMessage(i));
-					attributes = getMessageAttributes(msj);
+					attributes = getMessageAttributes(msj,true);
 					String[] filters = ConfigManager.getFilters();
 					csvmanager.addCSVRegister(attributes, expandFilters(filters));
 				}// for
@@ -112,7 +112,7 @@ public class FilterManager {
 			System.out.println("Messages retrieved " + messagesRetrieved);
 			MessageInfo msgInfo = new MessageInfo(iterator.next());
 			try {
-				atributos = getMessageAttributes(msgInfo);
+				atributos = getMessageAttributes(msgInfo, true);
 				String[] filtros = ConfigManager.getFilters();
 				csvmanager.addCSVRegister(atributos, expandFilters(filtros));
 			} catch (IOException ex) {
@@ -135,7 +135,7 @@ public class FilterManager {
 		for (Message msg : reader) {
 			MessageInfo msgInfo = new MessageInfo(msg);
 			try {
-				atributos = getMessageAttributes(msgInfo);
+				atributos = getMessageAttributes(msgInfo, true);
 				String[] filters = ConfigManager.getFilters(); //esto, como parametro TODO
 				/**
 				 * 
@@ -169,7 +169,7 @@ public class FilterManager {
 	 */
 	public Instance makeInstance(MessageInfo msg, String initialFolderName,
 			Instances dataSet) throws Exception {
-		String[] atribs = getMessageAttributes(msg);
+		String[] atribs = getMessageAttributes(msg, true);
 		Instance inst = new Instance(atribs.length);
 		List<String> filtros = ConfigManager.getClassificationAttributes();
 		inst.setDataset(dataSet);
@@ -201,7 +201,7 @@ public class FilterManager {
 	 * iterating over the mails chronologically):w
 	 *
 	 */
-	public static String[] getMessageAttributes(MessageInfo msj) throws MessagingException {
+	public static String[] getMessageAttributes(MessageInfo msj, boolean includeWords) throws MessagingException {
 		if (msj.getFolder() != null) { //The folder can be null when the message is read from console
 			if (!msj.getFolder().isOpen()) {
 				msj.getFolder().open(Folder.READ_ONLY);

@@ -6,6 +6,7 @@
  */
 package gnusmail.core;
 
+import gnusmail.FilterManager;
 import gnusmail.filters.WordFrequency;
 import java.util.*;
 import java.io.*;
@@ -39,19 +40,9 @@ public class ConfigManager {
 	public static List<String> getClassificationAttributes() {
 		if (classificationAttributes == null) {
 			String[] filters = getFilters();
-			classificationAttributes = new ArrayList<String>();
-			for (String filter : filters) {
-				if (!filter.contains("WordFrequency")) {
-					classificationAttributes.add(filter);
-				} else {
-					for (String word : WordFrequency.getWordsToAnalyze()) {
-						classificationAttributes.add(word);
-					}
-				}
-			}
+			classificationAttributes =  FilterManager.expandFilters(filters);
 		}
 		return classificationAttributes;
-
 	}
 
 	private static Properties loadProperties() {
@@ -110,6 +101,18 @@ public class ConfigManager {
 		String filters = properties.getProperty("filters");
 		String[] filterList = filters.split(" ");
 		return filterList;
+	}
+
+	public static String[] getFiltersWithoutWords() {
+		String filters = properties.getProperty("filters");
+		String[] filterList = filters.split(" ");
+		List<String> list = new ArrayList<String>();
+		for (int i = 0; i < filterList.length; i++) {
+			if (!filterList[i].contains("WordFrequency")) {
+				list.add(filterList[i]);
+			}
+		}
+		return list.toArray(new String[list.size()]);
 	}
 
 	public static void listProperties() {

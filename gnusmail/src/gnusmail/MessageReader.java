@@ -66,6 +66,7 @@ public class MessageReader implements Iterable<Message> {
 		TreeSet<ComparableMessage> message_list;
 		int numberOfNexts = 0;
 
+		//TODO imprimir cuantos mensajes hay?
 		public LimitedMessageReaderIterator(Connection connection, int limit) {
 			message_list = new TreeSet<ComparableMessage>();
 			long total_msgs = 0;

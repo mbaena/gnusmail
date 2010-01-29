@@ -55,6 +55,14 @@ public class WordsStore {
 	int numAnalyzedDocuments = 0;
 	Map<Language, List<String>> stopWords;
 
+	public TermFrequencyManager getTermFrequencyManager() {
+		return termFrequencyManager;
+	}
+
+	public void setTermFrequencyManager(TermFrequencyManager termFrequencyManager) {
+		this.termFrequencyManager = termFrequencyManager;
+	}
+
 	public void addTokenizedString(MessageInfo str, String folderName) {
 		Map<String, WordCount> wordCount = new TreeMap<String, WordCount>();
 		String body = null;
@@ -82,19 +90,19 @@ public class WordsStore {
 			}
 
 		}
-			Date d1 = new Date();
+		Date d1 = new Date();
 		for (String word : wordCount.keySet()) {
 			termFrequencyManager.addTermAppearancesInDocumentForFolder(word,
 					wordCount.get(word).getCount(),
 					folderName);
 			termFrequencyManager.addNewDocumentForWord(word, folderName);
 		}
-			Date d2 = new Date();
+		Date d2 = new Date();
 		//We update the number of words for this folder
 		termFrequencyManager.addNumberOfWordsPerFolder(folderName, numberOfTokens);
-			Date d3 = new Date();
+		Date d3 = new Date();
 		numAnalyzedDocuments++;
-		System.out.println((d2.getTime() - d1.getTime()) + " " + (d3.getTime() - d2.getTime()) + " " + wordCount.size() + " "+ tokens.size());
+		System.out.println((d2.getTime() - d1.getTime()) + " " + (d3.getTime() - d2.getTime()) + " " + wordCount.size() + " " + tokens.size());
 	}
 
 	public WordsStore() {
@@ -102,6 +110,28 @@ public class WordsStore {
 		readStopWordsFile();
 	}
 
+	public List<String> getFrequentWords() {
+
+		//For each folder, we store the most frequent non-stopword terms
+		List<String> wordsToReturn = new ArrayList<String>();
+		for (String folder : termFrequencyManager.getTfidfByFolder().keySet()) {
+			int index = 0;
+			List<TFIDFSummary> tfidSummaries =
+					termFrequencyManager.getTfidfByFolder().get(folder);
+			Collections.sort(tfidSummaries);
+
+			while (index < 50 && index < tfidSummaries.size()) {
+				TFIDFSummary ts = tfidSummaries.get(tfidSummaries.size() - 1 - index);
+				wordsToReturn.add(ts.getTerm());
+				index++;
+			}
+		}
+		return wordsToReturn;
+	}
+
+	/**
+	 * @deprecated
+	 */
 	public void writeToFile() {
 		FileWriter outFile = null;
 		Set<String> wordsToWrite = new TreeSet<String>();
@@ -203,35 +233,31 @@ public class WordsStore {
 
 	public void readWordsList(MessageReader reader) {
 		int numberOfMessages = 0;
-		Map<String, Integer> folderMap = new TreeMap<String, Integer>(); 
-		for (Message msg: reader) {
-			if (numberOfMessages == MAX_MESSAGES_PER_FOLDER) break;
+		Map<String, Integer> folderMap = new TreeMap<String, Integer>();
+		for (Message msg : reader) { //Esto a WordsFrequency
+			//TODO mirar por que esta esto
+			//if (numberOfMessages == MAX_MESSAGES_PER_FOLDER) break;
 			MessageInfo msgInfo = new MessageInfo(msg);
 			String folder = msgInfo.getFolderAsString();
-			System.out.println("Folder : " + folder);
-			Date d = new Date();
 			addTokenizedString(msgInfo, folder);
-			Date d2 = new Date();
 			numberOfMessages++;
 			if (numberOfMessages % 10 == 0) {
 				System.out.println(msgInfo.getFolderAsString() + " Number of messages " + numberOfMessages);
-				System.out.println("Dura " + (d2.getTime() - d.getTime()));
 			}
 			try {
-				folderMap.put(folder, folderMap.get(folder)+1);
+				folderMap.put(folder, folderMap.get(folder) + 1);
 			} catch (NullPointerException e) {
 				folderMap.put(folder, 1);
 			}
 		}
-		
-		for (String folder: folderMap.keySet()) {
+
+		for (String folder : folderMap.keySet()) { //Esto a wordsfreqency, pero en el futuro metodo get atributes
 			termFrequencyManager.updateWordCountPorFolder(folder);
 			termFrequencyManager.setNumberOfDocumentsByFolder(folder, folderMap.get(folder));
 		}
-		
+
 		System.out.println("Write to file...");
 		writeToFile();
 		System.out.println("Written to file...");
 	}
-
 }
