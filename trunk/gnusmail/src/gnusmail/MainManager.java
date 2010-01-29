@@ -12,6 +12,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Header;
@@ -30,9 +31,9 @@ public class MainManager {
 
 	public MainManager() {
 		classifierManager = new ClassifierManager();
-		filterManager = new FilterManager();		
+		filterManager = new FilterManager();
 	}
-	
+
 	public MainManager(String url) {
 		this();
 		try {
@@ -56,7 +57,6 @@ public class MainManager {
 			this.maildir = maildir;
 		}
 	}
-
 
 	/** Connects to URL
 	 * @throws Exception */
@@ -139,13 +139,67 @@ public class MainManager {
 	public void extractAttributes() {
 		System.out.println("Mainmanager.extract attributes");
 		try {
-			filterManager.extractAttributes(getMessageReader());
+			filterManager.extractAttributes(getMessageReader()); //TODO aqui se le pasaria el word wordstore
 			filterManager.writeToFile();
 		} catch (Exception e1) {
 			filterManager.writeToFile();
 			e1.printStackTrace();
 		}
 
+	}
+
+	//Nuevo metodo
+	/**
+	 * Nuevo metodo
+	 * Este metodo devuelve un conjunto de nombres de atributos con sus valores asociados,
+	 * incluyendo la informacion de las palabras frecuentes
+	 * @param ws
+	 * @return
+	 */
+	public Map<String, List<String>> extractAttributeHeaders(WordsStore ws) {
+		Map<String, List<String>> headerValues = new TreeMap<String, List<String>>();
+		String[] atributos = null;
+		Map<String, Integer> folderMap = new TreeMap<String, Integer>();
+		for (Message msg : getMessageReader()) { //Esto a WordsFrequency
+			MessageInfo msgInfo = new MessageInfo(msg);
+			String folder = msgInfo.getFolderAsString();
+			ws.addTokenizedString(msgInfo, folder);
+			try {
+				folderMap.put(folder, folderMap.get(folder) + 1);
+				atributos = FilterManager.getMessageAttributes(msgInfo, false);
+			} catch (MessagingException ex) {
+				Logger.getLogger(MainManager.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (NullPointerException e) {
+				folderMap.put(folder, 1);
+			}
+			String[] filters = ConfigManager.getFiltersWithoutWords(); //esto, como parametro TODO
+
+			//Actualizamos el mapa
+			Vector<String> headerNames = FilterManager.expandFilters(filters);
+			for (int i = 0; i < atributos.length; i++) {
+				String atributo = headerNames.get(i);
+				String valor = atributos[i];
+				if (!headerValues.containsKey(atributo)) {
+					headerValues.put(atributo, new ArrayList<String>());
+				}
+				headerValues.get(atributo).add(valor);
+			}
+			//csvmanager.addCSVRegister(atributos, expandFilters(filters));
+		}
+
+		for (String folder : folderMap.keySet()) { //Esto a wordsfreqency, pero en el futuro metodo get atributes
+			ws.getTermFrequencyManager().updateWordCountPorFolder(folder);
+			ws.getTermFrequencyManager().setNumberOfDocumentsByFolder(folder, folderMap.get(folder));
+		}
+
+		for (String word : ws.getFrequentWords()) {
+			headerValues.put(word, new ArrayList<String>());
+			headerValues.get(word).add("True");
+			headerValues.get(word).add("False");
+		}
+		return headerValues;
+		//TODO actualizar los atributos de palabra
+		//ws.writeToFile();
 
 	}
 
@@ -178,7 +232,7 @@ public class MainManager {
 
 	public void incrementallyTrainModel() {
 		initiallyTrainModel();
-		MessageReader reader = getMessageReader();	
+		MessageReader reader = getMessageReader();
 		List<Double> rates = classifierManager.incrementallyTrainModel(reader);
 		printRateToFile(rates, tasasFileName);
 		System.out.println("Fin");
@@ -252,7 +306,7 @@ public class MainManager {
 			System.err.println("No se pueden imprimir tasas");
 		}
 	}
-	
+
 	private MessageReader getMessageReader() {
 		MessageReader reader = null;
 		if (readMailsFromFile) {
@@ -291,7 +345,9 @@ public class MainManager {
 		}
 		for (String name : headers.keySet()) {
 			Map<String, Integer> mapa = headers.get(name);
-			if (mapa.size() > 0) System.out.println(name + ":");
+			if (mapa.size() > 0) {
+				System.out.println(name + ":");
+			}
 			for (String value : mapa.keySet()) {
 
 				if (mapa.get(value) > 10) {

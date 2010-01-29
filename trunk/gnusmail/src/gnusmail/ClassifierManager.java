@@ -88,7 +88,7 @@ public class ClassifierManager {
 			} catch (FileNotFoundException e) {
 			}
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
-			for (Message msg : reader) {
+			for (Message msg : reader) { //TODO: esto en mainmanager,
 				try {
 					MessageInfo msgInfo = new MessageInfo(msg);
 					//if (!msg.getFolder().isOpen()) msg.getFolder().open(Folder.READ_ONLY);
