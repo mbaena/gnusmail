@@ -3,7 +3,6 @@ package gnusmail.languagefeatures;
 import gnusmail.Languages.Language;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +16,9 @@ import java.util.regex.Pattern;
  * @author jmcarmona
  */
 public class StopWordsProvider {
-    static private final String MAIN_FOLDER = System.getProperty("user.home") + "/.gnusmail/";
-
     static StopWordsProvider instance;
-    static final String SPANISH_FILE = MAIN_FOLDER + "spanish-stopwords.data";
-    static final String ENGLISH_FILE = MAIN_FOLDER + "english-stopwords.data";
+    static final String SPANISH_FILE = "spanish-stopwords.data";
+    static final String ENGLISH_FILE = "english-stopwords.data";
     public Map<Language, List<String>> stopwordsMap;
 
         public Map<Language, List<String>> getStopwordsMap() {
@@ -64,8 +61,8 @@ public class StopWordsProvider {
         List<String> swList = new ArrayList<String>();
         swList = new ArrayList<String>();
         try {
-            FileInputStream fstream = new FileInputStream(file);
-            DataInputStream in = new DataInputStream(fstream);
+            //FileInputStream fstream = new FileInputStream(file);
+            DataInputStream in = new DataInputStream(StopWordsProvider.class.getResourceAsStream(file));
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String strLine;
             while ((strLine = br.readLine()) != null) {
