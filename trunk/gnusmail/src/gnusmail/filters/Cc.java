@@ -26,6 +26,7 @@ public final class Cc extends Filter{
 			//e.printStackTrace();
 			res= "?";
 		}
+		if (res.equals("")) res = "None";
 		return res;
 	}
 }

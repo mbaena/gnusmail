@@ -21,7 +21,7 @@ public final class Bcc extends Filter {
 		//String res = csvmng.getValue(this.getNombreFiltro(), mess);
 		try {
 			String bcc = mess.getBcc();
-			if (bcc == "") bcc = "None";
+			if (bcc.equals("")) bcc = "None";
 			return bcc;
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
