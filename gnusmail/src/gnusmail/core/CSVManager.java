@@ -1,11 +1,15 @@
 package gnusmail.core;
 
-import com.Ostermiller.util.*;
-import java.util.*;
-import java.io.*;
-import java.util.StringTokenizer;
-
+import com.Ostermiller.util.CSVParser;
+import com.Ostermiller.util.CSVPrinter;
+import com.Ostermiller.util.LabeledCSVParser;
 import gnusmail.core.cnx.MessageInfo;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 public class CSVManager {
 

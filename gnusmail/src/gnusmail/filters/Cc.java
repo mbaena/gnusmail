@@ -1,29 +1,13 @@
 package gnusmail.filters;
 
-//import javax.mail.*;
+public final class Cc extends Filter {
 
-import gnusmail.core.cnx.MessageInfo;
-
-public final class Cc extends Filter{
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-	public String getName(){
-		return "Cc";
-	}
-	
-	public String applyTo(MessageInfo mess) {
-		String res;// = csvmng.getValue(this.getNombreFiltro(), mess);
+	@Override
+	public String getValueForHeader(String header) {
+		String res;
 		try {
 			res= mess.getCc();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
 			res= "?";
 		}
 		if (res.equals("")) res = "None";

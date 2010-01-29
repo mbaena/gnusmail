@@ -1,10 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gnusmail.filters;
 
-import gnusmail.core.cnx.MessageInfo;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.MessagingException;
@@ -16,12 +11,7 @@ import javax.mail.MessagingException;
 public class SenderUsername extends Filter {
 
 	@Override
-	public String getName() {
-		return "SenderUsername";
-	}
-
-	@Override
-	public String applyTo(MessageInfo mess) {
+	public String getValueForHeader(String header) {
 		String res = "?";
 		try {
 			String from = mess.getFrom();
