@@ -2,24 +2,13 @@ package gnusmail.filters;
 
 import javax.mail.MessagingException;
 
-import gnusmail.core.cnx.MessageInfo;
-
 public final class ReceivedDate extends Filter {
 
 	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return "ReceivedDate";
-	}
-
-	@Override
-	public String applyTo(MessageInfo mess) {
-		// TODO Auto-generated method stub
+	public String getValueForHeader(String header) {
 		try {
 			return mess.getReceivedDate();
 		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
 			return "?";
 		}
 	}

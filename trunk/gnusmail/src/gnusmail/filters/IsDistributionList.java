@@ -1,6 +1,5 @@
 package gnusmail.filters;
 
-import gnusmail.core.cnx.MessageInfo;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,14 +11,8 @@ import javax.mail.MessagingException;
  * @author jmcarmona
  */
 public class IsDistributionList extends Filter {
-
 	@Override
-	public String getName() {
-		return "IsDistributionList";
-	}
-
-	@Override
-	public String applyTo(MessageInfo mess) {
+	public String getValueForHeader(String header) {
 		boolean isList = false;
 		try {
 			Enumeration en = mess.getMessage().getAllHeaders();

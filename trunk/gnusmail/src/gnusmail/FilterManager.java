@@ -1,12 +1,10 @@
 package gnusmail;
 
-import gnusmail.filesystem.MessageFromFileReader;
 import gnusmail.core.CSVManager;
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
 import gnusmail.filters.Filter;
-import gnusmail.filters.WordFrequency;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -130,6 +128,7 @@ public class FilterManager {
 		}
 	}
 
+	//Aqui se tendrian que extraer (cabeceras) de atributos, no innstancias.
 	public void extractAttributes(MessageReader reader) {
 		String[] atributos;
 		int num = 0;
@@ -137,7 +136,10 @@ public class FilterManager {
 			MessageInfo msgInfo = new MessageInfo(msg);
 			try {
 				atributos = getMessageAttributes(msgInfo);
-				String[] filters = ConfigManager.getFilters();
+				String[] filters = ConfigManager.getFilters(); //esto, como parametro TODO
+				/**
+				 * 
+				 */
 				csvmanager.addCSVRegister(atributos, expandFilters(filters));
 				num++;
 				if (num % 100 == 0) System.out.println("_Num de mensajes " + num);
@@ -148,6 +150,7 @@ public class FilterManager {
 				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+		//al final de aqui , todos los filtros con sus cabeceras y valores
 		//writeToFile();
 	}
 
@@ -220,26 +223,13 @@ public class FilterManager {
 			}
 		}
 
+		//TODO deben funcionar todos como wordstore, para que todos funcionen igual
 		for (Filter filter : filters) {
-			if (filter instanceof WordFrequency) {
-				List<String> words = WordFrequency.getWordsToAnalyze();
-				try {
-					for (String word : words) {
-						WordFrequency wordsFilter = (WordFrequency) filter;
-						wordsFilter.setWordToCheck(word);
-						String elemento = wordsFilter.applyTo(msj);
-						res.addElement(elemento);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} else {
-				try {
-					String element = filter.applyTo(msj);
-					res.addElement(element);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			filter.initializeWithMessage(msj);
+			List<String> associatedHeaders = filter.getAssociatedHeaders();
+			for (String header : associatedHeaders) {
+				String elemento = filter.getValueForHeader(header);
+				res.addElement(elemento);
 			}
 		}
 
@@ -269,13 +259,18 @@ public class FilterManager {
 	 */
 	public static Vector<String> expandFilters(String[] filters) {
 		Vector<String> res = new Stack<String>();
-		for (String s : filters) {
-			if (s.contains("WordFrequency")) {
-				for (String word : WordFrequency.getWordsToAnalyze()) {
-					res.add(word);
+		for (String fName: filters) {
+			try {
+				Filter filter = (Filter) Class.forName(fName).newInstance();
+				for (String header : filter.getAssociatedHeaders()) {
+					res.add(header);
 				}
-			} else {
-				res.add(s);
+			} catch (InstantiationException ex) {
+				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (IllegalAccessException ex) {
+				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (ClassNotFoundException ex) {
+				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 		return res;

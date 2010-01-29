@@ -1,19 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package gnusmail.filters;
 
-import gnusmail.Languages.Language;
-import gnusmail.core.cnx.MessageInfo;
 import gnusmail.languagefeatures.LanguageDetection;
-import gnusmail.languagefeatures.StopWordsProvider;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.MessagingException;
@@ -25,15 +13,8 @@ import javax.mail.MessagingException;
  * @author jmcarmona
  */
 public class LanguageDetectionFilter extends Filter {
-    static Map<Language, List<String>> frequentWordsByLanguage;
-
     @Override
-    public String getName() {
-        return "Language Detection";
-    }
-
-    @Override
-    public String applyTo(MessageInfo mess) {
+    public String getValueForHeader(String header)  {
         String body = "";
         try {
             body = mess.getBody();
