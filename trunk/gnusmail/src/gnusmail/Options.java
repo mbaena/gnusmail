@@ -28,6 +28,7 @@ public class Options {
 	private String moaClassifier;
 	private boolean incrementallyTraining;
 	private String tasasFileName;
+	private boolean attributeExtraction;
 
 	public static Options getInstance() {
 		if (instance == null) {
@@ -65,6 +66,9 @@ public class Options {
 		}
 		if (this.showAttributes >= 0) {
 			mainManager.showAttibutes(this.showAttributes);
+		}
+		if (this.attributeExtraction) {
+			mainManager.extractAttributes();
 		}
 		if (this.tasasFileName!=null) {
 			mainManager.setTasasFileName(tasasFileName);
@@ -207,5 +211,9 @@ public class Options {
 
 	public void setMoaClassifier(String arg) {
 		this.moaClassifier = arg;
+	}
+
+	public void setAttributeExtraction(boolean b) {
+		this.attributeExtraction = b;
 	}
 }
