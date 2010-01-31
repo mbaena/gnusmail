@@ -169,6 +169,7 @@ public class MainManager {
 
 	public void incrementallyTrainModel() {
 		//initiallyTrainModel();
+		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Incrementally Train Model");
 		MessageReader reader = getMessageReader();
 		filterManager.extractAttributeHeaders(reader);
 		List<Double> rates = classifierManager.incrementallyTrainModel(reader);

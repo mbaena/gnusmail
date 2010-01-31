@@ -14,6 +14,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,15 +65,14 @@ public class ClassifierManager {
 		int goodClassifications = 0;
 		List<Double> rates = new ArrayList<Double>();
 		try {
-			Classifier model = null;
+			Classifier model = new NaiveBayesUpdateable(); //TODO configurable Classifier
 			try {
-				FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
-				ObjectInputStream fie = new ObjectInputStream(fe);
-				model = (Classifier) fie.readObject();
-			} catch (FileNotFoundException e) {
+				model.buildClassifier(filterManager.getDataset()); // Add attributes information
+			} catch (Exception ex) {
+				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
-			for (Message msg : reader) { //TODO: esto en mainmanager,
+			for (Message msg: reader) { //TODO: esto en mainmanager,
 				try {
 					MessageInfo msgInfo = new MessageInfo(msg);
 					Instance inst = filterManager.makeInstance(msgInfo);
@@ -96,8 +96,6 @@ public class ClassifierManager {
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(updateableModel);
 			fis.close();
-		} catch (ClassNotFoundException ex) {
-			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
 			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		}
