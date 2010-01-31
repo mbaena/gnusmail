@@ -6,19 +6,12 @@ import weka.core.Attribute;
 import weka.core.Instance;
 
 public abstract class Filter {
-	MessageInfo mess;
-
 	/**
 	 * Get the name of this filter
 	 * @return
 	 */
 	public String getName() {
 		return this.getClass().getSimpleName();
-	}
-
-	// ¿Para qué es este método? 
-	public void initializeWithMessage(MessageInfo mess) {
-		this.mess = mess;
 	}
 
 	/**

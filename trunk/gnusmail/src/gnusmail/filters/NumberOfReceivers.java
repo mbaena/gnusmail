@@ -16,7 +16,7 @@ public class NumberOfReceivers extends SingleNumericAttFilter {
 	@Override
 	protected double getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-		int res = new StringTokenizer(mess.getTo(), ",").countTokens();
+		int res = new StringTokenizer(messageInfo.getTo(), ",").countTokens();
 		return res;
 	}
 

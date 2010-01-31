@@ -18,7 +18,7 @@ public class NumberOfAttachments extends SingleNumericAttFilter {
 			throws MessagingException {
         int res = 0;
         try {
-            res = mess.numberOfAttachments();
+            res = messageInfo.numberOfAttachments();
         } catch (IOException ex) {
         	throw new MessagingException();
         }

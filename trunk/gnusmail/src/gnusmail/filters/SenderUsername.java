@@ -16,7 +16,7 @@ public class SenderUsername extends SingleAttFilter {
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
 		String res = null;
-		String from = mess.getFrom();
+		String from = messageInfo.getFrom();
 		String[] fields = from.split("@");
 		if (fields.length > 0) {
 			res = fields[0];

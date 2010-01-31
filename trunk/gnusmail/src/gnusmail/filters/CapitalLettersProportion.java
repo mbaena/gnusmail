@@ -17,7 +17,7 @@ public class CapitalLettersProportion extends SingleNumericAttFilter {
         int capitals = 0;
         int total = 1;
         try {
-            String body = mess.getBody();
+            String body = messageInfo.getBody();
             total = body.length();
             int index = 0;
             while (index < body.length()) {

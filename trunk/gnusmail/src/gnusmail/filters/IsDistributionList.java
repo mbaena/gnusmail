@@ -18,7 +18,7 @@ public class IsDistributionList extends SingleAttFilter {
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
 		boolean isList = false;
-		Enumeration en = mess.getMessage().getAllHeaders();
+		Enumeration en = messageInfo.getMessage().getAllHeaders();
 		while (en.hasMoreElements() && !isList) {
 			Header h = (Header) en.nextElement();
 			isList = h.getName().contains("List-");

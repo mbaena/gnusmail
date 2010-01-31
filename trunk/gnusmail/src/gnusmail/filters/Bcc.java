@@ -10,7 +10,7 @@ public final class Bcc extends SingleAttFilter {
 	@Override
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-		String bcc = mess.getBcc();
+		String bcc = messageInfo.getBcc();
 		if (bcc.equals("")) bcc = "None";
 		return bcc;
 	}

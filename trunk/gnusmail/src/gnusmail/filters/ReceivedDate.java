@@ -9,7 +9,7 @@ public final class ReceivedDate extends SingleAttFilter {
 	@Override
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-		return mess.getReceivedDate();
+		return messageInfo.getReceivedDate();
 	}
 
 }

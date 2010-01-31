@@ -15,7 +15,7 @@ public class SizeOfEmail extends SingleNumericAttFilter {
 	@Override
 	protected double getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-        return mess.size();
+        return messageInfo.size();
     }
 
 }
