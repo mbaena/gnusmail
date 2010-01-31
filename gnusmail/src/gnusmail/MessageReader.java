@@ -116,12 +116,10 @@ public class MessageReader implements Iterable<Message> {
 			System.out.println("End of transversing folders");
 		}
 
-		@Override
 		public boolean hasNext() {
 			return !message_list.isEmpty();
 		}
 
-		@Override
 		public Message next() {
 			numberOfNexts++;
 			System.out.println("---------- Seen messages " + numberOfNexts);
@@ -158,7 +156,6 @@ public class MessageReader implements Iterable<Message> {
 			return msg;
 		}
 
-		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}

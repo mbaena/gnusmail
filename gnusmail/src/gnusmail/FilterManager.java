@@ -1,5 +1,6 @@
 package gnusmail;
 
+import com.sun.security.auth.login.ConfigFile;
 import gnusmail.core.CSVManager;
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
@@ -57,7 +58,7 @@ public class FilterManager {
 
 				for (int i = 1; i <= folder.getMessageCount(); i++) {
 					MessageInfo msj = new MessageInfo(folder.getMessage(i));
-					attributes = getMessageAttributes(msj,true);
+					attributes = getMessageAttributes(msj, true);
 					String[] filters = ConfigManager.getFilters();
 					csvmanager.addCSVRegister(attributes, expandFilters(filters));
 				}// for
@@ -109,7 +110,7 @@ public class FilterManager {
 		int messagesRetrieved = 0;
 		while (iterator.hasNext() && messagesRetrieved <= messagesToRetrieve) {
 			messagesRetrieved++;
-			System.out.println("Messages retrieved " + messagesRetrieved);
+			//System.out.println("Messages retrieved " + messagesRetrieved);
 			MessageInfo msgInfo = new MessageInfo(iterator.next());
 			try {
 				atributos = getMessageAttributes(msgInfo, true);
@@ -142,8 +143,12 @@ public class FilterManager {
 				 */
 				csvmanager.addCSVRegister(atributos, expandFilters(filters));
 				num++;
-				if (num % 100 == 0) System.out.println("_Num de mensajes " + num);
-				if (num == 200) break;
+				if (num % 100 == 0) {
+					System.out.println("_Num de mensajes " + num);
+				}
+				if (num == 200) {
+					break;
+				}
 			} catch (IOException ex) {
 				Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (MessagingException ex) {
@@ -209,7 +214,12 @@ public class FilterManager {
 		}
 		Vector<String> res = new Vector<String>();
 
-		String[] filtersName = ConfigManager.getFilters();
+		String[] filtersName = null;
+		if (includeWords) {
+			filtersName = ConfigManager.getFilters();
+		} else {
+			filtersName = ConfigManager.getFiltersWithoutWords();
+		}
 		Vector<Filter> filters = new Vector<Filter>();
 		for (String sfiltro : filtersName) {
 			try {
@@ -237,8 +247,8 @@ public class FilterManager {
 		if (msj.getFolder() != null) {
 			msj.getFolder().close(false);
 		}
-		return res.toArray(sres);
-
+		String toReturn[] = res.toArray(sres);
+		return toReturn;
 
 	}
 
@@ -259,7 +269,7 @@ public class FilterManager {
 	 */
 	public static Vector<String> expandFilters(String[] filters) {
 		Vector<String> res = new Stack<String>();
-		for (String fName: filters) {
+		for (String fName : filters) {
 			try {
 				Filter filter = (Filter) Class.forName(fName).newInstance();
 				for (String header : filter.getAssociatedHeaders()) {

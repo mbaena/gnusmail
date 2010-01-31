@@ -1,19 +1,13 @@
 package gnusmail;
 
-import gnusmail.core.CSVManager;
 import gnusmail.core.ConfigManager;
-import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
@@ -25,23 +19,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
-
 import moa.core.InstancesHeader;
 import moa.core.Measurement;
 import moa.evaluation.ClassificationPerformanceEvaluator;
 import moa.evaluation.EWMAClassificationPerformanceEvaluator;
 import moa.evaluation.WindowClassificationPerformanceEvaluator;
 import moa.options.ClassOption;
-import moa.options.Option;
-import moa.options.OptionHandler;
-import moa.options.Options;
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.converters.CSVLoader;
 
 /**
  * TODO
@@ -49,19 +38,21 @@ import weka.core.converters.CSVLoader;
  */
 public class ClassifierManager {
 
-	static Instances dataSet;
-	static CSVManager csvmanager;
+	private Instances dataSet;
 	private FilterManager filterManager;
-	
-	public ClassifierManager() {
-		try {
-			csvmanager = new CSVManager();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		filterManager = new FilterManager();
+
+	public Instances getDataSet() {
+		return dataSet;
 	}
 
+	public void setDataSet(Instances dataSet) {
+		this.dataSet = dataSet;
+		this.dataSet.setClass(dataSet.attribute("Folder"));
+	}
+
+	public ClassifierManager() {
+		filterManager = new FilterManager();
+	}
 
 	/**
 	 * This method reads the messages in chronological order, and updates
@@ -71,15 +62,8 @@ public class ClassifierManager {
 	public List<Double> incrementallyTrainModel(MessageReader reader) {
 		int seenMails = 0;
 		int goodClassifications = 0;
-		BufferedReader r = null;
-		dataSet = null;
 		List<Double> rates = new ArrayList<Double>();
 		try {
-			//It's necessary to have a dataset.arff
-			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
-			dataSet = new Instances(r, 0); // Only the headers are needed
-			dataSet.setClass(dataSet.attribute("Folder"));
-			r.close();
 			Classifier model = null;
 			try {
 				FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
@@ -91,7 +75,6 @@ public class ClassifierManager {
 			for (Message msg : reader) { //TODO: esto en mainmanager,
 				try {
 					MessageInfo msgInfo = new MessageInfo(msg);
-					//if (!msg.getFolder().isOpen()) msg.getFolder().open(Folder.READ_ONLY);
 					Instance inst = filterManager.makeInstance(msgInfo, dataSet);
 					double predictedClass = model.classifyInstance(inst);
 					double trueClass = inst.classValue();
@@ -113,21 +96,10 @@ public class ClassifierManager {
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(updateableModel);
 			fis.close();
-			Writer w = new BufferedWriter(new FileWriter(ConfigManager.DATASET_FILE));
-			Instances h = new Instances(dataSet);
-			w.write(h.toString());
-			w.write("\n");
-			w.close();
 		} catch (ClassNotFoundException ex) {
 			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
 			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
-		} finally {
-			try {
-				r.close();
-			} catch (IOException ex) {
-				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
-			}
 		}
 		return rates;
 	}
@@ -138,16 +110,11 @@ public class ClassifierManager {
 	public void incrementallyTrainModelFromDataSet() {
 		Classifier model = new NaiveBayesUpdateable();
 		System.out.println("Training model...");
-		CSVLoader csvdata = new CSVLoader();
 		try {
-			csvdata.setSource(new File(CSVManager.FILE_CSV));
-			dataSet = csvdata.getDataSet();
-			dataSet.setClass(dataSet.attribute("Folder"));
 			UpdateableClassifier updateableClassifier = (UpdateableClassifier) model;
 			for (Enumeration instances = dataSet.enumerateInstances(); instances.hasMoreElements();) {
 				Instance instance = (Instance) instances.nextElement();
 				updateableClassifier.updateClassifier(instance);
-				String opciones[] = model.getOptions();
 			}
 			model.buildClassifier(dataSet);
 		} catch (Exception e) {
@@ -158,15 +125,10 @@ public class ClassifierManager {
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(model);
 			fis.close();
-			Writer w = new BufferedWriter(new FileWriter(ConfigManager.DATASET_FILE));
-			Instances h = new Instances(dataSet);
-			w.write(h.toString());
-			w.write("\n");
-			w.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("File " +
-					ConfigManager.MODEL_FILE.getAbsolutePath() +
-					" not found");
+			System.out.println("File "
+					+ ConfigManager.MODEL_FILE.getAbsolutePath()
+					+ " not found");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -174,20 +136,6 @@ public class ClassifierManager {
 	}
 
 	public List<Double> evaluatePrecuential(MessageReader reader, String moaClassifier) {
-		BufferedReader r = null;
-
-		try {
-			r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
-			dataSet = new Instances(r, 0); // Only the headers are needed
-			dataSet.setClass(dataSet.attribute("Folder"));
-			r.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 		// Evaluator Factory
 		ClassOption evaluatorOption = new ClassOption("evaluator", 'e',
 				"Evaluator to use.", ClassificationPerformanceEvaluator.class, "WindowClassificationPerformanceEvaluator");
@@ -214,25 +162,12 @@ public class ClassifierManager {
 		try {
 			System.out.println("\n**MOA**\nLearner: " + learner);
 			System.out.println("\nEvaluator: " + evaluator + "\n**MOA**\n");
-			System.out.println("Press a key to continue..."); //We want to see the model
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			String aux = br.readLine();
 		} catch (Exception ex) {
 			System.out.println("Can't print model. Is sizeofag.jar accessible?");
 		}
 
 
 		InstancesHeader instancesHeader = new InstancesHeader(dataSet);
-		System.out.println(instancesHeader);
-		System.out.println("Pulse una tecla para continuar (lo de arriba son las instancias headers");
-
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		try {
-			String aux = br.readLine();
-		} catch (IOException ex) {
-			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
-		}
-
 		learner.setModelContext(instancesHeader);
 
 		List<Double> tasas = new ArrayList<Double>();
@@ -287,32 +222,21 @@ public class ClassifierManager {
 	public void trainModel() {
 		Classifier model = new NaiveBayesUpdateable();
 		System.out.println("Training model...");
-		CSVLoader csvdata = new CSVLoader();
 		try {
-			csvdata.setSource(new File(CSVManager.FILE_CSV));
-			dataSet =
-					csvdata.getDataSet();
-			dataSet.setClass(dataSet.attribute("Folder"));
 			model.buildClassifier(dataSet);
 		} catch (Exception e) {
 			return;
 		}
-//System.out.println(model);
 
 		try {
 			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(model);
 			fis.close();
-			Writer w = new BufferedWriter(new FileWriter(ConfigManager.DATASET_FILE));
-			Instances h = new Instances(dataSet);
-			w.write(h.toString());
-			w.write("\n");
-			w.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("File " +
-					ConfigManager.MODEL_FILE.getAbsolutePath() +
-					" not found");
+			System.out.println("File "
+					+ ConfigManager.MODEL_FILE.getAbsolutePath()
+					+ " not found");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -322,11 +246,6 @@ public class ClassifierManager {
 
 	public void classifyMail(MimeMessage mimeMessage) throws Exception {
 		MessageInfo msg = new MessageInfo(mimeMessage);
-		Reader r = new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
-		dataSet =
-				new Instances(r, 0); // Only the headers are necessary
-		dataSet.setClass(dataSet.attribute("Folder"));
-		r.close();
 		Instance inst = filterManager.makeInstance(msg, dataSet);
 		Classifier model;
 
@@ -345,10 +264,10 @@ public class ClassifierManager {
 		Attribute att = dataSet.attribute("Folder");
 		double biggest = 0;
 		int biggest_index = 0;
-		for (int i = 0; i <
-				res.length; i++) {
-			System.out.println("\nDestination folder will be " + att.value(i) +
-					" with probability: " + res[i]);
+		for (int i = 0; i
+				< res.length; i++) {
+			System.out.println("\nDestination folder will be " + att.value(i)
+					+ " with probability: " + res[i]);
 			if (res[i] > biggest) {
 				biggest_index = i;
 				biggest =
@@ -364,13 +283,8 @@ public class ClassifierManager {
 		Reader r = null;
 		try {
 			MessageInfo msg = new MessageInfo(mimeMessage);
-			System.out.println("Updating model with message, which folder is " + msg.getFolderAsString());
-			r =
-					new BufferedReader(new FileReader(ConfigManager.DATASET_FILE));
-			dataSet =
-					new Instances(r, 0); // Only the headers are necessary
-			dataSet.setClass(dataSet.attribute("Folder"));
-			r.close();
+			System.out.println("Updating model with message, which folder is " +
+					msg.getFolderAsString());
 			Instance inst = filterManager.makeInstance(msg, dataSet);
 			Classifier model;
 
@@ -396,6 +310,5 @@ public class ClassifierManager {
 		}
 
 	}
-
 }
 
