@@ -50,8 +50,8 @@ public class ClassifierManager {
 		this.dataSet.setClass(dataSet.attribute("Folder"));
 	}
 
-	public ClassifierManager() {
-		filterManager = new FilterManager();
+	public ClassifierManager(FilterManager filterManager) {
+		this.filterManager = filterManager;
 	}
 
 	/**
@@ -75,7 +75,7 @@ public class ClassifierManager {
 			for (Message msg : reader) { //TODO: esto en mainmanager,
 				try {
 					MessageInfo msgInfo = new MessageInfo(msg);
-					Instance inst = filterManager.makeInstance(msgInfo, dataSet);
+					Instance inst = filterManager.makeInstance(msgInfo);
 					double predictedClass = model.classifyInstance(inst);
 					double trueClass = inst.classValue();
 					if (predictedClass == trueClass) {
@@ -190,7 +190,7 @@ public class ClassifierManager {
 				!msgInfo.getFolderAsString().toLowerCase().contains("attachment") ) {*/
 				//if (!msg.getFolder().isOpen()) msg.getFolder().open(Folder.READ_ONLY);
 				System.out.println("Folder: " + msgInfo.getFolderAsString());
-				Instance trainInst = filterManager.makeInstance(msgInfo, dataSet);
+				Instance trainInst = filterManager.makeInstance(msgInfo);
 				Instance testInst = (Instance) trainInst.copy();
 				int trueClass = (int) trainInst.classValue();
 				testInst.setClassMissing();
@@ -246,7 +246,7 @@ public class ClassifierManager {
 
 	public void classifyMail(MimeMessage mimeMessage) throws Exception {
 		MessageInfo msg = new MessageInfo(mimeMessage);
-		Instance inst = filterManager.makeInstance(msg, dataSet);
+		Instance inst = filterManager.makeInstance(msg);
 		Classifier model;
 
 		System.out.println(inst);
@@ -285,7 +285,7 @@ public class ClassifierManager {
 			MessageInfo msg = new MessageInfo(mimeMessage);
 			System.out.println("Updating model with message, which folder is " +
 					msg.getFolderAsString());
-			Instance inst = filterManager.makeInstance(msg, dataSet);
+			Instance inst = filterManager.makeInstance(msg);
 			Classifier model;
 
 			FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);

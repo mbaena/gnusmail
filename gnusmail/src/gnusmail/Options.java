@@ -70,18 +70,18 @@ public class Options {
 			mainManager.setTasasFileName(tasasFileName);
 		}
 		if (this.modelTraining) {
-			Instances dataSet = mainManager.extractAttributeHeaders(new WordsStore());
-			mainManager.setDataset(dataSet);
+			//Instances dataSet = mainManager.extractAttributeHeaders(new WordsStore());
+			//mainManager.setDataset(dataSet);
 			if (this.incrementallyTraining) {
 				mainManager.incrementallyTrainModel();
 			} else {
-				mainManager.trainModel();
+			//	mainManager.trainModel();
 			}
 		}
 
 		if (this.moaTraining) {
-			Instances dataSet = mainManager.extractAttributeHeaders(new WordsStore());
-			mainManager.setDataset(dataSet);
+			//Instances dataSet = mainManager.extractAttributeHeaders(new WordsStore());
+			//mainManager.setDataset(dataSet);
 			mainManager.evaluateWithMOA(moaClassifier);
 		}
 
@@ -96,7 +96,7 @@ public class Options {
 		}
 
 		if (this.studyHeaders) {
-			mainManager.studyHeaders();
+			//mainManager.studyHeaders();
 		}
 
 

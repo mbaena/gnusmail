@@ -34,15 +34,7 @@ public class ConfigManager {
 	public final static File MODEL_FILE = new File(CONF_FOLDER + "model.bin");
 	public final static File MAILDIR = new File(CONF_FOLDER + "maildirln");
 	private static Properties properties = loadProperties();
-	private static List<String> classificationAttributes;
 
-	public static List<String> getClassificationAttributes() {
-		if (classificationAttributes == null) {
-			String[] filters = getFilters();
-			classificationAttributes =  FilterManager.expandFilters(filters);
-		}
-		return classificationAttributes;
-	}
 
 	private static Properties loadProperties() {
 		Properties props = new Properties();

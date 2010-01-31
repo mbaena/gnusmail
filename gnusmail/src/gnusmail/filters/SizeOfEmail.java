@@ -1,5 +1,7 @@
 package gnusmail.filters;
 
+import gnusmail.core.cnx.MessageInfo;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.MessagingException;
@@ -8,17 +10,12 @@ import javax.mail.MessagingException;
  *
  * @author jmcarmona
  */
-public class SizeOfEmail extends Filter {
+public class SizeOfEmail extends SingleNumericAttFilter {
 
-    @Override
-    public String getValueForHeader(String header) {
-        int size = 0;
-        try {
-            size = mess.size();
-        } catch (MessagingException ex) {
-            Logger.getLogger(SizeOfEmail.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return size + "";
+	@Override
+	protected double getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
+        return mess.size();
     }
 
 }

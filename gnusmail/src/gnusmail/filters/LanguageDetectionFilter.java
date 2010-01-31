@@ -1,5 +1,6 @@
 package gnusmail.filters;
 
+import gnusmail.core.cnx.MessageInfo;
 import gnusmail.languagefeatures.LanguageDetection;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -12,17 +13,17 @@ import javax.mail.MessagingException;
  * Different approaches are to be tested in the future
  * @author jmcarmona
  */
-public class LanguageDetectionFilter extends Filter {
-    @Override
-    public String getValueForHeader(String header)  {
+public class LanguageDetectionFilter extends SingleAttFilter {
+
+	@Override
+	protected String getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
         String body = "";
         try {
             body = mess.getBody();
-        } catch (MessagingException ex) {
-            Logger.getLogger(LanguageDetectionFilter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(LanguageDetectionFilter.class.getName()).log(Level.SEVERE, null, ex);
+            throw new MessagingException();
         }
         return new LanguageDetection().detectLanguage(body).getLanguageName();
-    }
+	}
 }

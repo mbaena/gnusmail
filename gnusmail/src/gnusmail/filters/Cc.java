@@ -1,16 +1,18 @@
 package gnusmail.filters;
 
-public final class Cc extends Filter {
+import gnusmail.core.cnx.MessageInfo;
+import javax.mail.MessagingException;
+
+
+
+public final class Cc extends SingleAttFilter {
 
 	@Override
-	public String getValueForHeader(String header) {
-		String res;
-		try {
-			res= mess.getCc();
-		} catch (Exception e) {
-			res= "?";
-		}
-		if (res.equals("")) res = "None";
-		return res;
+	protected String getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
+		String cc = mess.getBcc();
+		if (cc.equals("")) cc = "None";
+		return cc;
 	}
+
 }

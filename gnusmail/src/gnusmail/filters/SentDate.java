@@ -1,13 +1,14 @@
 package gnusmail.filters;
 
-public final class SentDate extends Filter {
+import gnusmail.core.cnx.MessageInfo;
+
+import javax.mail.MessagingException;
+
+public final class SentDate extends SingleAttFilter {
 
 	@Override
-	public String getValueForHeader(String header) {
-		try {
-			return mess.getSentDate();
-		} catch (Exception e){
-			return "?";
-		}
+	protected String getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
+		return mess.getSentDate();
 	}
 }

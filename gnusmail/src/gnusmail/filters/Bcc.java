@@ -1,17 +1,17 @@
 package gnusmail.filters;
 
+import gnusmail.core.cnx.MessageInfo;
+
 import javax.mail.MessagingException;
 
 
-public final class Bcc extends Filter {
+public final class Bcc extends SingleAttFilter {
+	
 	@Override
-	public String getValueForHeader(String header) {
-		try {
-			String bcc = mess.getBcc();
-			if (bcc.equals("")) bcc = "None";
-			return bcc;
-		} catch (MessagingException e) {
-			return "?";
-		}
+	protected String getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
+		String bcc = mess.getBcc();
+		if (bcc.equals("")) bcc = "None";
+		return bcc;
 	}
 }

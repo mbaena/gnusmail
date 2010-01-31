@@ -1,14 +1,14 @@
 package gnusmail.filters;
 
+import gnusmail.core.cnx.MessageInfo;
+
 import javax.mail.MessagingException;
 
-public final class From extends Filter {
+public final class From extends SingleAttFilter {
 	
-	public String getValueForHeader(String header) {
-		try {
-			return mess.getFrom();
-		} catch (MessagingException e) {
-			return "?";
-		}
+	@Override
+	protected String getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
+		return mess.getFrom();
 	}
 }

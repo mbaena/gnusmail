@@ -1,16 +1,15 @@
 package gnusmail.filters;
 
+import gnusmail.core.cnx.MessageInfo;
+
 import javax.mail.MessagingException;
 
-public final class ReceivedDate extends Filter {
+public final class ReceivedDate extends SingleAttFilter {
 
 	@Override
-	public String getValueForHeader(String header) {
-		try {
-			return mess.getReceivedDate();
-		} catch (MessagingException e) {
-			return "?";
-		}
+	protected String getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
+		return mess.getReceivedDate();
 	}
 
 }

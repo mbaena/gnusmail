@@ -1,24 +1,25 @@
 package gnusmail.filters;
 
+import gnusmail.core.cnx.MessageInfo;
+
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javax.mail.MessagingException;
 
 /**
  *
  * @author jmcarmona
  */
-public class BodyLength extends Filter {
+public class BodyLength extends SingleNumericAttFilter {
+
 	@Override
-	public String getValueForHeader(String header) {
-        String size = "0";
+	protected double getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
+        double size = 0;
         try {
-            size = mess.getBody().length() + "";
-        } catch (MessagingException ex) {
-            Logger.getLogger(BodyLength.class.getName()).log(Level.SEVERE, null, ex);
+            size = mess.getBody().length();
         } catch (IOException ex) {
-            Logger.getLogger(BodyLength.class.getName()).log(Level.SEVERE, null, ex);
+            throw new MessagingException();
         }
         return size;
 	}
