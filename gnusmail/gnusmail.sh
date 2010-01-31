@@ -7,4 +7,4 @@ then
 gnusmail_path="."
 fi
 
-java -javaagent:${gnusmail_path}/lib/sizeofag.jar -jar -Xmx5G ${gnusmail_path}/gnusmail.jar $*
+eval java -javaagent:${gnusmail_path}/lib/sizeofag.jar -jar -Xmx5G ${gnusmail_path}/gnusmail.jar $*
