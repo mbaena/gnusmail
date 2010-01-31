@@ -1,13 +1,14 @@
 package gnusmail.filters;
 
-public final class ReplyTo extends Filter {
+import gnusmail.core.cnx.MessageInfo;
 
-	public String getValueForHeader(String header) {
-		try{
-			return mess.getReplyTo();
-		} catch (Exception e){
-			return "?";
-		}
-		
+import javax.mail.MessagingException;
+
+public final class ReplyTo extends SingleAttFilter {
+
+	@Override
+	protected String getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
+		return mess.getReplyTo();
 	}
 }

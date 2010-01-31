@@ -7,6 +7,7 @@ import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
 import gnusmail.filesystem.FSFoldersReader;
 import gnusmail.filesystem.MessageFromFileReader;
+import gnusmail.filters.WordFrequency;
 import gnusmail.languagefeatures.EmailTokenizer;
 import gnusmail.languagefeatures.LanguageDetection;
 import gnusmail.languagefeatures.TFIDFSummary;
@@ -63,24 +64,12 @@ public class WordsStore {
 		this.termFrequencyManager = termFrequencyManager;
 	}
 
-	public void addTokenizedString(MessageInfo str, String folderName) {
+	public void addTokenizedString(List<Token> tokens, String folderName) {
 		Map<String, WordCount> wordCount = new TreeMap<String, WordCount>();
-		String body = null;
-		try {
-			body = str.getBody() + " " + str.getSubject();
-		} catch (MessagingException ex) {
-			System.out.println("MessagingException: couldn't add " + str);
-		} catch (IOException ex) {
-			System.out.println("IOException: couldn't add " + str);
-		}
-		Language lang = new LanguageDetection().detectLanguage(body);
-		EmailTokenizer et = new EmailTokenizer(body);
-		List<Token> tokens = et.tokenize();
 		int numberOfTokens = tokens.size();
 		for (Token token : tokens) {
-			token.setLanguage(lang); //language for stemming
 			String stemmedForm = token.getStemmedForm();
-			if (!stopWords.get(lang).contains(stemmedForm)) {
+			if (!stopWords.get(token.getLanguage()).contains(stemmedForm)) {
 				if (!wordCount.containsKey(stemmedForm)) {
 					wordCount.put(stemmedForm, new WordCount(stemmedForm, 1));
 				} else {
@@ -239,7 +228,7 @@ public class WordsStore {
 			//if (numberOfMessages == MAX_MESSAGES_PER_FOLDER) break;
 			MessageInfo msgInfo = new MessageInfo(msg);
 			String folder = msgInfo.getFolderAsString();
-			addTokenizedString(msgInfo, folder);
+			addTokenizedString(WordFrequency.tokenizeMessageInfo(msgInfo), folder);
 			numberOfMessages++;
 			if (numberOfMessages % 10 == 0) {
 				System.out.println(msgInfo.getFolderAsString() + " Number of messages " + numberOfMessages);

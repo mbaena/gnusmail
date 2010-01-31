@@ -1,17 +1,19 @@
 package gnusmail.filters;
 
+import gnusmail.core.cnx.MessageInfo;
+
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.mail.MessagingException;
 
 /**
  *
  * @author jmcarmona
  */
-public class CapitalLettersProportion extends Filter {
+public class CapitalLettersProportion extends SingleNumericAttFilter {
+
 	@Override
-	public String getValueForHeader(String header) {
+	protected double getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
         int capitals = 0;
         int total = 1;
         try {
@@ -25,15 +27,13 @@ public class CapitalLettersProportion extends Filter {
                 }
                 index++;
             }
-        } catch (MessagingException ex) {
-            Logger.getLogger(CapitalLettersProportion.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(CapitalLettersProportion.class.getName()).log(Level.SEVERE, null, ex);
+        	throw new MessagingException();
         }
         double proporcion = 0.0;
         if (total > 0) {
             proporcion = (100.0 * capitals) / (1.0 * total);
         }
-        return "" + proporcion;
-	}
+        return proporcion;	
+        }
 }

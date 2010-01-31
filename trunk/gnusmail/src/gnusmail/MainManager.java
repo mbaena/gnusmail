@@ -7,15 +7,11 @@ import gnusmail.core.cnx.MessageInfo;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +19,8 @@ import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+
+import weka.core.FastVector;
 import weka.core.Instances;
 
 public class MainManager {
@@ -35,8 +33,8 @@ public class MainManager {
 	private String tasasFileName = "tasas";
 
 	public MainManager() {
-		classifierManager = new ClassifierManager();
 		filterManager = new FilterManager();
+		classifierManager = new ClassifierManager(filterManager);
 	}
 
 	public MainManager(String url) {
@@ -147,111 +145,8 @@ public class MainManager {
 
 	public void extractAttributes() {
 		System.out.println("Mainmanager.extract attributes");
-		try {
-			filterManager.extractAttributes(getMessageReader()); //TODO aqui se le pasaria el word wordstore
-			filterManager.writeToFile();
-		} catch (Exception e1) {
-			filterManager.writeToFile();
-			e1.printStackTrace();
-		}
-
-	}
-
-	/**
-	 * Nuevo metodo
-	 * Este metodo devuelve un conjunto de nombres de atributos con sus valores asociados,
-	 * incluyendo la informacion de las palabras frecuentes
-	 * @param ws
-	 * @return
-	 */
-	public Instances extractAttributeHeaders(WordsStore ws) {
-		Map<String, Set<String>> headerValues = new TreeMap<String, Set<String>>();
-		String[] atributos = null;
-		Map<String, Integer> folderMap = new TreeMap<String, Integer>();
-		int read = 0;
-		for (Message msg : getMessageReader()) { //Esto a WordsFrequency
-			read++;
-			if (read > 10) break;
-			MessageInfo msgInfo = new MessageInfo(msg);
-			String folder = msgInfo.getFolderAsString();
-			ws.addTokenizedString(msgInfo, folder);
-			try {
-				if (!folderMap.containsKey(folder)) {
-					folderMap.put(folder, 1);
-				}
-				folderMap.put(folder, folderMap.get(folder) + 1);
-				atributos = FilterManager.getMessageAttributes(msgInfo, false);
-			} catch (MessagingException ex) {
-				Logger.getLogger(MainManager.class.getName()).log(Level.SEVERE, null, ex);
-			} 
-			String[] filters = ConfigManager.getFiltersWithoutWords(); //esto, como parametro TODO
-
-			//Actualizamos el mapa
-			Vector<String> headerNames = FilterManager.expandFilters(filters);
-			if (headerNames.size() != atributos.length) {
-				System.out.println("Esto esta mal");
-			}
-			for (int i = 0; i < atributos.length; i++) {
-				String atributo = headerNames.get(i);
-				String valor = atributos[i];
-				if (!headerValues.containsKey(atributo)) {
-					headerValues.put(atributo, new TreeSet<String>());
-				}
-				headerValues.get(atributo).add(valor);
-			}
-		}
-
-		for (String folder : folderMap.keySet()) { //Esto a wordsfreqency, pero en el futuro metodo get atributes
-			ws.getTermFrequencyManager().updateWordCountPorFolder(folder);
-			ws.getTermFrequencyManager().setNumberOfDocumentsByFolder(folder, folderMap.get(folder));
-		}
-
-		for (String word : ws.getFrequentWords()) {
-			headerValues.put(word, new TreeSet<String>());
-			headerValues.get(word).add("True");
-			headerValues.get(word).add("False");
-		}
-		try {
-			Instances ins = createHeader(headerValues);
-			return ins;
-		} catch (IOException ex) {
-			Logger.getLogger(MainManager.class.getName()).log(Level.SEVERE, null, ex);
-			return null;
-		}
-
-	}
-
-	private Instances createHeader(Map<String, Set<String>> map) throws IOException {
-		String str = "@relation atributos\n\n";
-		for (String attr : map.keySet()) {
-			str += "@attribute " + attr + " {";
-			for (String value : map.get(attr)) {
-				str += "\"" + value + "\",";
-			}
-			str = str.substring(0, str.length() - 1);
-			str += "}\n";
-		}
-		str += "\n@data";
-		System.out.println(str);
-		StringReader strReader = new StringReader(str);
-		return new Instances(strReader,0);
-	}
-
-	public void extractFrequentWords() {
-		System.out.println("Mainmanager.extract frequent words");
-		WordsStore wordStore = new WordsStore();
-		wordStore.readWordsList(getMessageReader());
-	}
-
-	/**
-	 * This method constructs an initial model, using a restricted number of 
-	 * examples (5). This model will be updated incrementally using the rest of 
-	 * emails, in chronological order
-	 */
-	private void initiallyTrainModel() {
-		System.out.println("TrainModel (init)");
-		filterManager.saveAttributesForInitialModel(connection, 5, 1000);
-		classifierManager.trainModel();
+		filterManager.extractAttributeHeaders(getMessageReader());
+		//TODO: filterManager.writeToFile();
 
 	}
 
@@ -265,19 +160,20 @@ public class MainManager {
 	}
 
 	public void incrementallyTrainModel() {
-		initiallyTrainModel();
+		//initiallyTrainModel();
 		MessageReader reader = getMessageReader();
+		filterManager.extractAttributeHeaders(reader);
 		List<Double> rates = classifierManager.incrementallyTrainModel(reader);
 		printRateToFile(rates, tasasFileName);
 		System.out.println("Fin");
 	}
 
-	public void trainModelFromFile() {
+/*	public void trainModelFromFile() {
 		System.out.println("TrainModel from file");
 		initiallyTrainModel();
 		classifierManager.incrementallyTrainModelFromDataSet();
 	}
-
+*/
 	public void classifyMail(MimeMessage msg) {
 		try {
 			classifierManager.classifyMail(msg);
@@ -297,7 +193,7 @@ public class MainManager {
 	public void updateModelWithMail(MimeMessage msg) {
 		try {
 			if (!ConfigManager.MODEL_FILE.exists()) {
-				initiallyTrainModel();
+				//initiallyTrainModel();
 			}
 			classifierManager.updateModelWithMessage(msg);
 		} catch (Exception e) {
@@ -320,7 +216,7 @@ public class MainManager {
 	public void evaluateWithMOA(String moaClassifier) {
 		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Evaluate with moa");
 		MessageReader reader = getMessageReader();
-		filterManager.saveAttributesForInitialModel(connection, 100, 1);
+		filterManager.extractAttributeHeaders(getMessageReader());
 		List<Double> rates = classifierManager.evaluatePrecuential(reader, moaClassifier);
 		printRateToFile(rates, tasasFileName);
 	}
@@ -349,46 +245,6 @@ public class MainManager {
 			reader = MessageReaderFactory.createReader(connection, 2);
 		}
 		return reader;
-	}
-
-	void studyHeaders() {
-		Map<String, Map<String, Integer>> headers = new TreeMap<String, Map<String, Integer>>();
-		MessageReader reader = getMessageReader();
-		List<Double> tasas = new ArrayList<Double>();
-		System.out.println("Analizando correos...");
-		int num = 0;
-		for (Message msg : reader) {
-			num++;
-			try {
-				Enumeration enumer = msg.getAllHeaders();
-				while (enumer.hasMoreElements()) {
-					Header h = (Header) enumer.nextElement();
-					String name = h.getName();
-					String value = h.getValue();
-					if (!headers.containsKey(name)) {
-						headers.put(name, new TreeMap<String, Integer>());
-					}
-					if (!headers.get(name).containsKey(value)) {
-						headers.get(name).put(value, 0);
-					}
-					headers.get(name).put(value, 1 + headers.get(name).get(value));
-				}
-			} catch (MessagingException ex) {
-				Logger.getLogger(MainManager.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		}
-		for (String name : headers.keySet()) {
-			Map<String, Integer> mapa = headers.get(name);
-			if (mapa.size() > 0) {
-				System.out.println(name + ":");
-			}
-			for (String value : mapa.keySet()) {
-
-				if (mapa.get(value) > 10) {
-					System.out.println("\t" + value + " -> " + mapa.get(value));
-				}
-			}
-		}
 	}
 
 	public void setTasasFileName(String tasasFileName) {

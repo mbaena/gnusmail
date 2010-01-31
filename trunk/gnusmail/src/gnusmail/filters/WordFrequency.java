@@ -7,100 +7,106 @@ import gnusmail.core.cnx.MessageInfo;
 import gnusmail.languagefeatures.EmailTokenizer;
 import gnusmail.languagefeatures.LanguageDetection;
 import gnusmail.languagefeatures.Token;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.mail.MessagingException;
 
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+
 /**
- *
+ * 
  * @author jmcarmona
  */
 public class WordFrequency extends Filter {
-	Set<String> stringsEsteDocumento;
+	private TreeMap<String, Integer> folderMap;
+	private WordsStore ws;
 	static List<String> palabrasAAnalizar;
 
+	List<Attribute> attList;
+
+	public WordFrequency() {
+		folderMap = new TreeMap<String, Integer>();
+		ws = new WordsStore();
+		attList = new ArrayList<Attribute>();
+	}
 
 	@Override
 	public String getName() {
 		return "WordFrequency";
 	}
 
-	/**
-	 * Esta funcion lee una lista de palabras que deben ser usadas como filtro en el cuerpo
-	 * @return
-	 */
-	private static List<String> getWordsToAnalyze() {
-		List<String> res = new ArrayList<String>();
-		if (palabrasAAnalizar == null) {
-			try {
-				FileInputStream fstream = new FileInputStream(WordsStore.WORDS_FILE); //TODO Esto no lo deberia leer de fichero
-				// Get the object of DataInputStream
-				DataInputStream in = new DataInputStream(fstream);
-				BufferedReader br = new BufferedReader(new InputStreamReader(in));
-				String strLine;
-				//Read File Line By Line
-				while ((strLine = br.readLine()) != null) {
-					// Print the content on the console
-					if (strLine.length() > 2) //We only use words with 3 or more letters
-					{
-						res.add(strLine);
-					}
-				}
-				//Close the input stream
-				in.close();
-			} catch (Exception e) {//Catch exception if any
-				System.err.println("Error: " + e.getMessage());
-			}
-			palabrasAAnalizar = res;
-		} else {
-			res = palabrasAAnalizar;
+	@Override
+	public List<Attribute> getAttributes() {
+		for (String folder : folderMap.keySet()) { // Esto a wordsfreqency, pero
+													// en el futuro metodo get
+													// atributes
+			ws.getTermFrequencyManager().updateWordCountPorFolder(folder);
+			ws.getTermFrequencyManager().setNumberOfDocumentsByFolder(folder,
+					folderMap.get(folder));
 		}
-		return res;
+		for (String word : ws.getFrequentWords()) {
+			FastVector values = new FastVector();
+			values.addElement("True");
+			values.addElement("False");
+			attList.add(new Attribute(word, values));
+		}
+		return attList;
 	}
 
 	@Override
-	public List<String> getAssociatedHeaders() {
-		return getWordsToAnalyze();
+	public void updateAttValues(MessageInfo msgInfo) {
+		String folder = msgInfo.getFolderAsString();
+		List<Token> tokens = tokenizeMessageInfo(msgInfo);
+		ws.addTokenizedString(tokens, folder);
+		try {
+			folderMap.put(folder, folderMap.get(folder) + 1);
+		} catch (NullPointerException e) {
+			folderMap.put(folder, 1);
+		}
 	}
 
 	@Override
-	public void initializeWithMessage(MessageInfo mess) {
-		if (stringsEsteDocumento == null) {
-			try {
-				stringsEsteDocumento = new TreeSet<String>();
-				//Extraemos las palabras del cuerpo y la cabecera
-				String body = mess.getBody() + " " + mess.getSubject();
-				Language lang = new LanguageDetection().detectLanguage(body);
-				EmailTokenizer et = new EmailTokenizer(body);
-				List<Token> tokens = et.tokenize();
-				for (Token token : tokens) {
-					token.setLanguage(lang);
-					stringsEsteDocumento.add(token.getStemmedForm());
-				}
-			} catch (IOException ex) {
-				Logger.getLogger(WordFrequency.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (MessagingException ex) {
-				Logger.getLogger(WordFrequency.class.getName()).log(Level.SEVERE, null, ex);
+	public void updateInstance(Instance inst, MessageInfo messageInfo) {
+		Set<String> stringsEsteDocumento = new TreeSet<String>();
+		List<Token> tokens = tokenizeMessageInfo(messageInfo);
+		for (Token token : tokens) {
+			stringsEsteDocumento.add(token.getStemmedForm());
+		}
+		for (Attribute att : attList) {
+			if (stringsEsteDocumento.contains(att.name())) {
+				inst.setValue(att, "True");
+			} else {
+				inst.setValue(att, "False");
 			}
 		}
+
 	}
 
-	@Override
-	public String getValueForHeader(String header) {
-		if (stringsEsteDocumento.contains(header)) {
-			return "True";
-		} else {
-			return "False";
+	public static List<Token> tokenizeMessageInfo(MessageInfo messageInfo) {
+		String body = null;
+		try {
+			// Extraemos las palabras del cuerpo y la cabecera
+			body = messageInfo.getBody() + " "
+					+ messageInfo.getSubject();
+		} catch (IOException ex) {
+			Logger.getLogger(WordFrequency.class.getName()).log(Level.SEVERE,
+					null, ex);
+		} catch (MessagingException ex) {
+			Logger.getLogger(WordFrequency.class.getName()).log(Level.SEVERE,
+					null, ex);
 		}
+		Language lang = new LanguageDetection().detectLanguage(body);
+		EmailTokenizer et = new EmailTokenizer(body, lang);
+		return et.tokenize();
 	}
+
 }

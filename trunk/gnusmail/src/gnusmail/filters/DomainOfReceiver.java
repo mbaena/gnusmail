@@ -1,26 +1,27 @@
 package gnusmail.filters;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import gnusmail.core.cnx.MessageInfo;
+
 import javax.mail.MessagingException;
 
 /**
- *
+ * 
  * @author jmcarmona
  */
-public class DomainOfReceiver extends Filter {
+public class DomainOfReceiver extends SingleAttFilter {
+
 	@Override
-	public String getValueForHeader(String header) {
-        String res = "?";
-        try {
-			String to = mess.getTo();
-			String fields[] = to.split("@");
-			if (fields.length > 0)
-				res = fields[1];
-        } catch (MessagingException ex) {
-            Logger.getLogger(DomainOfSender.class.getName()).log(Level.SEVERE, null, ex);
+	protected String getSingleValue(MessageInfo messageInfo)
+			throws MessagingException {
+		String res = null;
+		String to = mess.getTo();
+		String fields[] = to.split("@");
+		if (fields.length > 0)
+			res = fields[1];
+        if (res==null){
+        	throw new MessagingException();
         }
-        return res;
+		return res;
 	}
 
 }
