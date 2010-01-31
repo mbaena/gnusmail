@@ -17,7 +17,7 @@ public class BodyLength extends SingleNumericAttFilter {
 			throws MessagingException {
         double size = 0;
         try {
-            size = mess.getBody().length();
+            size = messageInfo.getBody().length();
         } catch (IOException ex) {
             throw new MessagingException();
         }

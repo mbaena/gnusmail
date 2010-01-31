@@ -14,7 +14,7 @@ public class DomainOfReceiver extends SingleAttFilter {
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
 		String res = null;
-		String to = mess.getTo();
+		String to = messageInfo.getTo();
 		String fields[] = to.split("@");
 		if (fields.length > 0)
 			res = fields[1];

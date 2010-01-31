@@ -9,6 +9,6 @@ public final class SentDate extends SingleAttFilter {
 	@Override
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-		return mess.getSentDate();
+		return messageInfo.getSentDate();
 	}
 }

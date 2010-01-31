@@ -20,7 +20,7 @@ public class LanguageDetectionFilter extends SingleAttFilter {
 			throws MessagingException {
         String body = "";
         try {
-            body = mess.getBody();
+            body = messageInfo.getBody();
         } catch (IOException ex) {
             throw new MessagingException();
         }

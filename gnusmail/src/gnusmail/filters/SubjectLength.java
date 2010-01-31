@@ -15,7 +15,7 @@ public class SubjectLength extends SingleNumericAttFilter {
 	@Override
 	protected double getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-        return mess.getSubject().length();
+        return messageInfo.getSubject().length();
 	}
 
 }

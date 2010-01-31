@@ -9,6 +9,6 @@ public final class ReplyTo extends SingleAttFilter {
 	@Override
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-		return mess.getReplyTo();
+		return messageInfo.getReplyTo();
 	}
 }

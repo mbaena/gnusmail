@@ -9,6 +9,6 @@ public final class From extends SingleAttFilter {
 	@Override
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-		return mess.getFrom();
+		return messageInfo.getFrom();
 	}
 }

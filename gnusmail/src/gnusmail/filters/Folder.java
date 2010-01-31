@@ -9,7 +9,7 @@ public final class Folder extends SingleAttFilter {
 	@Override
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-		String folder = mess.getFolderAsString();
+		String folder = messageInfo.getFolderAsString();
 		return folder;
 	}
 }

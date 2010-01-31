@@ -9,7 +9,7 @@ public final class MessageId extends SingleAttFilter {
 	@Override
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-		return mess.getMessageId();
+		return messageInfo.getMessageId();
 	}
 
 
