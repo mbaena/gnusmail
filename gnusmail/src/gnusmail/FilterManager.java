@@ -109,8 +109,12 @@ public class FilterManager {
 		*/
 	}
 
-	public void writeToFile(String filename) {
-		if (dataset == null) {
+	public void writeToFile(Instances instances) {
+		writeToFile(instances, null);
+	}
+	
+	public void writeToFile(Instances instances, String filename) {
+		if (instances == null) {
 			Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, "Dataset is null");
 			return;
 		}
@@ -119,9 +123,9 @@ public class FilterManager {
 		}
 		File file = new File(filename);
 		ArffSaver arffSaver = new ArffSaver();
-		arffSaver.setInstances(dataset);
+		arffSaver.setInstances(instances);
 		try {
-			arffSaver.setDestination(file);
+			arffSaver.setFile(file);
 			arffSaver.writeBatch();
 		} catch (IOException e) {
 			Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE, null, e);			

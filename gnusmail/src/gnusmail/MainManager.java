@@ -21,6 +21,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import weka.core.FastVector;
+import weka.core.Instance;
 import weka.core.Instances;
 
 public class MainManager {
@@ -146,8 +147,15 @@ public class MainManager {
 	public void extractAttributes() {
 		System.out.println("Mainmanager.extract attributes");
 		filterManager.extractAttributeHeaders(getMessageReader());
-		//TODO: filterManager.writeToFile();
-
+		Instances instances = new Instances(filterManager.getDataset());
+		MessageReader reader = getMessageReader();
+		for (Message msg: reader) {
+			// TODO new incrementalWriteToFile in filterManager
+			MessageInfo msgInfo = new MessageInfo(msg);
+			Instance inst = filterManager.makeInstance(msgInfo);
+			instances.add(inst);
+		}
+		filterManager.writeToFile(instances);
 	}
 
 	/**
