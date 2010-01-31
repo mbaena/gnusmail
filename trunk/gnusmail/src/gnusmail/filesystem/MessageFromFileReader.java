@@ -85,7 +85,6 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 			 */
 			Message res = messages.get(index).getMesssage();
 			index++;
-			System.out.println("La carpeta era " + ((MIMEMessageWithFolder)res).getFolderAsStr());
 			return res;
 		}
 

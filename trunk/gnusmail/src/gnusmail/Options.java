@@ -3,14 +3,15 @@ package gnusmail;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import gnusmail.core.ConfigManager;
+import gnusmail.core.WordsStore;
 import javax.mail.Folder;
+import weka.core.Instances;
 
 public class Options {
 
 	private MainManager mainManager;
 	private String url;
 	private int showAttributes;
-	private boolean attributeExtraction;
 	private boolean modelTraining;
 	private boolean listFolders;
 	private boolean listMailsInFolder;
@@ -18,7 +19,6 @@ public class Options {
 	private int openMail;
 	private boolean listMails;
 	private int listMailsLimit;
-	private boolean extractWords;
 	private boolean updateModelWithMail;
 	private boolean readMailsFromFileSystem;
 	private String maildir;
@@ -39,7 +39,6 @@ public class Options {
 	private Options() {
 		this.url = null;
 		this.showAttributes = -1;
-		this.attributeExtraction = false;
 		this.modelTraining = false;
 		this.listFolders = false;
 		this.listMails = false;
@@ -47,7 +46,6 @@ public class Options {
 		this.listMailsInFolder = false;
 		this.mailClassification = false;
 		this.openMail = -1;
-		this.extractWords = false;
 		this.readMailsFromFileSystem=false;
 		this.updateModelWithMail = false;
 		this.moaTraining = false;
@@ -68,13 +66,12 @@ public class Options {
 		if (this.showAttributes >= 0) {
 			mainManager.showAttibutes(this.showAttributes);
 		}
-		if (this.attributeExtraction) {
-			mainManager.extractAttributes();
-		}
 		if (this.tasasFileName!=null) {
 			mainManager.setTasasFileName(tasasFileName);
 		}
 		if (this.modelTraining) {
+			Instances dataSet = mainManager.extractAttributeHeaders(new WordsStore());
+			mainManager.setDataset(dataSet);
 			if (this.incrementallyTraining) {
 				mainManager.incrementallyTrainModel();
 			} else {
@@ -83,6 +80,8 @@ public class Options {
 		}
 
 		if (this.moaTraining) {
+			Instances dataSet = mainManager.extractAttributeHeaders(new WordsStore());
+			mainManager.setDataset(dataSet);
 			mainManager.evaluateWithMOA(moaClassifier);
 		}
 
@@ -94,9 +93,6 @@ public class Options {
 		}
 		if (this.listMailsInFolder) {
 			mainManager.mailsInFolder();
-		}
-		if (this.extractWords) {
-			mainManager.extractFrequentWords();
 		}
 
 		if (this.studyHeaders) {
@@ -167,10 +163,6 @@ public class Options {
 		this.showAttributes = mail_id;
 	}
 
-	public void setAttributeExtraction(boolean b) {
-		this.attributeExtraction = b;
-	}
-	
 	public void setTasasFileName(String tasasFileName) {
 		this.tasasFileName = tasasFileName;
 	}
@@ -207,14 +199,6 @@ public class Options {
 	public void setListMails(boolean b, int limit) {
 		this.listMailsLimit = limit;
 		this.listMails = b;
-	}
-
-	public boolean isExtractWords() {
-		return extractWords;
-	}
-
-	public void setExtractWords(boolean extractWords) {
-		this.extractWords = extractWords;
 	}
 
 	public void setUpdateModelWithMail() {

@@ -7,11 +7,15 @@ import gnusmail.core.cnx.MessageInfo;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +23,7 @@ import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import weka.core.Instances;
 
 public class MainManager {
 
@@ -42,6 +47,10 @@ public class MainManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void setDataset(Instances dataSet) {
+		classifierManager.setDataSet(dataSet);
 	}
 
 	public boolean isReadMailsFromFile() {
@@ -148,7 +157,6 @@ public class MainManager {
 
 	}
 
-	//Nuevo metodo
 	/**
 	 * Nuevo metodo
 	 * Este metodo devuelve un conjunto de nombres de atributos con sus valores asociados,
@@ -156,35 +164,41 @@ public class MainManager {
 	 * @param ws
 	 * @return
 	 */
-	public Map<String, List<String>> extractAttributeHeaders(WordsStore ws) {
-		Map<String, List<String>> headerValues = new TreeMap<String, List<String>>();
+	public Instances extractAttributeHeaders(WordsStore ws) {
+		Map<String, Set<String>> headerValues = new TreeMap<String, Set<String>>();
 		String[] atributos = null;
 		Map<String, Integer> folderMap = new TreeMap<String, Integer>();
+		int read = 0;
 		for (Message msg : getMessageReader()) { //Esto a WordsFrequency
+			read++;
+			if (read > 10) break;
 			MessageInfo msgInfo = new MessageInfo(msg);
 			String folder = msgInfo.getFolderAsString();
 			ws.addTokenizedString(msgInfo, folder);
 			try {
+				if (!folderMap.containsKey(folder)) {
+					folderMap.put(folder, 1);
+				}
 				folderMap.put(folder, folderMap.get(folder) + 1);
 				atributos = FilterManager.getMessageAttributes(msgInfo, false);
 			} catch (MessagingException ex) {
 				Logger.getLogger(MainManager.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (NullPointerException e) {
-				folderMap.put(folder, 1);
-			}
+			} 
 			String[] filters = ConfigManager.getFiltersWithoutWords(); //esto, como parametro TODO
 
 			//Actualizamos el mapa
 			Vector<String> headerNames = FilterManager.expandFilters(filters);
+			if (headerNames.size() != atributos.length) {
+				System.out.println("Esto esta mal");
+			}
 			for (int i = 0; i < atributos.length; i++) {
 				String atributo = headerNames.get(i);
 				String valor = atributos[i];
 				if (!headerValues.containsKey(atributo)) {
-					headerValues.put(atributo, new ArrayList<String>());
+					headerValues.put(atributo, new TreeSet<String>());
 				}
 				headerValues.get(atributo).add(valor);
 			}
-			//csvmanager.addCSVRegister(atributos, expandFilters(filters));
 		}
 
 		for (String folder : folderMap.keySet()) { //Esto a wordsfreqency, pero en el futuro metodo get atributes
@@ -193,14 +207,34 @@ public class MainManager {
 		}
 
 		for (String word : ws.getFrequentWords()) {
-			headerValues.put(word, new ArrayList<String>());
+			headerValues.put(word, new TreeSet<String>());
 			headerValues.get(word).add("True");
 			headerValues.get(word).add("False");
 		}
-		return headerValues;
-		//TODO actualizar los atributos de palabra
-		//ws.writeToFile();
+		try {
+			Instances ins = createHeader(headerValues);
+			return ins;
+		} catch (IOException ex) {
+			Logger.getLogger(MainManager.class.getName()).log(Level.SEVERE, null, ex);
+			return null;
+		}
 
+	}
+
+	private Instances createHeader(Map<String, Set<String>> map) throws IOException {
+		String str = "@relation atributos\n\n";
+		for (String attr : map.keySet()) {
+			str += "@attribute " + attr + " {";
+			for (String value : map.get(attr)) {
+				str += "\"" + value + "\",";
+			}
+			str = str.substring(0, str.length() - 1);
+			str += "}\n";
+		}
+		str += "\n@data";
+		System.out.println(str);
+		StringReader strReader = new StringReader(str);
+		return new Instances(strReader,0);
 	}
 
 	public void extractFrequentWords() {

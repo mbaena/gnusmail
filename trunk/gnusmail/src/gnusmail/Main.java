@@ -2,7 +2,6 @@ package gnusmail;
 
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
-import gnusmail.core.ConfigManager;
 
 public class Main {
 
@@ -13,7 +12,7 @@ public class Main {
 		longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
 		longopts[3] = new LongOpt("moa-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 243);
-		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgi::kz::m::n::r::p::a::c:::l::w::hx", longopts);
+		Getopt getopt = new Getopt("Clasificador", argv, "-:defgi::kz::m::n::r::p::a::c:::l::hx", longopts);
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
 		System.out.println("WELCOME TO GENUSMAIL!!!");
@@ -26,7 +25,6 @@ public class Main {
 		while (c != -1) {
 			switch (c) {
 				case 0:
-					System.out.println("sb: " + sb);
 					char car = (char) (new Integer(sb.toString())).intValue();
 					if (arg != null) {
 						if (car == 'c') {
@@ -45,9 +43,9 @@ public class Main {
 					options.setShowAttributes(Integer.parseInt(arg));
 					break;
 
-				case 'b':
+				/*case 'b':
 					options.setAttributeExtraction(true);
-					break;
+					break;*/
 
 				case 'c':
 					System.out.println(arg);
@@ -55,9 +53,9 @@ public class Main {
 						options.setURL(arg);
 					}
 					break;
-				case 'w':
+				/*case 'w':
 					options.setExtractWords(true);
-					break;
+					break;*/
 				/*case 'd':	//Clasifica el correo n-esimo de la carpeta actual
 				arg =  (g.getOptarg());
 				if (miconexion==null) miconexion=new Conexion();
@@ -119,8 +117,7 @@ public class Main {
 		System.out.println("----------------------------------------------");
 		System.out.println("-h/--help\n	Shows this menu \n");
 		//System.out.println("-a/--atrib numMail\n	Gets the attributes of a message\n");
-		System.out.println("-b	Extracts attributes for every mail and stores them in\n" +
-				"\tthe CSV file " + ConfigManager.DATASET_FILE);
+		System.out.println("-b	Extracts attributes for every mail\n");
 		//System.out.println("-c/--connect url\n\tSpecifies a connection url: \n " +
 		//		"\tprotocol://user:passwd@server[/folder.subFolder]\n");
 		//System.out.println("-d numCorreo\n	Clasifica con el modelo el correo numCorreo-esimo" +
