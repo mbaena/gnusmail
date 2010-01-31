@@ -166,8 +166,7 @@ public class ClassifierManager {
 			System.out.println("Can't print model. Is sizeofag.jar accessible?");
 		}
 
-
-		InstancesHeader instancesHeader = new InstancesHeader(dataSet);
+		InstancesHeader instancesHeader = new InstancesHeader(filterManager.getDataset());
 		learner.setModelContext(instancesHeader);
 
 		List<Double> tasas = new ArrayList<Double>();

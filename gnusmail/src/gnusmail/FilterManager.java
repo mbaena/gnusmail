@@ -128,4 +128,8 @@ public class FilterManager {
 		}
 	}
 
+	public Instances getDataset() {
+		return dataset;
+	}
+
 }
