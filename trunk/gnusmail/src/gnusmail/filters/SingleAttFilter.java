@@ -5,6 +5,7 @@ import gnusmail.core.cnx.MessageInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.TreeSet;
 
 import javax.mail.MessagingException;
 
@@ -17,16 +18,20 @@ import weka.core.converters.ArffLoader;
 public abstract class SingleAttFilter extends Filter {
 
 	private Attribute attribute;
-	private FastVector attValues;
+	private TreeSet<String> attValues;
 	
 	public SingleAttFilter() {
-		attValues = new FastVector();
+		attValues = new TreeSet<String>();
 	}
 		
 	@Override
 	public List<Attribute> getAttributes() {
 		// New nominal attribute
-		attribute = new Attribute(this.getName(), new FastVector(), new ProtectedProperties(new Properties()));
+		FastVector attValuesF = new FastVector();
+		for (String value: attValues) {
+			attValuesF.addElement(value);
+		}
+		attribute = new Attribute(this.getName(), attValuesF);
 		ArrayList<Attribute> attList = new ArrayList<Attribute>();
 		attList.add(attribute);
 		return attList;
@@ -35,7 +40,8 @@ public abstract class SingleAttFilter extends Filter {
 	@Override
 	public void updateAttValues(MessageInfo msgInfo) {
 		try {
-			attValues.addElement(getSingleValue(msgInfo));
+			String value = getSingleValue(msgInfo);
+			attValues.add(value);
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
