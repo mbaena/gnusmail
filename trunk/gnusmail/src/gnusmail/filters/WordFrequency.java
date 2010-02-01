@@ -27,10 +27,10 @@ import weka.core.Instance;
  * @author jmcarmona
  */
 public class WordFrequency extends Filter {
+
 	private TreeMap<String, Integer> folderMap;
 	private WordsStore ws;
 	static List<String> palabrasAAnalizar;
-
 	List<Attribute> attList;
 
 	public WordFrequency() {
@@ -47,8 +47,8 @@ public class WordFrequency extends Filter {
 	@Override
 	public List<Attribute> getAttributes() {
 		for (String folder : folderMap.keySet()) { // Esto a wordsfreqency, pero
-													// en el futuro metodo get
-													// atributes
+			// en el futuro metodo get
+			// atributes
 			ws.getTermFrequencyManager().updateWordCountPorFolder(folder);
 			ws.getTermFrequencyManager().setNumberOfDocumentsByFolder(folder,
 					folderMap.get(folder));
@@ -79,7 +79,10 @@ public class WordFrequency extends Filter {
 		Set<String> stringsEsteDocumento = new TreeSet<String>();
 		List<Token> tokens = tokenizeMessageInfo(messageInfo);
 		for (Token token : tokens) {
-			stringsEsteDocumento.add(token.getStemmedForm());
+			String stemmedForm = token.getStemmedForm();
+			if (stemmedForm.length() > 2) {
+				stringsEsteDocumento.add(stemmedForm);
+			}
 		}
 		for (Attribute att : attList) {
 			if (stringsEsteDocumento.contains(att.name())) {
@@ -95,8 +98,7 @@ public class WordFrequency extends Filter {
 		String body = null;
 		try {
 			// Extraemos las palabras del cuerpo y la cabecera
-			body = messageInfo.getBody() + " "
-					+ messageInfo.getSubject();
+			body = messageInfo.getBody() + " " + messageInfo.getSubject();
 		} catch (IOException ex) {
 			Logger.getLogger(WordFrequency.class.getName()).log(Level.SEVERE,
 					null, ex);
@@ -108,5 +110,4 @@ public class WordFrequency extends Filter {
 		EmailTokenizer et = new EmailTokenizer(body, lang);
 		return et.tokenize();
 	}
-
 }

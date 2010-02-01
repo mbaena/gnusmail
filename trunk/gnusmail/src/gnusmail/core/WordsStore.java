@@ -69,7 +69,9 @@ public class WordsStore {
 		int numberOfTokens = tokens.size();
 		for (Token token : tokens) {
 			String stemmedForm = token.getStemmedForm();
-			if (!stopWords.get(token.getLanguage()).contains(stemmedForm)) {
+			if (!stopWords.get(token.getLanguage()).contains(stemmedForm) &&
+					!stopWords.get(token.getLanguage()).contains(token.getLowerCaseForm()) &&
+					 stemmedForm.length() > 2) {
 				if (!wordCount.containsKey(stemmedForm)) {
 					wordCount.put(stemmedForm, new WordCount(stemmedForm, 1));
 				} else {
@@ -91,7 +93,6 @@ public class WordsStore {
 		termFrequencyManager.addNumberOfWordsPerFolder(folderName, numberOfTokens);
 		Date d3 = new Date();
 		numAnalyzedDocuments++;
-		System.out.println((d2.getTime() - d1.getTime()) + " " + (d3.getTime() - d2.getTime()) + " " + wordCount.size() + " " + tokens.size());
 	}
 
 	public WordsStore() {
@@ -100,9 +101,8 @@ public class WordsStore {
 	}
 
 	public List<String> getFrequentWords() {
-
 		//For each folder, we store the most frequent non-stopword terms
-		List<String> wordsToReturn = new ArrayList<String>();
+		Set<String> wordsToReturn = new TreeSet<String>();
 		for (String folder : termFrequencyManager.getTfidfByFolder().keySet()) {
 			int index = 0;
 			List<TFIDFSummary> tfidSummaries =
@@ -115,7 +115,8 @@ public class WordsStore {
 				index++;
 			}
 		}
-		return wordsToReturn;
+
+		return new ArrayList<String>(wordsToReturn);
 	}
 
 	/**
