@@ -46,7 +46,7 @@ def createWordlists(author):
 
 def evaluateMOA(author, alg, output):
     maildir = os.path.join(_MAILDIR_PATH, author)
-    task = '%s -z%s -m%s --moa-classifier="%s" > %s.out' % (_GNUSMAIL_SH, maildir, output, alg, output) #moaClassifier
+    task = """%s -z%s -m%s --moa-classifier=\\\"%s\\\" > %s.out""" % (_GNUSMAIL_SH, maildir, output, alg, output) #moaClassifier
     print task
     commands.getoutput("bash %s" % (task))
 	#os.system('java -javaagent:%s -jar -Xmx5G %s -z -m --moa-classifier="%s"' % (_SIZEOFAG_JAR, _GNUSMAIL_JAR, alg)) #moaClassifier
