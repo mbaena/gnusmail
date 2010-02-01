@@ -105,12 +105,16 @@ public class WordsStore {
 		Set<String> wordsToReturn = new TreeSet<String>();
 		for (String folder : termFrequencyManager.getTfidfByFolder().keySet()) {
 			int index = 0;
-			List<TFIDFSummary> tfidSummaries =
+			Map<String, TFIDFSummary> tfidSummaries =
 					termFrequencyManager.getTfidfByFolder().get(folder);
-			Collections.sort(tfidSummaries);
+			ArrayList<TFIDFSummary> tfidfSummariesList = new ArrayList<TFIDFSummary>(tfidSummaries.size());
+			for (String term: tfidSummaries.keySet()) {
+				tfidfSummariesList.add(tfidSummaries.get(term));
+			}
+			Collections.sort(tfidfSummariesList);
 
-			while (index < 50 && index < tfidSummaries.size()) {
-				TFIDFSummary ts = tfidSummaries.get(tfidSummaries.size() - 1 - index);
+			while (index < 50 && index < tfidfSummariesList.size()) {
+				TFIDFSummary ts = tfidfSummariesList.get(tfidfSummariesList.size() - 1 - index);
 				wordsToReturn.add(ts.getTerm());
 				index++;
 			}
@@ -132,12 +136,16 @@ public class WordsStore {
 			//For each folder, we store the most frequent non-stopword terms
 			for (String folder : termFrequencyManager.getTfidfByFolder().keySet()) {
 				int index = 0;
-				List<TFIDFSummary> tfidSummaries =
+				Map<String, TFIDFSummary> tfidSummaries =
 						termFrequencyManager.getTfidfByFolder().get(folder);
-				Collections.sort(tfidSummaries);
+				ArrayList<TFIDFSummary> tfidfSummariesList = new ArrayList<TFIDFSummary>(tfidSummaries.size());
+				for (String term: tfidSummaries.keySet()) {
+					tfidfSummariesList.add(tfidSummaries.get(term));
+				}
+				Collections.sort(tfidfSummariesList);
 
-				while (index < 50 && index < tfidSummaries.size()) {
-					TFIDFSummary ts = tfidSummaries.get(tfidSummaries.size() - 1 - index);
+				while (index < 50 && index < tfidfSummariesList.size()) {
+					TFIDFSummary ts = tfidfSummariesList.get(tfidSummaries.size() - 1 - index);
 					System.out.println(ts);
 					wordsToWrite.add(ts.getTerm());
 					index++;
