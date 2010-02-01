@@ -144,7 +144,7 @@ public class MainManager {
 		}
 	}
 
-	public void extractAttributes() {
+	public void extractAttributes(String datasetFileName) {
 		System.out.println("Mainmanager.extract attributes");
 		filterManager.extractAttributeHeaders(getMessageReader());
 		Instances instances = new Instances(filterManager.getDataset());
@@ -155,7 +155,7 @@ public class MainManager {
 			Instance inst = filterManager.makeInstance(msgInfo);
 			instances.add(inst);
 		}
-		filterManager.writeToFile(instances);
+		filterManager.writeToFile(instances, datasetFileName);
 	}
 
 	/**

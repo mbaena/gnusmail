@@ -12,7 +12,7 @@ public class Main {
 		longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
 		longopts[3] = new LongOpt("moa-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 243);
-		Getopt getopt = new Getopt("Clasificador", argv, "-:bdefgi::kz::m::n::r::p::a::c:::l::hx", longopts);
+		Getopt getopt = new Getopt("Clasificador", argv, "-:b::defgi::kz::m::n::r::p::a::c:::l::hx", longopts);
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
 		System.out.println("WELCOME TO GENUSMAIL!!!");
@@ -44,6 +44,7 @@ public class Main {
 					break;
 
 				case 'b':
+					options.setDatasetFileName(arg);
 					options.setAttributeExtraction(true);
 					break;
 

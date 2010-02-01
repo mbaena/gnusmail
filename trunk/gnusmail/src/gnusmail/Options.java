@@ -29,6 +29,7 @@ public class Options {
 	private boolean incrementallyTraining;
 	private String tasasFileName;
 	private boolean attributeExtraction;
+	private String datasetFileName;
 
 	public static Options getInstance() {
 		if (instance == null) {
@@ -68,7 +69,7 @@ public class Options {
 			mainManager.showAttibutes(this.showAttributes);
 		}
 		if (this.attributeExtraction) {
-			mainManager.extractAttributes();
+			mainManager.extractAttributes(this.datasetFileName);
 		}
 		if (this.tasasFileName!=null) {
 			mainManager.setTasasFileName(tasasFileName);
@@ -213,7 +214,11 @@ public class Options {
 		this.moaClassifier = arg;
 	}
 
-	public void setAttributeExtraction(boolean b) {
-		this.attributeExtraction = b;
+	public void setAttributeExtraction(boolean bool) {
+		this.attributeExtraction = bool;
+	}
+
+	public void setDatasetFileName(String arg) {
+		this.datasetFileName = arg;
 	}
 }
