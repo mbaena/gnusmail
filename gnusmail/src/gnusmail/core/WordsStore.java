@@ -113,7 +113,7 @@ public class WordsStore {
 			}
 			Collections.sort(tfidfSummariesList);
 
-			while (index < 50 && index < tfidfSummariesList.size()) {
+			while (index < tfidfSummariesList.size()) {
 				TFIDFSummary ts = tfidfSummariesList.get(tfidfSummariesList.size() - 1 - index);
 				wordsToReturn.add(ts.getTerm());
 				index++;
@@ -144,7 +144,7 @@ public class WordsStore {
 				}
 				Collections.sort(tfidfSummariesList);
 
-				while (index < 50 && index < tfidfSummariesList.size()) {
+				while (index < tfidfSummariesList.size()) {
 					TFIDFSummary ts = tfidfSummariesList.get(tfidSummaries.size() - 1 - index);
 					System.out.println(ts);
 					wordsToWrite.add(ts.getTerm());
