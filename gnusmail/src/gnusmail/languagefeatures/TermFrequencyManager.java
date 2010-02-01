@@ -7,11 +7,12 @@ import java.util.TreeMap;
 
 /**
  * This class mantains a list of tfidf summaries by folder
+ * 
  * @author jmcarmona
  */
 public class TermFrequencyManager {
 
-	Map<String, List<TFIDFSummary>> tfidfByFolder;
+	Map<String, Map<String, TFIDFSummary>> tfidfByFolder;
 	Map<String, Long> numberOfWordsByFolder;
 	Map<String, Integer> numberOfDocumentsByFolder;
 
@@ -19,14 +20,18 @@ public class TermFrequencyManager {
 		return numberOfDocumentsByFolder;
 	}
 
-	public void setNumberOfDocumentsByFolder(String folder, int numberOfDocumentsByFolder) {
+	public void setNumberOfDocumentsByFolder(String folder,
+			int numberOfDocumentsByFolder) {
 		if (this.getNumberOfDocumentsByFolder() == null) {
 			this.numberOfDocumentsByFolder = new TreeMap<String, Integer>();
 		}
 		this.numberOfDocumentsByFolder.put(folder, numberOfDocumentsByFolder);
 		if (tfidfByFolder.containsKey(folder)) {
-			for (TFIDFSummary tfidf : tfidfByFolder.get(folder)) {
-				tfidf.setTotalNumberOfDocumentsInThisFolder(numberOfDocumentsByFolder);
+			Map<String, TFIDFSummary> termSummaries = tfidfByFolder.get(folder);
+			for (String term : termSummaries.keySet()) {
+				TFIDFSummary tfidf = termSummaries.get(term);
+				tfidf
+						.setTotalNumberOfDocumentsInThisFolder(numberOfDocumentsByFolder);
 			}
 		}
 	}
@@ -39,67 +44,66 @@ public class TermFrequencyManager {
 		this.numberOfWordsByFolder = numberOfWordsByFolder;
 	}
 
-	public Map<String, List<TFIDFSummary>> getTfidfByFolder() {
+	public Map<String, Map<String, TFIDFSummary>> getTfidfByFolder() {
 		return tfidfByFolder;
 	}
 
-	public void setTfidfByFolder(Map<String, List<TFIDFSummary>> tfidfByFolder) {
+	public void setTfidfByFolder(
+			Map<String, Map<String, TFIDFSummary>> tfidfByFolder) {
 		this.tfidfByFolder = tfidfByFolder;
 	}
 
 	public TermFrequencyManager() {
-		tfidfByFolder = new TreeMap<String, List<TFIDFSummary>>();
+		tfidfByFolder = new TreeMap<String, Map<String, TFIDFSummary>>();
 	}
 
 	/**
 	 * This method must be called once per folder
-	 * @param appearances how many times does term appear in a document
+	 * 
+	 * @param appearances
+	 *            how many times does term appear in a document
 	 * @param folder
 	 * @param term
 	 */
-	public void addTermAppearancesInDocumentForFolder(String term, int appearances, String folder) {
+	public void addTermAppearancesInDocumentForFolder(String term,
+			int appearances, String folder) {
 		if (!tfidfByFolder.containsKey(folder)) {
-			tfidfByFolder.put(folder, new LinkedList<TFIDFSummary>());
+			tfidfByFolder.put(folder, new TreeMap<String, TFIDFSummary>());
 		}
 		TFIDFSummary summary = locateTermInList(term, tfidfByFolder.get(folder));
 		summary.addNewAppearances(appearances);
 	}
 
 	/**
-	 * Like addTermAppearancesInDocumentForFolder, but adding appearances one by one
+	 * Like addTermAppearancesInDocumentForFolder, but adding appearances one by
+	 * one
+	 * 
 	 * @param term
 	 * @param folder
 	 */
-	public void addSingleTermAppearanceInDocumentForFolder(String term, String folder) {
+	public void addSingleTermAppearanceInDocumentForFolder(String term,
+			String folder) {
 		if (!tfidfByFolder.containsKey(folder)) {
-			tfidfByFolder.put(folder, new LinkedList<TFIDFSummary>());
+			tfidfByFolder.put(folder, new TreeMap<String, TFIDFSummary>());
 		}
 		TFIDFSummary summary = locateTermInList(term, tfidfByFolder.get(folder));
 		summary.addNewAppearances(1);
 	}
 
-	private TFIDFSummary locateTermInList(String term, List<TFIDFSummary> list) {
-		boolean found = false;
-		int counter = 0;
-		TFIDFSummary res = null;
-
-		while (!found && counter < list.size()) {
-			if (list.get(counter).getTerm().equals(term)) {
-				found = true;
-				res = list.get(counter);
-			}
-			counter++;
-		}
+	private TFIDFSummary locateTermInList(String term,
+			Map<String, TFIDFSummary> termSummaries) {
+		TFIDFSummary res = termSummaries.get(term);
 		if (res == null) {
 			res = new TFIDFSummary();
 			res.setTerm(term);
-			list.add(res);
+			termSummaries.put(term, res);
 		}
 		return res;
 	}
 
 	public void addNewDocumentForWord(String term, String folder) {
-		TFIDFSummary tfidf = locateTermInList(term, this.tfidfByFolder.get(folder));
+		TFIDFSummary tfidf = locateTermInList(term, this.tfidfByFolder
+				.get(folder));
 		tfidf.addNewDocumentAppearance();
 	}
 
@@ -110,13 +114,15 @@ public class TermFrequencyManager {
 		if (!getNumberOfWordsByFolder().containsKey(folder)) {
 			numberOfWordsByFolder.put(folder, new Long(0));
 		}
-		numberOfWordsByFolder.put(folder,
-				numberOfWordsByFolder.get(folder) + numberOfWords);
+		numberOfWordsByFolder.put(folder, numberOfWordsByFolder.get(folder)
+				+ numberOfWords);
 	}
 
 	public void updateWordCountPorFolder(String folder) {
-		if (tfidfByFolder.containsKey(folder)) {
-			for (TFIDFSummary tfidf : tfidfByFolder.get(folder)) {
+		Map<String, TFIDFSummary> termSummaries = tfidfByFolder.get(folder);
+		if (termSummaries != null) {
+			for (String term : termSummaries.keySet()) {				
+				TFIDFSummary tfidf = termSummaries.get(term);
 				tfidf.setTotalNumberOfWordsInThisFolder(numberOfWordsByFolder.get(folder));
 			}
 			System.out.println("Word count succesfully update for " + folder);
