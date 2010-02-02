@@ -11,10 +11,11 @@ import java.util.List;
  */
 public class FolderMessagesIterator implements Iterator<File> {
 
-	boolean recursive;
-	String baseFolder;
-	List<File> foldersToBeOpened;
-	List<File> filesToRetrieve;
+	private boolean recursive;
+	private int limitMessages = 50;
+	private String baseFolder;
+	protected List<File> foldersToBeOpened;
+	protected List<File> filesToRetrieve;
 
 	public String getBaseFolder() {
 		return baseFolder;
@@ -24,21 +25,23 @@ public class FolderMessagesIterator implements Iterator<File> {
 		this.baseFolder = baseFolder;
 	}
 
-	public FolderMessagesIterator(String baseFolder) {
+	public FolderMessagesIterator(String baseFolder, int limitMessages) {
 		this.baseFolder = baseFolder;
-		foldersToBeOpened = new ArrayList<File>();
-		foldersToBeOpened.add(new File(baseFolder));
-		filesToRetrieve = new ArrayList<File>();
+		this.foldersToBeOpened = new ArrayList<File>();
+		this.foldersToBeOpened.add(new File(baseFolder));
+		this.filesToRetrieve = new ArrayList<File>();
 		this.recursive = true;
+		this.limitMessages = limitMessages;
 	}
 
-	public FolderMessagesIterator(String baseFolder, boolean recursive) {
+	public FolderMessagesIterator(String baseFolder, boolean recursive, int limitMessages) {
 		System.out.println("create Folder Messages Iterator " + baseFolder + " " + recursive);
 		this.baseFolder = baseFolder;
-		foldersToBeOpened = new ArrayList<File>();
-		foldersToBeOpened.add(new File(baseFolder));
-		filesToRetrieve = new ArrayList<File>();
+		this.foldersToBeOpened = new ArrayList<File>();
+		this.foldersToBeOpened.add(new File(baseFolder));
+		this.filesToRetrieve = new ArrayList<File>();
 		this.recursive = recursive;
+		this.limitMessages = limitMessages;
 		//Alternativa: sin while
 		while (filesToRetrieve.size() == 0 && foldersToBeOpened.size() > 0) {
 			expandFolder(foldersToBeOpened.get(0));
@@ -77,7 +80,6 @@ public class FolderMessagesIterator implements Iterator<File> {
 	}
 
 	private void expandFolder(File folder) {
-		int limitMessages = 50; //Used in order to balance
 		int openedMessages = 0;
 		System.out.println("Expand " + folder.getAbsolutePath());
 		if (foldersToBeOpened != null && foldersToBeOpened.size() > 0) {

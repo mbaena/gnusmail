@@ -238,18 +238,17 @@ public class MainManager {
 			for (double d : rates) {
 				out.write(d + "\n");
 			}
-//Close the output stream
-
 			out.close();
 		} catch (Exception e) {//Catch exception if any
-			System.err.println("No se pueden imprimir tasas");
+			System.err.println("No se pueden imprimir tasas a " + fileName);
+			e.printStackTrace();
 		}
 	}
 
 	private MessageReader getMessageReader() {
 		MessageReader reader = null;
 		if (readMailsFromFile) {
-			reader = MessageReaderFactory.createReader(this.maildir);
+			reader = MessageReaderFactory.createReader(this.maildir, 50); 
 		} else {
 			reader = MessageReaderFactory.createReader(connection, 2);
 		}

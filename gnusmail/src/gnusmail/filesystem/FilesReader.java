@@ -8,17 +8,19 @@ import java.util.Iterator;
  * @author jmcarmona
  */
 public class FilesReader implements Iterable<File> {
-	String baseFolder;
-	boolean recursive;
+	private String baseFolder;
+	private boolean recursive;
+	private int limit;
 
-	public FilesReader(String baseFolder, boolean recursive) {
+	public FilesReader(String baseFolder, boolean recursive, int limit) {
 		this.baseFolder = baseFolder;
 		this.recursive = recursive;
+		this.limit = limit;
 	}
 
 
 	public Iterator<File> iterator() {
-		return new FolderMessagesIterator(baseFolder, recursive);
+		return new FolderMessagesIterator(baseFolder, recursive, limit);
 	}
 
 }
