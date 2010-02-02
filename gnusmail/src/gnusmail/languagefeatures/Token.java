@@ -44,7 +44,7 @@ public class Token {
         String toStem = originalForm.replaceAll("\\.|:|,|\\(|\\)", "");
        // String toStem = getLowerCaseForm();
 		String stemmed = StemmerFactory.getStemmer(language).extactRoot(toStem);
-		return stemmed;
+		return stemmed.toLowerCase();
     }
 
     @Override
