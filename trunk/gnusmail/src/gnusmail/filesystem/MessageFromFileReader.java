@@ -23,7 +23,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 
 /**
- *
+ * TODO paramtro
  * @author jmcarmona
  */
 public class MessageFromFileReader extends MessageReader implements Iterable<Message> {
@@ -59,30 +59,18 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 			System.out.println("Imprimiendo cuentas: fin");
 		}
 
-		public MessagesFromFileIterator(String baseFolder, boolean recursive) {
-			FilesReader fr = new FilesReader(baseFolder, recursive);
+		public MessagesFromFileIterator(String baseFolder, boolean recursive, int limit) {
+			FilesReader fr = new FilesReader(baseFolder, recursive, limit);
 			it = (FolderMessagesIterator) fr.iterator();
 			createMessagesList();
 		}
 
 		public boolean hasNext() {
-			//boolean res = it.hasNext();
 			boolean res = index < messages.size();
 			return res;
 		}
 
 		public Message next() {
-			/*
-			Message res = null;
-			File f = it.next();
-			while (f == null && it.hasNext()) {
-			f = it.next();
-			}
-			if (f != null) {
-			res = convertFileToMessage(f);
-			}
-			return res;
-			 */
 			Message res = messages.get(index).getMesssage();
 			index++;
 			return res;
@@ -100,9 +88,8 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 		 */
 		//TODO habria que hacer una clase que heredara de Message, y que tuviera una carpeta
 		private Message convertFileToMessage(File f) {
-			String parentFolder = f.getParentFile().getAbsolutePath();
+			String parentFolder = f.getParentFile().getPath();
 			InputStream is = null;
-			MessageInfo ms = null;
 			Message m = null;
 			try {
 				Session s = null;
@@ -123,12 +110,16 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 			return m;
 		}
 	}
+
 	private String baseFolder;
 	private boolean recursive = false;
+	private int limit = 0;
 
-	public MessageFromFileReader(String baseFolder) {
+	public MessageFromFileReader(String baseFolder, int limit) {
 		this.baseFolder = baseFolder;
-		recursive = true;
+		this.recursive = true;
+		this.limit = limit;
+
 	}
 
 	public MessageFromFileReader(String baseFolder, boolean recursive) {
@@ -138,6 +129,6 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 
 	@Override
 	public Iterator<Message> iterator() {
-		return new MessagesFromFileIterator(baseFolder, recursive);
+		return new MessagesFromFileIterator(baseFolder, recursive, limit);
 	}
 }

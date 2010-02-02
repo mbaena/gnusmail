@@ -4,7 +4,6 @@ import gnusmail.core.cnx.MessageInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TreeSet;
 
 import javax.mail.MessagingException;
@@ -12,8 +11,6 @@ import javax.mail.MessagingException;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.ProtectedProperties;
-import weka.core.converters.ArffLoader;
 
 public abstract class SingleAttFilter extends Filter {
 
@@ -28,8 +25,10 @@ public abstract class SingleAttFilter extends Filter {
 	public List<Attribute> getAttributes() {
 		// New nominal attribute
 		FastVector attValuesF = new FastVector();
+		System.out.println("Atributo " + getName());
 		for (String value: attValues) {
 			attValuesF.addElement(value);
+			System.out.println("Anadimos " + value);
 		}
 		attribute = new Attribute(this.getName(), attValuesF);
 		ArrayList<Attribute> attList = new ArrayList<Attribute>();

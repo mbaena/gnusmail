@@ -2,19 +2,15 @@ package gnusmail;
 
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.MessageInfo;
-import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -177,7 +173,12 @@ public class ClassifierManager {
 			}
 		}
 
+		int nmess = 0;
 		for (Message msg : reader) {
+			nmess ++;
+			if (nmess % 100 == 0) {
+				System.out.println("Number of messages: " + nmess);
+			}
 			try {
 				MessageInfo msgInfo = new MessageInfo(msg);
 				/*if (!msgInfo.getFolderAsString().toLowerCase().contains("inbox") &&

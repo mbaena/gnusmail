@@ -9,14 +9,17 @@ import java.util.Iterator;
  */
 public class FSFoldersReader implements Iterable<File> {
 	String baseFolder;
+	int limit;
 
-	public FSFoldersReader(String baseFolder) {
+	public FSFoldersReader(String baseFolder, int limit) {
 		this.baseFolder = baseFolder;
+		this.limit = limit;
+
 	}
 
 
 	public Iterator<File> iterator() {
-		return new FSFolderIterator(baseFolder);
+		return new FSFolderIterator(baseFolder, this.limit);
 	}
 
 }

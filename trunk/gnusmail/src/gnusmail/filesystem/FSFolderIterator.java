@@ -1,7 +1,6 @@
 package gnusmail.filesystem;
 
 import java.io.File;
-import java.util.ArrayList;
 
 /**
  *
@@ -9,8 +8,8 @@ import java.util.ArrayList;
  */
 public class FSFolderIterator extends FolderMessagesIterator {
 
-	public FSFolderIterator(String baseFolder) {
-		super(baseFolder);
+	public FSFolderIterator(String baseFolder, int limit) {
+		super(baseFolder, limit);
 		System.out.println("Tras la creacionk, num de folders "  + foldersToBeOpened.size());
 	}
 
