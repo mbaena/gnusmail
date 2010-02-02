@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -48,8 +49,8 @@ public class WordsStore {
 	public final static String tokenPattern = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
 	public final static String configFolder = System.getProperty("user.home") + "/.gnusmail/";
 	public final static File WORDS_FILE = new File(configFolder + "/wordlist.data");
-	public final static File STOPWORDS_FILE_EN = new File(configFolder + "/english-stopwords.data");
-	public final static File STOPWORDS_FILE_ES = new File(configFolder + "/spanish-stopwords.data");
+	public final static String STOPWORDS_RESOURCE_ES = "/resources/spanish-stopwords.data";
+	public final static String STOPWORDS_RESOURCE_EN = "/resources/english-stopwords.data";
 	public final static double PROP_DOCUMENTS = 0.45;
 	public final static int MIN_DOCUMENTS = 3;
 	public final static int MAX_NUM_ATTRIBUTES = 400;
@@ -196,9 +197,9 @@ public class WordsStore {
 		try {
 			// Open the file that is the first
 			// command line parameter
-			FileInputStream fstream = new FileInputStream(STOPWORDS_FILE_ES);
+			InputStream is = WordsStore.class.getResourceAsStream(STOPWORDS_RESOURCE_ES);
 			// Get the object of DataInputStream
-			DataInputStream in = new DataInputStream(fstream);
+			DataInputStream in = new DataInputStream(is);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			String strLine;
 			//Read File Line By Line
@@ -209,9 +210,9 @@ public class WordsStore {
 			}
 			//Close the input stream
 			in.close();
-			fstream = new FileInputStream(STOPWORDS_FILE_EN);
+			is = WordsStore.class.getResourceAsStream(STOPWORDS_RESOURCE_ES);
 			// Get the object of DataInputStream
-			in = new DataInputStream(fstream);
+			in = new DataInputStream(is);
 			br = new BufferedReader(new InputStreamReader(in));
 			//Read File Line By Line
 			List<String> wordsEn = new ArrayList<String>();

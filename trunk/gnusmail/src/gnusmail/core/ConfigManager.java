@@ -77,7 +77,7 @@ public class ConfigManager {
 	 */
 	public static String[] getFilters() {
 		String filters = properties.getProperty("filters");
-		String[] filterList = filters.split(" ");
+		String[] filterList = filters.split(" +");
 		return filterList;
 	}
 
