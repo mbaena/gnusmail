@@ -1,15 +1,7 @@
 package gnusmail.core;
 
 import gnusmail.Languages.Language;
-import gnusmail.MessageReader;
-import gnusmail.Options;
-import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
-import gnusmail.filesystem.FSFoldersReader;
-import gnusmail.filesystem.MessageFromFileReader;
-import gnusmail.filters.WordFrequency;
-import gnusmail.languagefeatures.EmailTokenizer;
-import gnusmail.languagefeatures.LanguageDetection;
 import gnusmail.languagefeatures.TFIDFSummary;
 import gnusmail.languagefeatures.TermFrequencyManager;
 import gnusmail.languagefeatures.Token;
@@ -17,23 +9,16 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.mail.Folder;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 
 /**
@@ -42,19 +27,14 @@ import javax.mail.MessagingException;
  * @author jmcarmona
  */
 public class WordsStore {
-	//Max number of messages to extract information from
-
-	private final int MAX_MESSAGES_PER_FOLDER = 50;
 	TermFrequencyManager termFrequencyManager;
 	public final static String tokenPattern = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’";
 	public final static String configFolder = System.getProperty("user.home") + "/.gnusmail/";
-	public final static File WORDS_FILE = new File(configFolder + "/wordlist.data");
 	public final static String STOPWORDS_RESOURCE_ES = "/resources/spanish-stopwords.data";
 	public final static String STOPWORDS_RESOURCE_EN = "/resources/english-stopwords.data";
-	public final static double PROP_DOCUMENTS = 0.45;
-	public final static int MIN_DOCUMENTS = 3;
-	public final static int MAX_NUM_ATTRIBUTES = 400;
+	public final static int MAX_NUM_ATTRIBUTES_BY_FOLDER = 20;
 	int numAnalyzedDocuments = 0;
+	List<String> frequentWords = null;
 	Map<Language, List<String>> stopWords;
 
 	public TermFrequencyManager getTermFrequencyManager() {
@@ -72,7 +52,7 @@ public class WordsStore {
 			String stemmedForm = token.getStemmedForm();
 			if (!stopWords.get(token.getLanguage()).contains(stemmedForm) &&
 					!stopWords.get(token.getLanguage()).contains(token.getLowerCaseForm()) &&
-					 stemmedForm.length() > 2) {
+					stemmedForm.length() > 2) {
 				if (!wordCount.containsKey(stemmedForm)) {
 					wordCount.put(stemmedForm, new WordCount(stemmedForm, 1));
 				} else {
@@ -82,17 +62,14 @@ public class WordsStore {
 			}
 
 		}
-		Date d1 = new Date();
 		for (String word : wordCount.keySet()) {
 			termFrequencyManager.addTermAppearancesInDocumentForFolder(word,
 					wordCount.get(word).getCount(),
 					folderName);
 			termFrequencyManager.addNewDocumentForWord(word, folderName);
 		}
-		Date d2 = new Date();
 		//We update the number of words for this folder
 		termFrequencyManager.addNumberOfWordsPerFolder(folderName, numberOfTokens);
-		Date d3 = new Date();
 		numAnalyzedDocuments++;
 	}
 
@@ -103,31 +80,38 @@ public class WordsStore {
 
 	public List<String> getFrequentWords() {
 		//For each folder, we store the most frequent non-stopword terms
-		Set<String> wordsToReturn = new TreeSet<String>();
-		for (String folder : termFrequencyManager.getTfidfByFolder().keySet()) {
-			int index = 0;
-			Map<String, TFIDFSummary> tfidSummaries =
-					termFrequencyManager.getTfidfByFolder().get(folder);
-			ArrayList<TFIDFSummary> tfidfSummariesList = new ArrayList<TFIDFSummary>(tfidSummaries.size());
-			for (String term: tfidSummaries.keySet()) {
-				tfidfSummariesList.add(tfidSummaries.get(term));
-			}
-			Collections.sort(tfidfSummariesList);
+		//We compute the frequent words only once
+		if (this.frequentWords == null) {
+			Set<String> wordsToReturn = new TreeSet<String>();
+			for (String folder : termFrequencyManager.getTfidfByFolder().keySet()) {
+				int index = 0;
+				Map<String, TFIDFSummary> tfidSummaries =
+						termFrequencyManager.getTfidfByFolder().get(folder);
+				ArrayList<TFIDFSummary> tfidfSummariesList = new ArrayList<TFIDFSummary>(tfidSummaries.size());
+				for (String term : tfidSummaries.keySet()) {
+					tfidfSummariesList.add(tfidSummaries.get(term));
+				}
+				Collections.sort(tfidfSummariesList);
 
-			while (index < tfidfSummariesList.size()) {
-				TFIDFSummary ts = tfidfSummariesList.get(tfidfSummariesList.size() - 1 - index);
-				wordsToReturn.add(ts.getTerm());
-				index++;
+				//while (index < tfidfSummariesList.size()) {
+				while (index < tfidfSummariesList.size() && index < MAX_NUM_ATTRIBUTES_BY_FOLDER) {
+					TFIDFSummary ts = tfidfSummariesList.get(tfidfSummariesList.size() - 1 - index);
+					wordsToReturn.add(ts.getTerm());
+					index++;
+				}
 			}
+
+			this.frequentWords = new ArrayList<String>(wordsToReturn);
 		}
-
-		return new ArrayList<String>(wordsToReturn);
+		System.out.println("Numero de palabras frecuentes: " + this.frequentWords.size());
+		for (String w : frequentWords) System.out.println("FreqWord " + w);
+		return this.frequentWords;
 	}
 
 	/**
 	 * @deprecated
 	 */
-	public void writeToFile() {
+	/*public void writeToFile() {
 		FileWriter outFile = null;
 		Set<String> wordsToWrite = new TreeSet<String>();
 
@@ -140,7 +124,7 @@ public class WordsStore {
 				Map<String, TFIDFSummary> tfidSummaries =
 						termFrequencyManager.getTfidfByFolder().get(folder);
 				ArrayList<TFIDFSummary> tfidfSummariesList = new ArrayList<TFIDFSummary>(tfidSummaries.size());
-				for (String term: tfidSummaries.keySet()) {
+				for (String term : tfidSummaries.keySet()) {
 					tfidfSummariesList.add(tfidSummaries.get(term));
 				}
 				Collections.sort(tfidfSummariesList);
@@ -166,7 +150,7 @@ public class WordsStore {
 				Logger.getLogger(WordsStore.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-	}
+	}*/
 
 	/**
 	 * This function creates a list with the maxMessagesPerFolder newer messages
@@ -230,7 +214,11 @@ public class WordsStore {
 		}
 	}
 
-	public void readWordsList(MessageReader reader) {
+	/**
+	 * @deprecated 
+	 * @param reader
+	 */
+	/*public void readWordsList(MessageReader reader) {
 		int numberOfMessages = 0;
 		Map<String, Integer> folderMap = new TreeMap<String, Integer>();
 		for (Message msg : reader) { //Esto a WordsFrequency
@@ -258,5 +246,5 @@ public class WordsStore {
 		System.out.println("Write to file...");
 		writeToFile();
 		System.out.println("Written to file...");
-	}
+	}*/
 }
