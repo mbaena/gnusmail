@@ -12,6 +12,8 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
@@ -56,34 +58,62 @@ public class ClassifierManager {
 	 * the underlying model with each message
 	 * @return 
 	 */
-	public List<Double> incrementallyTrainModel(MessageReader reader) {
+	public List<Double> incrementallyTrainModel(MessageReader reader, String wekaClassifier) {
 		int seenMails = 0;
 		int goodClassifications = 0;
+		Map<String, Integer> messagesViewedByFolder = new TreeMap<String, Integer>();
+		Map<String, Integer> correctClassificationsByFolder = new TreeMap<String, Integer>();
 		List<Double> rates = new ArrayList<Double>();
 		try {
-			Classifier model = new NaiveBayesUpdateable(); //TODO configurable Classifier
+			Classifier model = null;
+			model = (Classifier) Class.forName(wekaClassifier).newInstance();
 			try {
 				model.buildClassifier(filterManager.getDataset()); // Add attributes information
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
-			for (Message msg: reader) { //TODO: esto en mainmanager,
+			for (Message msg : reader) { //TODO: esto en mainmanager,
 				try {
 					MessageInfo msgInfo = new MessageInfo(msg);
+					String folder = msgInfo.getFolderAsString();
 					Instance inst = filterManager.makeInstance(msgInfo);
 					double predictedClass = model.classifyInstance(inst);
 					double trueClass = inst.classValue();
+
+					//Statistics update: total number
 					if (predictedClass == trueClass) {
 						goodClassifications++;
 					}
 					seenMails++;
+
 					double rate = goodClassifications * 100.0 / seenMails;
 					System.out.println("Correct answers rate: " + rate + "%");
 					rates.add(rate);
 
+					//Statistics update by folder
+					if (!messagesViewedByFolder.containsKey(folder)) {
+						messagesViewedByFolder.put(folder, 0);
+					}
+					if (!correctClassificationsByFolder.containsKey(folder)) {
+						correctClassificationsByFolder.put(folder, 0);
+					}
+					int currentViewedMessages = messagesViewedByFolder.get(folder);
+					messagesViewedByFolder.put(folder, currentViewedMessages + 1);
+					if (predictedClass == trueClass) {
+						int currentGuessed = correctClassificationsByFolder.get(folder);
+						correctClassificationsByFolder.put(folder, currentGuessed + 1);
+					}
+					String strCorrectByFolder = "";
+					for (String f : messagesViewedByFolder.keySet()) {
+						int totalForThisFolder = messagesViewedByFolder.get(f);
+						int guessedForThisFolder = correctClassificationsByFolder.get(f);
+						strCorrectByFolder += "\t" + f + ": " + guessedForThisFolder + "/" + totalForThisFolder +
+								"(" + (guessedForThisFolder * 100.0 / totalForThisFolder) + "%); \n";
+					}
+					System.out.println("Correct answers rate by folder: " + strCorrectByFolder);
+
 					updateableModel.updateClassifier(inst);
-					//msg.getFolder().close(false);
 				} catch (Exception ex) {
 					Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -92,6 +122,12 @@ public class ClassifierManager {
 			ObjectOutputStream fis = new ObjectOutputStream(f);
 			fis.writeObject(updateableModel);
 			fis.close();
+		} catch (InstantiationException ex) {
+			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (IllegalAccessException ex) {
+			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (ClassNotFoundException ex) {
+			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
 			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -120,9 +156,7 @@ public class ClassifierManager {
 			fis.writeObject(model);
 			fis.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("File "
-					+ ConfigManager.MODEL_FILE.getAbsolutePath()
-					+ " not found");
+			System.out.println("File " + ConfigManager.MODEL_FILE.getAbsolutePath() + " not found");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -130,6 +164,8 @@ public class ClassifierManager {
 	}
 
 	public List<Double> evaluatePrecuential(MessageReader reader, String moaClassifier) {
+		Map<String, Integer> messagesViewedByFolder = new TreeMap<String, Integer>();
+		Map<String, Integer> correctClassificationsByFolder = new TreeMap<String, Integer>();
 		// Evaluator Factory
 		ClassOption evaluatorOption = new ClassOption("evaluator", 'e',
 				"Evaluator to use.", ClassificationPerformanceEvaluator.class, "WindowClassificationPerformanceEvaluator");
@@ -175,24 +211,43 @@ public class ClassifierManager {
 
 		int nmess = 0;
 		for (Message msg : reader) {
-			nmess ++;
+			nmess++;
 			if (nmess % 100 == 0) {
 				System.out.println("Number of messages: " + nmess);
 			}
 			try {
 				MessageInfo msgInfo = new MessageInfo(msg);
-				/*if (!msgInfo.getFolderAsString().toLowerCase().contains("inbox") &&
-				!msgInfo.getFolderAsString().toLowerCase().contains("deleted") &&
-				!msgInfo.getFolderAsString().toLowerCase().contains("sent")&&
-				!msgInfo.getFolderAsString().toLowerCase().contains("junk")&&
-				!msgInfo.getFolderAsString().toLowerCase().contains("attachment") ) {*/
-				//if (!msg.getFolder().isOpen()) msg.getFolder().open(Folder.READ_ONLY);
 				System.out.println("Folder: " + msgInfo.getFolderAsString());
+				String folder = msgInfo.getFolderAsString();
+				if (!messagesViewedByFolder.containsKey(folder)) {
+					messagesViewedByFolder.put(folder, 0);
+				}
+				if (!correctClassificationsByFolder.containsKey(folder)) {
+					correctClassificationsByFolder.put(folder, 0);
+				}
+				int totalThisFolder = messagesViewedByFolder.get(folder);
+				int correctThisFolder = messagesViewedByFolder.get(folder);
 				Instance trainInst = filterManager.makeInstance(msgInfo);
 				Instance testInst = (Instance) trainInst.copy();
 				int trueClass = (int) trainInst.classValue();
 				testInst.setClassMissing();
 				double[] prediction = learner.getVotesForInstance(testInst);
+
+				//Update statistics
+				if (learner.correctlyClassifies(testInst)) {
+					correctClassificationsByFolder.put(folder, correctThisFolder + 1);
+
+				}
+				messagesViewedByFolder.put(folder, totalThisFolder + 1);
+				String strCorrectByFolder = "";
+				for (String f : messagesViewedByFolder.keySet()) {
+					int totalForThisFolder = messagesViewedByFolder.get(f);
+					int guessedForThisFolder = correctClassificationsByFolder.get(f);
+					strCorrectByFolder += "\t" + f + ": " + guessedForThisFolder + "/" + totalForThisFolder +
+							"(" + (guessedForThisFolder * 100.0 / totalForThisFolder) + "%); \n";
+				}
+				System.out.println("Correct answers rate by folder: " + strCorrectByFolder);
+
 				evaluator.addClassificationAttempt(trueClass, prediction, testInst.weight());
 				listMs = evaluator.getPerformanceMeasurements();
 				tasas.add(listMs[posCorrect].getValue());
@@ -232,9 +287,7 @@ public class ClassifierManager {
 			fis.writeObject(model);
 			fis.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("File "
-					+ ConfigManager.MODEL_FILE.getAbsolutePath()
-					+ " not found");
+			System.out.println("File " + ConfigManager.MODEL_FILE.getAbsolutePath() + " not found");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -262,10 +315,8 @@ public class ClassifierManager {
 		Attribute att = dataSet.attribute("Folder");
 		double biggest = 0;
 		int biggest_index = 0;
-		for (int i = 0; i
-				< res.length; i++) {
-			System.out.println("\nDestination folder will be " + att.value(i)
-					+ " with probability: " + res[i]);
+		for (int i = 0; i < res.length; i++) {
+			System.out.println("\nDestination folder will be " + att.value(i) + " with probability: " + res[i]);
 			if (res[i] > biggest) {
 				biggest_index = i;
 				biggest =
