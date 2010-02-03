@@ -3,9 +3,7 @@ package gnusmail;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import gnusmail.core.ConfigManager;
-import gnusmail.core.WordsStore;
 import javax.mail.Folder;
-import weka.core.Instances;
 
 public class Options {
 
@@ -26,6 +24,7 @@ public class Options {
 	private boolean moaTraining;
 	private boolean studyHeaders;
 	private String moaClassifier;
+	private String wekaClassifier = "NaiveBayesUpdateable";
 	private boolean incrementallyTraining;
 	private String tasasFileName;
 	private boolean attributeExtraction;
@@ -48,7 +47,7 @@ public class Options {
 		this.listMailsInFolder = false;
 		this.mailClassification = false;
 		this.openMail = -1;
-		this.readMailsFromFileSystem=false;
+		this.readMailsFromFileSystem = false;
 		this.updateModelWithMail = false;
 		this.moaTraining = false;
 		this.incrementallyTraining = false;
@@ -71,16 +70,16 @@ public class Options {
 		if (this.attributeExtraction) {
 			mainManager.extractAttributes(this.datasetFileName);
 		}
-		if (this.tasasFileName!=null) {
+		if (this.tasasFileName != null) {
 			mainManager.setTasasFileName(tasasFileName);
 		}
 		if (this.modelTraining) {
 			//Instances dataSet = mainManager.extractAttributeHeaders(new WordsStore());
 			//mainManager.setDataset(dataSet);
 			if (this.incrementallyTraining) {
-				mainManager.incrementallyTrainModel();
+				mainManager.incrementallyTrainModel(wekaClassifier);
 			} else {
-			//	mainManager.trainModel();
+				//	mainManager.trainModel();
 			}
 		}
 
@@ -150,8 +149,7 @@ public class Options {
 	}
 
 	public void setReadMailsFromFileSystem(String maildir) {
-		System.out.println("Options: Set Read Mail From FS: "
-				+ readMailsFromFileSystem);
+		System.out.println("Options: Set Read Mail From FS: " + readMailsFromFileSystem);
 		this.readMailsFromFileSystem = true;
 		this.maildir = maildir;
 	}
@@ -208,6 +206,14 @@ public class Options {
 
 	public void setUpdateModelWithMail() {
 		this.updateModelWithMail = true;
+	}
+
+	public String getWekaClassifier() {
+		return wekaClassifier;
+	}
+
+	public void setWekaClassifier(String wekaClassifier) {
+		this.wekaClassifier = wekaClassifier;
 	}
 
 	public void setMoaClassifier(String arg) {
