@@ -225,7 +225,7 @@ public class MainManager {
 	public void evaluateWithMOA(String moaClassifier) {
 		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Evaluate with moa");
 		MessageReader reader = getMessageReader();
-		filterManager.extractAttributeHeaders(getMessageReader());
+		filterManager.extractAttributeHeaders(reader);
 		List<Double> rates = classifierManager.evaluatePrecuential(reader, moaClassifier);
 		printRateToFile(rates, tasasFileName);
 	}
