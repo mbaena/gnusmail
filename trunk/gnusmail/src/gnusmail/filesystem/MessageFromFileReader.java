@@ -34,6 +34,7 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 		FolderMessagesIterator it;
 		List<SortableMessage> messages = null;
 		Map<String, Integer> cuentasPorCarpeta = new TreeMap<String, Integer>();
+		private int baseFolderLength;
 
 		private void createMessagesList() {
 			System.out.print("Initializing message list...");
@@ -60,6 +61,7 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 		}
 
 		public MessagesFromFileIterator(String baseFolder, boolean recursive, int limit) {
+			this.baseFolderLength = baseFolder.length()+1;
 			FilesReader fr = new FilesReader(baseFolder, recursive, limit);
 			it = (FolderMessagesIterator) fr.iterator();
 			createMessagesList();
@@ -95,7 +97,7 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 				Session s = null;
 				is = new FileInputStream(f);
 				m = new MIMEMessageWithFolder(s, is);
-				((MIMEMessageWithFolder) m).setFolderAsStr(parentFolder);
+				((MIMEMessageWithFolder) m).setFolderAsStr(parentFolder.substring(baseFolderLength, parentFolder.length()));
 			} catch (MessagingException ex) {
 				Logger.getLogger(MessageFromFileReader.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (FileNotFoundException ex) {
