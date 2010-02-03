@@ -1,26 +1,18 @@
 package gnusmail;
 
 import gnusmail.core.ConfigManager;
-import gnusmail.core.WordsStore;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -167,12 +159,12 @@ public class MainManager {
 		classifierManager.trainModel();
 	}
 
-	public void incrementallyTrainModel() {
+	public void incrementallyTrainModel(String wekaClassifier) {
 		//initiallyTrainModel();
 		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Incrementally Train Model");
 		MessageReader reader = getMessageReader();
 		filterManager.extractAttributeHeaders(reader);
-		List<Double> rates = classifierManager.incrementallyTrainModel(reader);
+		List<Double> rates = classifierManager.incrementallyTrainModel(reader, wekaClassifier);
 		printRateToFile(rates, tasasFileName);
 		System.out.println("Fin");
 	}

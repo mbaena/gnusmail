@@ -6,12 +6,13 @@ import gnu.getopt.LongOpt;
 public class Main {
 
 	public static void main(String argv[]) throws Exception {
-		LongOpt[] longopts = new LongOpt[4];
+		LongOpt[] longopts = new LongOpt[5];
 		StringBuffer sb = new StringBuffer();
 		longopts[0] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
 		longopts[1] = new LongOpt("connect", LongOpt.REQUIRED_ARGUMENT, sb, 'c');
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
 		longopts[3] = new LongOpt("moa-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 243);
+		longopts[4] = new LongOpt("weka-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 244);
 		Getopt getopt = new Getopt("Clasificador", argv, "-:b::defgi::kz::m::n::r::p::a::c:::l::hx", longopts);
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
@@ -33,6 +34,8 @@ public class Main {
 							options.setShowAttributes(Integer.parseInt(arg));
 						} else if (car == 243) {
 							options.setMoaClassifier(arg);
+						} else if (car == 244) {
+							options.setWekaClassifier(arg);
 						}
 					} else {
 						System.out.println("Invalid option" +
