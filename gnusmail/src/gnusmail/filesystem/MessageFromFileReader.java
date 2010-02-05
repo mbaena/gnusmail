@@ -52,16 +52,14 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 				}
 			}
 			this.messages = new ArrayList(sortedMessages);
-			System.out.println("done. We have : " + sortedMessages.size());
-			System.out.println("Imprimiendo cuentas");
-			for (String folder : cuentasPorCarpeta.keySet()) {
-				System.out.println(folder + " -> " + cuentasPorCarpeta.get(folder));
+			for (String fold : cuentasPorCarpeta.keySet()) {
+				System.out.println(fold + " tiene " + cuentasPorCarpeta.get(fold));
 			}
-			System.out.println("Imprimiendo cuentas: fin");
+			System.out.println("done. We have : " + sortedMessages.size());
 		}
 
 		public MessagesFromFileIterator(String baseFolder, boolean recursive, int limit) {
-			this.baseFolderLength = baseFolder.length()+1;
+			this.baseFolderLength = baseFolder.length() + 1;
 			FilesReader fr = new FilesReader(baseFolder, recursive, limit);
 			it = (FolderMessagesIterator) fr.iterator();
 			createMessagesList();
@@ -97,7 +95,11 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 				Session s = null;
 				is = new FileInputStream(f);
 				m = new MIMEMessageWithFolder(s, is);
-				((MIMEMessageWithFolder) m).setFolderAsStr(parentFolder.substring(baseFolderLength, parentFolder.length()));
+				if (baseFolderLength < parentFolder.length()) {
+					((MIMEMessageWithFolder) m).setFolderAsStr(parentFolder.substring(baseFolderLength, parentFolder.length()));
+				} else {
+					((MIMEMessageWithFolder) m).setFolderAsStr("/");
+				}
 			} catch (MessagingException ex) {
 				Logger.getLogger(MessageFromFileReader.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (FileNotFoundException ex) {
@@ -112,7 +114,6 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 			return m;
 		}
 	}
-
 	private String baseFolder;
 	private boolean recursive = false;
 	private int limit = 0;
@@ -124,9 +125,10 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 
 	}
 
-	public MessageFromFileReader(String baseFolder, boolean recursive) {
+	public MessageFromFileReader(String baseFolder, boolean recursive, int limit) {
 		this.baseFolder = baseFolder;
 		this.recursive = recursive;
+		this.limit = limit;
 	}
 
 	@Override

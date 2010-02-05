@@ -9,10 +9,11 @@ import gnusmail.languagefeatures.LanguageDetection;
 import gnusmail.languagefeatures.Token;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +33,7 @@ public class WordFrequency extends Filter {
 	private WordsStore ws;
 	static List<String> palabrasAAnalizar;
 	List<Attribute> attList;
+	private Map<String, Attribute> attrMap;
 
 	public WordFrequency() {
 		folderMap = new TreeMap<String, Integer>();
@@ -46,6 +48,7 @@ public class WordFrequency extends Filter {
 
 	@Override
 	public List<Attribute> getAttributes() {
+		attrMap = new TreeMap<String, Attribute>();
 		for (String folder : folderMap.keySet()) { // Esto a wordsfreqency, pero
 			// en el futuro metodo get
 			// atributes
@@ -57,7 +60,9 @@ public class WordFrequency extends Filter {
 			FastVector values = new FastVector();
 			values.addElement("True");
 			values.addElement("False");
-			attList.add(new Attribute(word, values));
+			Attribute att = new Attribute(word, values);
+			attList.add(att);
+			attrMap.put(word, att);
 		}
 		return attList;
 	}
@@ -76,7 +81,7 @@ public class WordFrequency extends Filter {
 
 	@Override
 	public void updateInstance(Instance inst, MessageInfo messageInfo) {
-		Set<String> stringsEsteDocumento = new TreeSet<String>();
+		Set<String> stringsEsteDocumento = new HashSet<String>();
 		List<Token> tokens = tokenizeMessageInfo(messageInfo);
 		for (Token token : tokens) {
 			String stemmedForm = token.getStemmedForm();
@@ -84,21 +89,24 @@ public class WordFrequency extends Filter {
 				stringsEsteDocumento.add(stemmedForm);
 			}
 		}
+
 		for (Attribute att : attList) {
-			if (stringsEsteDocumento.contains(att.name())) {
+			if (stringsEsteDocumento.contains(att.name())) { //TODO esto es lento...mejorar
 				inst.setValue(att, "True");
 			} else {
 				inst.setValue(att, "False");
 			}
 		}
-
 	}
 
 	public static List<Token> tokenizeMessageInfo(MessageInfo messageInfo) {
 		String body = null;
 		try {
 			// Extraemos las palabras del cuerpo y la cabecera
-			body = messageInfo.getBody() + " " + messageInfo.getSubject();
+			String subject = messageInfo.getSubject();
+			String b = messageInfo.getBody();
+			//body = messageInfo.getBody() + " " + messageInfo.getSubject(); //Lo desechamos
+			body = b + subject;
 		} catch (IOException ex) {
 			Logger.getLogger(WordFrequency.class.getName()).log(Level.SEVERE,
 					null, ex);

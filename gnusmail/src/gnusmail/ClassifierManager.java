@@ -74,11 +74,15 @@ public class ClassifierManager {
 			}
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
 			for (Message msg : reader) { //TODO: esto en mainmanager,
+				double predictedClass = 0.0;
 				try {
 					MessageInfo msgInfo = new MessageInfo(msg);
 					String folder = msgInfo.getFolderAsString();
 					Instance inst = filterManager.makeInstance(msgInfo);
-					double predictedClass = model.classifyInstance(inst);
+					try {
+						predictedClass = model.classifyInstance(inst);
+					} catch (Exception e) {
+					}
 					double trueClass = inst.classValue();
 
 					//Statistics update: total number
