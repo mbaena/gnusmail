@@ -9,7 +9,11 @@ public final class To extends SingleAttFilter {
 	@Override
 	protected String getSingleValue(MessageInfo messageInfo)
 			throws MessagingException {
-		return messageInfo.getTo();
+		String to =  messageInfo.getTo();
+		String splits[] = to.split(",");
+		String ret = "None";
+		if (splits.length > 0) ret = splits[0];
+		return ret;
 	}
 
 }

@@ -16,7 +16,7 @@ public class EmailTokenizer {
 	String body;
 	List<Token> tokens;
 	Language lang = null;
-	public final static String tokenPattern = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*0123456789ªº%&*@_|’\\#";
+	public final static String tokenPattern = " \t\n\r\f.,;:?¿!¡\"()'=[]{}/<>-*`0123456789ªº%&*@_|’\\#";
 	//public final static String alphabPattern = "[a-zA-Z]";
 	public final static String alphabPattern = "\\w";
 

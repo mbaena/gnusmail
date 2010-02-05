@@ -28,7 +28,6 @@ public abstract class SingleAttFilter extends Filter {
 		System.out.println("Atributo " + getName());
 		for (String value: attValues) {
 			attValuesF.addElement(value);
-			System.out.println("Anadimos " + value);
 		}
 		attribute = new Attribute(this.getName(), attValuesF);
 		ArrayList<Attribute> attList = new ArrayList<Attribute>();

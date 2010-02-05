@@ -7,8 +7,6 @@ import gnusmail.languagefeatures.TermFrequencyManager;
 import gnusmail.languagefeatures.Token;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ public class WordsStore {
 	public final static String configFolder = System.getProperty("user.home") + "/.gnusmail/";
 	public final static String STOPWORDS_RESOURCE_ES = "/resources/spanish-stopwords.data";
 	public final static String STOPWORDS_RESOURCE_EN = "/resources/english-stopwords.data";
-	public final static int MAX_NUM_ATTRIBUTES_BY_FOLDER = 20;
+	public final static int MAX_NUM_ATTRIBUTES_BY_FOLDER = 80;
 	int numAnalyzedDocuments = 0;
 	List<String> frequentWords = null;
 	Map<Language, List<String>> stopWords;
@@ -177,7 +175,6 @@ public class WordsStore {
 	}
 
 	private void readStopWordsFile() {
-		List<String> res = new ArrayList<String>();
 		try {
 			// Open the file that is the first
 			// command line parameter
@@ -194,7 +191,7 @@ public class WordsStore {
 			}
 			//Close the input stream
 			in.close();
-			is = WordsStore.class.getResourceAsStream(STOPWORDS_RESOURCE_ES);
+			is = WordsStore.class.getResourceAsStream(STOPWORDS_RESOURCE_EN);
 			// Get the object of DataInputStream
 			in = new DataInputStream(is);
 			br = new BufferedReader(new InputStreamReader(in));

@@ -240,7 +240,7 @@ public class MainManager {
 	private MessageReader getMessageReader() {
 		MessageReader reader = null;
 		if (readMailsFromFile) {
-			reader = MessageReaderFactory.createReader(this.maildir, 50); 
+			reader = MessageReaderFactory.createReader(this.maildir, 5000); //Para no limitar el n. de mensajes por carpeta
 		} else {
 			reader = MessageReaderFactory.createReader(connection, 2);
 		}

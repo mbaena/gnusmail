@@ -45,29 +45,25 @@ def createWordlists(author):
 			print ('done')
 
 def evaluateWeka(author, alg, output):
+    global graficas
     maildir = os.path.join(_MAILDIR_PATH, author)
-    task = """bash %s -z%s -i%s -e --weka-classifier=%s > %s.out""" % (_GNUSMAIL_SH, maildir, output, alg, output+"salidaporpantalla") #moaClassifier
-    print task
+    task = """%s -z%s -i%s -e --weka-classifier=%s > %s.out""" % (_GNUSMAIL_SH, maildir, output, alg, output+"salidaporpantalla") #moaClassifier
+    print 'Task', task
     commands.getoutput("bash %s" % (task))
-	#os.system('java -javaagent:%s -jar -Xmx5G %s -z -m --moa-classifier="%s"' % (_SIZEOFAG_JAR, _GNUSMAIL_JAR, alg)) #moaClassifier
+    print 'Fin', task
+
 
 
 def getAuthors():
-	return ['kitchen-l', 'lokay-m','sanders-r','beck-s','williams-w3', 'farmer-d', 'kaminski-v']
+	return ['beck-s','farmer-d','kaminski-v','kitchen-l','lokay-m','sanders-r','williams-w3']
 
 def getWekaAlgorithms():
-	return ["weka.classifiers.bayes.NaiveBayesUpdateable"]
-
-def createWordlistsForEveryAuthor():
-	for author in getAuthors():
-		print('---------------')
-		print(author)
-		print('---------------')
-		createWordlists(author)
+	return ["weka.classifiers.bayes.NaiveBayesUpdateable","weka.classifiers.lazy.IBk","weka.classifiers.rules.NNge"]
 
 def imprimirgraficas(graficas):
     for (key, value) in graficas.iteritems():
         filePng = "grafica_" + key + ".png"
+        print(filePng)
         sentencia = "plot "
         for gr in value:
             if not os.path.exists(output_file):
@@ -75,8 +71,8 @@ def imprimirgraficas(graficas):
             sentencia += '"' + gr + '" w l' 
             if gr <> value[-1]:
                 sentencia += ', '
-        print sentencia
         sentgnuplot = "echo 'set terminal png; set output \"" + filePng +  "\"; " + sentencia +  "' | gnuplot"
+        print(sentgnuplot)
         os.system(sentgnuplot)
 
 """""""""
@@ -84,8 +80,7 @@ MAIN SECTION
 """""""""
 
 
-#createWordlistsForEveryAuthor()
-pool = ThreadPool(3)
+#pool = ThreadPool(2)
 if not os.path.exists(_OUTPUT_PATH):
     os.mkdir(_OUTPUT_PATH)
 graficas = {}
@@ -96,12 +91,13 @@ for author in getAuthors():
         continue
     graficas[author] = []
     for alg in getWekaAlgorithms():
-        output_file = os.path.join(_OUTPUT_PATH, 'rates' + author + alg.replace(" ","").replace("(","").replace(")",""))
+        output_file = os.path.join(_OUTPUT_PATH, 'ratesWeka' + author + alg.replace(" ","").replace("(","").replace(")",""))
         if os.path.exists(output_file):
-            continue
-        print output_file
-        pool.queueTask(evaluateWeka, (author, alg, output_file))
+            #continue
+            pass
+	print(output_file)
+        #pool.queueTask(evaluateWeka, (author, alg, output_file))
+	evaluateWeka(author, alg, output_file)
         graficas[author].append(output_file)
-pool.joinAll()
+#pool.joinAll()
 imprimirgraficas(graficas)
-

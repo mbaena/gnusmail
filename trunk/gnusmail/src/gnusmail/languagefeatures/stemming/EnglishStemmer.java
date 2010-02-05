@@ -564,7 +564,11 @@ public class EnglishStemmer implements IStemmer {
        int longitud = word.length();
        add(caracteres, longitud);
        stem();
-       return new String(caracteres);
+	   char newcaracteres[] = new char[i_end];
+	   for (int myi = 0; myi < i_end; myi++) {
+		   newcaracteres[myi] = caracteres[myi];
+	   }
+       return new String(newcaracteres);
     }
 
 

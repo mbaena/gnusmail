@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.bayes.DMNBtext;
+import weka.classifiers.bayes.NaiveBayesMultinomialUpdateable;
 
 /**
  *
@@ -81,7 +84,6 @@ public class FolderMessagesIterator implements Iterator<File> {
 
 	private void expandFolder(File folder) {
 		int openedMessages = 0;
-		System.out.println("Expand " + folder.getAbsolutePath());
 		if (foldersToBeOpened != null && foldersToBeOpened.size() > 0) {
 			File[] listOfFiles = folder.listFiles();
 			for (int i = 0; i < listOfFiles.length; i++) {
@@ -94,7 +96,7 @@ public class FolderMessagesIterator implements Iterator<File> {
 				}
 			}
 		} else {
-			System.out.println("Imposible expandir");
+			System.out.println("WARNING: Imposible expandir " + folder);
 		}
 
 	}

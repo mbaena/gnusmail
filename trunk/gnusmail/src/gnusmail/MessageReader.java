@@ -43,21 +43,6 @@ public class MessageReader implements Iterable<Message> {
 		}
 	}
 
-	private class LimitedMessageReaderFromFSIterator implements Iterator<Message> {
-
-		public boolean hasNext() {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		public Message next() {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		public void remove() {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-	
-	}
 
 	private class LimitedMessageReaderIterator implements Iterator<Message> {
 
