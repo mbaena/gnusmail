@@ -7,6 +7,7 @@ import gnusmail.core.cnx.MessageInfo;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
@@ -222,6 +223,38 @@ public class MainManager {
 		printRateToFile(rates, tasasFileName);
 	}
 
+	private void printRatesByFolderToFile(Map<String, List<Double>> rates, String fileName) {
+		try {
+			// Create file
+			FileWriter fstream = new FileWriter(fileName);
+			BufferedWriter out = new BufferedWriter(fstream);
+			String header = "";
+			int minLength = Integer.MAX_VALUE;
+			for (String folder : rates.keySet()) {
+				header += folder + " ";
+				if (rates.get(folder).size() < minLength) {
+					minLength = rates.get(folder).size();
+				}
+			}
+
+			header = header.substring(0, header.length()-1);
+			out.write(header + "\n");
+			for (int i = 0; i < minLength; i++) {
+				String line = "";
+				for (String folder : rates.keySet()) {
+					line +=  rates.get(folder).get(i) + " ";
+				}
+				line = line.substring(0, line.length() - 1);
+				out.write(line + "\n");
+			}
+
+			out.close();
+		} catch (Exception e) {//Catch exception if any
+			System.err.println("No se pueden imprimir tasas a " + fileName);
+			e.printStackTrace();
+		}
+	}
+
 	private static void printRateToFile(List<Double> rates, String fileName) {
 		try {
 			// Create file
@@ -250,4 +283,5 @@ public class MainManager {
 	public void setTasasFileName(String tasasFileName) {
 		this.tasasFileName = tasasFileName;
 	}
+
 }
