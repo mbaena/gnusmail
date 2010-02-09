@@ -91,7 +91,6 @@ public class WordsStore {
 				}
 				Collections.sort(tfidfSummariesList);
 
-				//while (index < tfidfSummariesList.size()) {
 				while (index < tfidfSummariesList.size() && index < MAX_NUM_ATTRIBUTES_BY_FOLDER) {
 					TFIDFSummary ts = tfidfSummariesList.get(tfidfSummariesList.size() - 1 - index);
 					wordsToReturn.add(ts.getTerm());
@@ -153,6 +152,7 @@ public class WordsStore {
 	/**
 	 * This function creates a list with the maxMessagesPerFolder newer messages
 	 * of a given folder
+	 * @deprecated
 	 * @param buzon
 	 * @param maxMessagesPerFolder
 	 * @return

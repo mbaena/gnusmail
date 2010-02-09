@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
+import moa.classifiers.HoeffdingTreeNBAdaptive;
 import moa.core.InstancesHeader;
 import moa.core.Measurement;
 import moa.evaluation.ClassificationPerformanceEvaluator;
@@ -30,6 +31,7 @@ import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Utils;
 
 /**
  * TODO
@@ -62,7 +64,7 @@ public class ClassifierManager {
 		int seenMails = 0;
 		int goodClassifications = 0;
 		Map<String, Integer> messagesViewedByFolder = new TreeMap<String, Integer>();
-		Map<String, Integer> correctClassificationsByFolder = new TreeMap<String, Integer>();
+		Map<String, Double> correctClassificationsByFolder = new TreeMap<String, Double>();
 		List<Double> rates = new ArrayList<Double>();
 		try {
 			Classifier model = null;
@@ -100,18 +102,18 @@ public class ClassifierManager {
 						messagesViewedByFolder.put(folder, 0);
 					}
 					if (!correctClassificationsByFolder.containsKey(folder)) {
-						correctClassificationsByFolder.put(folder, 0);
+						correctClassificationsByFolder.put(folder, 0.0);
 					}
 					int currentViewedMessages = messagesViewedByFolder.get(folder);
 					messagesViewedByFolder.put(folder, currentViewedMessages + 1);
 					if (predictedClass == trueClass) {
-						int currentGuessed = correctClassificationsByFolder.get(folder);
+						double currentGuessed = correctClassificationsByFolder.get(folder);
 						correctClassificationsByFolder.put(folder, currentGuessed + 1);
 					}
 					String strCorrectByFolder = "";
 					for (String f : messagesViewedByFolder.keySet()) {
 						int totalForThisFolder = messagesViewedByFolder.get(f);
-						int guessedForThisFolder = correctClassificationsByFolder.get(f);
+						double guessedForThisFolder = correctClassificationsByFolder.get(f);
 						strCorrectByFolder += "\t" + f + ": " + guessedForThisFolder + "/" + totalForThisFolder +
 								"(" + (guessedForThisFolder * 100.0 / totalForThisFolder) + "%); \n";
 					}
@@ -168,8 +170,8 @@ public class ClassifierManager {
 	}
 
 	public List<Double> evaluatePrecuential(MessageReader reader, String moaClassifier) {
-		Map<String, Integer> messagesViewedByFolder = new TreeMap<String, Integer>();
-		Map<String, Integer> correctClassificationsByFolder = new TreeMap<String, Integer>();
+		Map<String, Double> messagesViewedByFolder = new TreeMap<String, Double>();
+		Map<String, Double> correctClassificationsByFolder = new TreeMap<String, Double>();
 		// Evaluator Factory
 		ClassOption evaluatorOption = new ClassOption("evaluator", 'e',
 				"Evaluator to use.", ClassificationPerformanceEvaluator.class, "WindowClassificationPerformanceEvaluator");
@@ -204,6 +206,7 @@ public class ClassifierManager {
 		learner.setModelContext(instancesHeader);
 
 		List<Double> tasas = new ArrayList<Double>();
+		Map<String, List<Double>>tasasByFolder = new TreeMap<String, List<Double>>();
 
 		Measurement[] listMs = evaluator.getPerformanceMeasurements();
 		int posCorrect = 0;
@@ -214,61 +217,76 @@ public class ClassifierManager {
 		}
 
 		int nmess = 0;
+		int numeroAciertos = 0;
 		for (Message msg : reader) {
-			nmess++;
-			if (nmess % 100 == 0) {
-				System.out.println("Number of messages: " + nmess);
+			MessageInfo msgInfo = new MessageInfo(msg);
+			System.out.println("Folder: " + msgInfo.getFolderAsString());
+			String folder = msgInfo.getFolderAsString();
+			if (!messagesViewedByFolder.containsKey(folder)) {
+				messagesViewedByFolder.put(folder, 0.0);
 			}
+			if (!correctClassificationsByFolder.containsKey(folder)) {
+				correctClassificationsByFolder.put(folder, 0.0);
+			}
+
+			if (!tasasByFolder.containsKey(folder)) {
+				tasasByFolder.put(folder, new ArrayList<Double>());
+				for (int i = 0; i < nmess; i++) {
+					tasasByFolder.get(folder).add(0.0);
+				}
+			}
+
+			double totalThisFolder = messagesViewedByFolder.get(folder);
+			double correctThisFolder = correctClassificationsByFolder.get(folder);
+			Instance trainInst = filterManager.makeInstance(msgInfo);
+			Instance testInst = (Instance) trainInst.copy();
+			int trueClass = (int) trainInst.classValue();
+			testInst.setClassMissing();
+			double[] prediction = learner.getVotesForInstance(testInst);
+
+			//Update statistics
+			if (Utils.maxIndex(prediction) == trueClass) {
+				System.out.println("---------->Correctly classifies!!!! folder autentica es " + folder + ", ponemos " + testInst.weight());
+				correctClassificationsByFolder.put(folder, correctThisFolder + testInst.weight());
+				numeroAciertos++;
+			} else {
+				System.out.println("---------->FAIL classification!!!!" + folder);
+			}
+			System.out.println("Numero de aciertos " + numeroAciertos);
+			System.out.println("Numero de mensajes " + nmess);
+			System.out.println("Predictions " + prediction);
+
+			messagesViewedByFolder.put(folder, totalThisFolder + testInst.weight());
+			String strCorrectByFolder = "";
+			for (String f : messagesViewedByFolder.keySet()) {
+				double totalForThisFolder = messagesViewedByFolder.get(f);
+				double guessedForThisFolder = correctClassificationsByFolder.get(f);
+				strCorrectByFolder += "\t" + f + ": " + guessedForThisFolder + "/" + totalForThisFolder +
+						"(" + (guessedForThisFolder * 100.0 / totalForThisFolder) + "%); \n";
+				System.out.println("A la folder " + f + " le anadimos " + guessedForThisFolder *100 / totalForThisFolder);
+			}
+			System.out.println("Correct answers rate by folder: " + strCorrectByFolder);
+
+			evaluator.addClassificationAttempt(trueClass, prediction, testInst.weight());
+			listMs = evaluator.getPerformanceMeasurements();
+			tasas.add(listMs[posCorrect].getValue());
+
+
+			for (Measurement measurement : listMs) {
+				System.out.print(measurement.getName() + ": Tasa: " + measurement.getValue() + "\t");
+			}
+
+			System.out.println();
+			learner.trainOnInstance(trainInst);
+//			System.out.println(learner);
+			System.out.println("Press a key to continue..."); //We want to see the model
+			//BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			//String aux = br.readLine();
+
+			//msg.getFolder().close(false);
+			//	}
+			nmess++;
 			try {
-				MessageInfo msgInfo = new MessageInfo(msg);
-				System.out.println("Folder: " + msgInfo.getFolderAsString());
-				String folder = msgInfo.getFolderAsString();
-				if (!messagesViewedByFolder.containsKey(folder)) {
-					messagesViewedByFolder.put(folder, 0);
-				}
-				if (!correctClassificationsByFolder.containsKey(folder)) {
-					correctClassificationsByFolder.put(folder, 0);
-				}
-				int totalThisFolder = messagesViewedByFolder.get(folder);
-				int correctThisFolder = messagesViewedByFolder.get(folder);
-				Instance trainInst = filterManager.makeInstance(msgInfo);
-				Instance testInst = (Instance) trainInst.copy();
-				int trueClass = (int) trainInst.classValue();
-				testInst.setClassMissing();
-				double[] prediction = learner.getVotesForInstance(testInst);
-
-				//Update statistics
-				if (learner.correctlyClassifies(testInst)) {
-					correctClassificationsByFolder.put(folder, correctThisFolder + 1);
-
-				}
-				messagesViewedByFolder.put(folder, totalThisFolder + 1);
-				String strCorrectByFolder = "";
-				for (String f : messagesViewedByFolder.keySet()) {
-					int totalForThisFolder = messagesViewedByFolder.get(f);
-					int guessedForThisFolder = correctClassificationsByFolder.get(f);
-					strCorrectByFolder += "\t" + f + ": " + guessedForThisFolder + "/" + totalForThisFolder +
-							"(" + (guessedForThisFolder * 100.0 / totalForThisFolder) + "%); \n";
-				}
-				System.out.println("Correct answers rate by folder: " + strCorrectByFolder);
-
-				evaluator.addClassificationAttempt(trueClass, prediction, testInst.weight());
-				listMs = evaluator.getPerformanceMeasurements();
-				tasas.add(listMs[posCorrect].getValue());
-
-				for (Measurement measurement : listMs) {
-					System.out.print(measurement.getName() + ": Tasa: " + measurement.getValue() + "\t");
-				}
-
-				System.out.println();
-				learner.trainOnInstance(trainInst);
-				System.out.println(learner);
-				System.out.println("Press a key to continue..."); //We want to see the model
-				//BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-				//String aux = br.readLine();
-
-				//msg.getFolder().close(false);
-				//	}
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
 			}
