@@ -6,6 +6,7 @@ import re
 from threadpool import *
 import logging
 from time import sleep
+import urllib
 
 _GNUSMAIL_PATH=os.path.join("..", "dist")
 _GNUSMAIL_SH=os.path.join(_GNUSMAIL_PATH, "gnusmail.sh")
@@ -14,6 +15,22 @@ _MAILDIR_PATH=os.path.join("dataset","maildir")
 _OUTPUT_PATH="output"
 
 hechos = 0
+
+def get_enron_dataset():
+    import tarfile
+    url = "http://www.cs.cmu.edu/~enron/enron_mail_082109.tar.gz"
+    x = raw_input("Do you want to download Enron Email Dataset? (y)/n")
+    if not (x=='' or x=='y'):
+       exit()
+    if not os.path.exists("dataset"):
+        os.mkdir("dataset")
+    if not os.path.exists(_MAILDIR_PATH):
+        os.mkdir(_MAILDIR_PATH)
+    #urllib.urlretrieve(url, "dataset/enron_mail_082109.tar.gz")
+    os.system("wget -O dataset/enron_mail_082109.tar.gz " + url)
+    tar = tarfile.open("dataset/enron_mail_082109.tar.gz")
+    tar.extractall("dataset")
+    tar.close()
 
 def genericEvaluation(task):
     global hechos
@@ -68,6 +85,9 @@ def launchEvaluation(evaluation_method, prefix, algorithms):
     #pool = ThreadPool(3)
     if not os.path.exists(_OUTPUT_PATH):
         os.mkdir(_OUTPUT_PATH)
+    if not os.path.exists(_MAILDIR_PATH):
+        print "Enron Dataset not found!"
+        get_enron_dataset()
     graficas = {}
     for author in getAuthors():
         if not os.path.exists(os.path.join(_MAILDIR_PATH, author)):
