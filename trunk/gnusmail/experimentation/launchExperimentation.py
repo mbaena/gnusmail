@@ -89,6 +89,7 @@ def launchEvaluation(evaluation_method, prefix, algorithms):
         print "Enron Dataset not found!"
         get_enron_dataset()
     graficas = {}
+    purge_pat = re.compile(r"[^\w]")
     for author in getAuthors():
         if not os.path.exists(os.path.join(_MAILDIR_PATH, author)):
             maildir = os.path.join(_MAILDIR_PATH, author)
@@ -96,7 +97,7 @@ def launchEvaluation(evaluation_method, prefix, algorithms):
             continue
         graficas[author] = []
         for alg in algorithms:
-            output_file = os.path.join(_OUTPUT_PATH, prefix + author + alg.replace(" ","").replace("(","").replace(")",""))
+            output_file = os.path.join(_OUTPUT_PATH, "%s_%s_%s" % (prefix, author, purge_pat.sub("", alg)))
             if os.path.exists(output_file):
                 logging.info("PATH EXISTS ! %s. We do not launch experimentation for it " % (maildir))
                 continue
