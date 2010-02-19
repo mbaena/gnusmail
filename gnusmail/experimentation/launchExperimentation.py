@@ -7,6 +7,7 @@ from threadpool import *
 import logging
 from time import sleep
 import urllib
+from string import Template
 
 _GNUSMAIL_PATH=os.path.join("..", "dist")
 _GNUSMAIL_SH=os.path.join(_GNUSMAIL_PATH, "gnusmail.sh")
@@ -45,7 +46,7 @@ def evaluateWeka(author, alg, output):
 
 def evaluateMOA(author, alg, output):
     maildir = os.path.join(_MAILDIR_PATH, author)
-    task = """%s -z%s -m%s.rates --moa-classifier=\\\"%s\\\" > %s.out""" % (_GNUSMAIL_SH, maildir, output, alg, output)
+    task = """%s -z%s -m%s --moa-classifier=\\\"%s\\\" > %s.out""" % (_GNUSMAIL_SH, maildir, output, alg, output)
     genericEvaluation(task)
 
 def getAuthors():
@@ -53,36 +54,66 @@ def getAuthors():
 
 def getMoaAlgorithms():
 	return ["MajorityClass", 
-        "HoeffdingTreeNBAdaptive",
-        "SingleClassifierDrift -d DDM -l HoeffdingTreeNBAdaptive", 
-        "SingleClassifierDrift -d EDDM -l HoeffdingTreeNBAdaptive", 
-        "OzaBagAdwin -l HoeffdingTreeNBAdaptive -s 10",
-        "SingleClassifierDrift -d DDM -l \\(OzaBag -l HoeffdingTreeNBAdaptive\\)"][-1:]
+        """HoeffdingTreeNBAdaptive -g 1 -c .1""",
+        """OzaBagAdwin -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\) -s 10""",
+        """SingleClassifierDrift -d DDM -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)""",
+        """SingleClassifierDrift -d DDM -l \(OzaBag -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)\)""",
+        """SingleClassifierDrift -d EDDM -l \(OzaBag -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)\)""",
+        """SingleClassifierDrift -d EDDM -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)"""]
 
 def getWekaAlgorithms():
 	return ["weka.classifiers.bayes.NaiveBayesUpdateable",
         "weka.classifiers.lazy.IBk",
         "weka.classifiers.rules.NNge"]
 
+def do_gnuplot(fname, plotdata, title, ylabel, xlabel):
+    f = open(fname + ".gnuplot", "w")
+    out = Template("""
+set terminal epslatex monochrome 8
+set output "${filename}.eps"
+reset
+set size 0.8,0.8
+set yrange [0:100]  
+set title $title
+set ylabel $ylabel
+set xlabel $xlabel
+set style fill pattern 8
+plot $plotdata
+set terminal png
+set output "${filename}.png"
+reset
+set size 0.8,0.8
+set yrange [0:100]  
+set title $title
+set ylabel $ylabel
+set xlabel $xlabel
+set style fill pattern 8
+plot $plotdata
+set output
+""")
+    out = out.substitute(filename=fname, plotdata=plotdata,title=title, ylabel=ylabel, xlabel=xlabel)
+    f.write(out)
+    f.close()
+    commands.getstatusoutput('gnuplot ' + fname + '.gnuplot')
+    commands.getstatusoutput('epstopdf ' + fname + '.eps')
+
 def imprimirgraficas(graficas):
     for (key, value) in graficas.iteritems():
-        filePng = "grafica_" + key + ".png"
-        sentencia = "plot "
+        filename = "grafica_" + key
+        sentencia = ""
+        classifier_num = 1
         for gr in value:
-            #if not os.path.exists(output_file):
-            #     logging.info(output_file + " does not exist; ignoring")
-            #     continue
-            sentencia += '"' + gr + '" w l' 
+            sentencia += '"' + gr + '" t "\\#%s" w l'  % classifier_num
+            classifier_num += 1
             if gr <> value[-1]:
                 sentencia += ', '
         print sentencia
-        sentgnuplot = "echo 'set terminal png; set output \"" + filePng +  "\"; " + sentencia +  "' | gnuplot"
-        os.system(sentgnuplot)
+        do_gnuplot(os.path.join(_OUTPUT_PATH, filename), sentencia, "", "", "")
 
 
 def launchEvaluation(evaluation_method, prefix, algorithms):
     global hechos
-    #pool = ThreadPool(3)
+    pool = ThreadPool(4)
     if not os.path.exists(_OUTPUT_PATH):
         os.mkdir(_OUTPUT_PATH)
     if not os.path.exists(_MAILDIR_PATH):
@@ -98,14 +129,14 @@ def launchEvaluation(evaluation_method, prefix, algorithms):
         graficas[author] = []
         for alg in algorithms:
             output_file = os.path.join(_OUTPUT_PATH, "%s_%s_%s" % (prefix, author, purge_pat.sub("", alg)))
+            graficas[author].append(output_file)
             if os.path.exists(output_file):
-                logging.info("PATH EXISTS ! %s. We do not launch experimentation for it " % (maildir))
+                logging.info("PATH EXISTS ! %s. We do not launch experimentation for it " % (output_file))
                 continue
             print output_file
-            #pool.queueTask(evaluation_method, (author, alg, output_file))
-            evaluation_method(author, alg, output_file)
-            graficas[author].append(output_file)
-    #pool.joinAll()
+            pool.queueTask(evaluation_method, (author, alg, output_file))
+            #evaluation_method(author, alg, output_file)
+    pool.joinAll()
     print("Hecho, a imprimir graficas")
     imprimirgraficas(graficas)
 
