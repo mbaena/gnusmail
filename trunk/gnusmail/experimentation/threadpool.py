@@ -103,26 +103,28 @@ class ThreadPool:
 
         """ Clear the task queue and terminate all pooled threads,
         optionally allowing the tasks and threads to finish."""
-        
+
         # Mark the pool as joining to prevent any more task queueing
         self.__isJoining = True
 
         # Wait for tasks to finish
         if waitForTasks:
             while self.__tasks != []:
-                sleep(.1)
+                sleep(0.1)
 
         # Tell all the threads to quit
         self.__resizeLock.acquire()
         try:
-            self.__setThreadCountNolock(0)
-            self.__isJoining = True
-
             # Wait until all threads have exited
             if waitForThreads:
                 for t in self.__threads:
+                    t.goAway()
+                for t in self.__threads:
                     t.join()
+                    # print t,"joined"
                     del t
+            self.__setThreadCountNolock(0)
+            self.__isJoining = True
 
             # Reset the pool for potential reuse
             self.__isJoining = False
