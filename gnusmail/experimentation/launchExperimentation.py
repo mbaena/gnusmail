@@ -54,15 +54,33 @@ def getAuthors():
 
 def getMoaAlgorithms():
 	return ["MajorityClass", 
-        """HoeffdingTreeNBAdaptive -g 1 -c .1""",
-        """OzaBagAdwin -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\) -s 10""",
-        """SingleClassifierDrift -d DDM -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)""",
-        """SingleClassifierDrift -d DDM -l \(OzaBag -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)\)""",
-        """SingleClassifierDrift -d EDDM -l \(OzaBag -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)\)""",
-        """SingleClassifierDrift -d EDDM -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)"""]
+        """HoeffdingTreeNBAdaptive -g 1""",
+#        """HoeffdingTreeNBAdaptive -g 1 -c .05""",
+#        """HoeffdingTreeNBAdaptive -g 1 -c .1""",
+#        """HoeffdingTreeNBAdaptive -g 1 -c .2""",
+#        """HoeffdingTreeNBAdaptive -g 1 -c .3""",
+#        """HoeffdingTreeNBAdaptive -g 1 -c .4""",
+#        """HoeffdingTreeNBAdaptive -g 1 -c .1 -b""",
+#        """HoeffdingTreeNBAdaptive -g 1 -c .4 -b""",
+        """WEKAClassifier -l weka.classifiers.rules.NNge""",
+#        """OzaBag -l \(WEKAClassifier -l weka.classifiers.rules.NNge\) -s 10""",
+        """OzaBag -l \(SingleClassifierDrift -d DDM -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)\) -s 10""",
+#        """OzaBag -l \(SingleClassifierDrift -d EDDM -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)\) -s 10""",
+#        """OzaBagAdwin -l \(WEKAClassifier -l weka.classifiers.rules.NNge\) -s 10""",
+#        """OzaBagAdwin -l \(HoeffdingTreeNBAdaptive -g 1 -c .1 -b\) -s 10""",
+#        """SingleClassifierDrift -d DDM -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)""",
+#        """SingleClassifierDrift -d DDM -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)""",
+#        """SingleClassifierDrift -d DDM -l \(OzaBag -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)\)""",
+#        """SingleClassifierDrift -d DDM -l \(OzaBagAdwin -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)\)""",
+#        """SingleClassifierDrift -d DDM -l \(OzaBagAdwin -l \(SingleClassifierDrift -d DDM -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)\)\)""",
+#        """SingleClassifierDrift -d EDDM -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)"""
+#        """SingleClassifierDrift -d EDDM -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)"""
+#        """SingleClassifierDrift -d EDDM -l \(OzaBag -l \(HoeffdingTreeNBAdaptive -g 1 -c .1\)\)""",
+         ]
 
 def getWekaAlgorithms():
-	return ["weka.classifiers.bayes.NaiveBayesUpdateable",
+	return [
+"weka.classifiers.bayes.NaiveBayesUpdateable",
         "weka.classifiers.lazy.IBk",
         "weka.classifiers.rules.NNge"]
 
@@ -103,7 +121,7 @@ def imprimirgraficas(graficas):
         sentencia = ""
         classifier_num = 1
         for gr in value:
-            sentencia += '"' + gr + '" t "\\#%s" w l'  % classifier_num
+            sentencia += '"' + gr + '" t "\\M#%s" w l'  % classifier_num
             classifier_num += 1
             if gr <> value[-1]:
                 sentencia += ', '

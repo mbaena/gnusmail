@@ -84,7 +84,7 @@ MAIN SECTION
 if not os.path.exists(_OUTPUT_PATH):
     os.mkdir(_OUTPUT_PATH)
 graficas = {}
-for author in getAuthors():
+for author in getAuthors()[4:5]:
     if not os.path.exists(os.path.join(_MAILDIR_PATH, author)):
         maildir = os.path.join(_MAILDIR_PATH, author)
         print "PATH NOT FOUND! %s " % (maildir)
@@ -93,8 +93,7 @@ for author in getAuthors():
     for alg in getWekaAlgorithms():
         output_file = os.path.join(_OUTPUT_PATH, 'ratesWeka' + author + alg.replace(" ","").replace("(","").replace(")",""))
         if os.path.exists(output_file):
-            #continue
-            pass
+            continue
 	print(output_file)
         #pool.queueTask(evaluateWeka, (author, alg, output_file))
 	evaluateWeka(author, alg, output_file)
