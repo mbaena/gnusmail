@@ -32,7 +32,8 @@ public class ConfigManager {
 	public final static String CONF_FOLDER = System.getProperty("user.home") + "/.gnusmail/";
 	public final static String CONF_FILE = "gnusmail.properties";
 	public final static File MODEL_FILE = new File(CONF_FOLDER + "model.bin");
-	public final static File MAILDIR = new File(CONF_FOLDER + "maildirln");
+	//public final static File MAILDIR = new File(CONF_FOLDER + "maildirln/farmer-d");
+	public final static File MAILDIR = new File("/local/home/users/jmcarmona/Chrome_Downloads/maildir/beck-s");
 	private static Properties properties = loadProperties();
 
 
