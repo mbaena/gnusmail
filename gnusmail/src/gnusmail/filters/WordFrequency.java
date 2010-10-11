@@ -99,7 +99,7 @@ public class WordFrequency extends Filter {
 		}
 	}
 
-	public static List<Token> tokenizeMessageInfo(MessageInfo messageInfo) {
+	private static List<Token> tokenizeMessageInfo(MessageInfo messageInfo) {
 		String body = null;
 		try {
 			// Extraemos las palabras del cuerpo y la cabecera

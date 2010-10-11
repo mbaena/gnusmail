@@ -3,6 +3,7 @@ package gnusmail;
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
+import gnusmail.filters.MultilabelFolder;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -149,6 +150,12 @@ public class MainManager {
 			instances.add(inst);
 		}
 		filterManager.writeToFile(instances, datasetFileName);
+		for (gnusmail.filters.Filter f : filterManager.filterList) {
+			if (f instanceof MultilabelFolder) {
+				((MultilabelFolder)f).writeToFile();
+			}
+		}
+			
 	}
 
 	/**
@@ -275,7 +282,7 @@ public class MainManager {
 		if (readMailsFromFile) {
 			reader = MessageReaderFactory.createReader(this.maildir, 5000); //Para no limitar el n. de mensajes por carpeta
 		} else {
-			reader = MessageReaderFactory.createReader(connection, 2);
+			reader = MessageReaderFactory.createReader(connection, 2000);
 		}
 		return reader;
 	}

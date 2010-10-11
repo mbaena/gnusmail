@@ -33,7 +33,6 @@ public class MessageReader implements Iterable<Message> {
 			return message;
 		}
 
-		@Override
 		public int compareTo(ComparableMessage o) {
 			return this.date.compareTo(o.date);
 		}
@@ -53,6 +52,7 @@ public class MessageReader implements Iterable<Message> {
 
 		//TODO imprimir cuantos mensajes hay?
 		public LimitedMessageReaderIterator(Connection connection, int limit) {
+			System.out.println("El limite es " + limit);
 			message_list = new TreeSet<ComparableMessage>();
 			long total_msgs = 0;
 			Folder[] folders = null;
@@ -159,7 +159,6 @@ public class MessageReader implements Iterable<Message> {
 		this.limit = limit;
 	}
 
-	@Override
 	public Iterator<Message> iterator() {
 		Iterator<Message> iterator;
 		iterator = new LimitedMessageReaderIterator(connection, limit);

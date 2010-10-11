@@ -97,6 +97,7 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 				m = new MIMEMessageWithFolder(s, is);
 				if (baseFolderLength < parentFolder.length()) {
 					((MIMEMessageWithFolder) m).setFolderAsStr(parentFolder.substring(baseFolderLength, parentFolder.length()));
+					//((MIMEMessageWithFolder) m).setFolderAsStr(parentFolder);
 				} else {
 					((MIMEMessageWithFolder) m).setFolderAsStr("/");
 				}
