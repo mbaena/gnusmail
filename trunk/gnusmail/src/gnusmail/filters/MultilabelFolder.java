@@ -7,9 +7,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,11 +73,9 @@ public class MultilabelFolder extends Filter {
 		String separator = "\\.";
 		String folders[] = folder.split(separator);
 		List<String> multilabelFolders = new ArrayList<String>();
+		int length = 0;
 		for (int i = 0; i < folders.length; i++) {
-			int length = 0;
-			for (int j = 0; j <= i; j++) {
-				length += folders[j].length();
-			}
+			length += folders[i].length();
 			String s = folder.substring(0, length + i);
 			multilabelFolders.add(s);			
 		}
@@ -98,6 +98,45 @@ public class MultilabelFolder extends Filter {
 			e.printStackTrace();
 		}
 		
+	}
+
+	public void writeToHierarchicalFile() {
+		String filename = ConfigManager.CONF_FOLDER + "labels.xml";
+		try {
+			Writer output = new BufferedWriter(new FileWriter(new File(filename)));
+			output.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<labels xmlns=\"http://mulan.sourceforge.net/labels\">\n");
+			Iterator<String> iter = this.existingFolders.iterator();
+			if (iter.hasNext()) {
+				String folder = iter.next();
+				recursiveLabels(iter, output, folder, "\t");
+				output.write("\t<label name=\"INBOX.DUMMY\"/>\n");				
+			}
+			output.write("</labels>");
+			output.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void recursiveLabels(Iterator<String> iter, Writer output, String parentFolder, String tab) throws IOException {
+		output.write(tab + "<label name=\"" + parentFolder + "\">\n");
+		int count = 0;
+		while (iter.hasNext()) {
+			String folder = iter.next();
+			if (folder.startsWith(parentFolder)) {
+			   recursiveLabels(iter, output, folder, tab+"\t");
+			} else {
+				break;
+			}
+			count++;
+		}	
+		if (count==1) {
+			output.write(tab+"\t<label name=\"" + parentFolder + ".DUMMY\"/>\n");			
+		}
+		output.write(tab + "</label>\n");
 	}
 
 }
