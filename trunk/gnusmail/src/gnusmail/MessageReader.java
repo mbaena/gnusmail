@@ -11,9 +11,9 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 
 public class MessageReader implements Iterable<Message> {
-	//Used to keep track of partially unprocessed folders. When a folder
-	//is totally processed, it's connection can be closed
-	//Map<String, Integer> mailsToReadFromFolders;
+	// Used to keep track of partially unprocessed folders. When a folder
+	// is totally processed, it's connection can be closed
+	// Map<String, Integer> mailsToReadFromFolders;
 
 	private class ComparableMessage implements Comparable<ComparableMessage> {
 
@@ -42,7 +42,6 @@ public class MessageReader implements Iterable<Message> {
 		}
 	}
 
-
 	private class LimitedMessageReaderIterator implements Iterator<Message> {
 
 		int limOpenFolders = 5;
@@ -50,7 +49,7 @@ public class MessageReader implements Iterable<Message> {
 		TreeSet<ComparableMessage> message_list;
 		int numberOfNexts = 0;
 
-		//TODO imprimir cuantos mensajes hay?
+		// TODO imprimir cuantos mensajes hay?
 		public LimitedMessageReaderIterator(Connection connection, int limit) {
 			System.out.println("El limite es " + limit);
 			message_list = new TreeSet<ComparableMessage>();
@@ -58,13 +57,13 @@ public class MessageReader implements Iterable<Message> {
 			Folder[] folders = null;
 			try {
 				folders = connection.getFolders();
-				//folders = cleanFolders(folders);
+				// folders = cleanFolders(folders);
 			} catch (MessagingException e) {
 				e.printStackTrace();
 			}
 			System.out.println("Transversing folders");
 			for (Folder folder : folders) {
-				if (!folder.getName().toLowerCase().contains("sent") 
+				if (!folder.getName().toLowerCase().contains("sent")
 						&& !folder.getName().toLowerCase().contains("antiguos")
 						&& !folder.getName().toLowerCase().contains("trash")) {
 					try {
@@ -90,25 +89,44 @@ public class MessageReader implements Iterable<Message> {
 							first_msg = 1;
 						}
 						Message msg = folder.getMessage(first_msg);
-						ComparableMessage comparableMsg = new ComparableMessage(msg);
+						ComparableMessage comparableMsg = new ComparableMessage(
+								msg);
 						message_list.add(comparableMsg);
 					} catch (MessagingException e) {
 						e.printStackTrace();
-					} finally {
-						/*try {
-							folder.close(false);
-						} catch (MessagingException e) {
-							e.printStackTrace();
-						}*/
 					}
 				} else {
 					System.out.println("Desechada: " + folder.getFullName());
 				}
 			}
+			while (openFolders.size() > 0) {
+				if (openFolders.get(0).isOpen()) {
+					try {
+						openFolders.get(0).close(false);
+					} catch (MessagingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				openFolders.remove(0);
+			}
 			System.out.println("End of transversing folders");
 		}
 
 		public boolean hasNext() {
+			if (message_list.isEmpty()) {
+				while (openFolders.size() > 0) {
+					if (openFolders.get(0).isOpen()) {
+						try {
+							openFolders.get(0).close(false);
+						} catch (MessagingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					openFolders.remove(0);
+				}
+			}
 			return !message_list.isEmpty();
 		}
 
@@ -132,18 +150,12 @@ public class MessageReader implements Iterable<Message> {
 				}
 				if (number < folder.getMessageCount()) {
 					Message nextMsg = folder.getMessage(number + 1);
-					ComparableMessage nextComparableMsg = new ComparableMessage(nextMsg);
+					ComparableMessage nextComparableMsg = new ComparableMessage(
+							nextMsg);
 					message_list.add(nextComparableMsg);
 				}
 			} catch (MessagingException e) {
 				e.printStackTrace();
-			} finally {
-				/*try {
-				folder.close(false);
-				} catch (MessagingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				}*/
 			}
 			return msg;
 		}
@@ -153,9 +165,9 @@ public class MessageReader implements Iterable<Message> {
 		}
 
 	}
+
 	private Connection connection;
 	private int limit;
-
 
 	public MessageReader() {
 
@@ -172,4 +184,3 @@ public class MessageReader implements Iterable<Message> {
 		return iterator;
 	}
 }
-
