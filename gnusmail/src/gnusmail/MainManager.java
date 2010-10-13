@@ -149,13 +149,12 @@ public class MainManager {
 			Instance inst = filterManager.makeInstance(msgInfo);
 			instances.add(inst);
 		}
-		filterManager.writeToFile(instances, datasetFileName);
 		for (gnusmail.filters.Filter f : filterManager.filterList) {
 			if (f instanceof MultilabelFolder) {
-				((MultilabelFolder)f).writeToFile();
+				((MultilabelFolder)f).writeToHierarchicalFile();
 			}
 		}
-			
+		filterManager.writeToFile(instances, datasetFileName);			
 	}
 
 	/**
@@ -282,7 +281,7 @@ public class MainManager {
 		if (readMailsFromFile) {
 			reader = MessageReaderFactory.createReader(this.maildir, 5000); //Para no limitar el n. de mensajes por carpeta
 		} else {
-			reader = MessageReaderFactory.createReader(connection, 2000);
+			reader = MessageReaderFactory.createReader(connection, 1);
 		}
 		return reader;
 	}

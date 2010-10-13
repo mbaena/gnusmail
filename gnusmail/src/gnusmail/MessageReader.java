@@ -45,7 +45,7 @@ public class MessageReader implements Iterable<Message> {
 
 	private class LimitedMessageReaderIterator implements Iterator<Message> {
 
-		int limOpenFolders = 15;
+		int limOpenFolders = 5;
 		List<Folder> openFolders = new ArrayList<Folder>();
 		TreeSet<ComparableMessage> message_list;
 		int numberOfNexts = 0;
@@ -69,6 +69,13 @@ public class MessageReader implements Iterable<Message> {
 						&& !folder.getName().toLowerCase().contains("trash")) {
 					try {
 						if (!folder.isOpen()) {
+							if (openFolders.size() == limOpenFolders) {
+								if (openFolders.get(0).isOpen()) {
+									openFolders.get(0).close(false);
+								}
+								openFolders.remove(0);
+							}
+							openFolders.add(folder);
 							folder.open(javax.mail.Folder.READ_ONLY);
 						}
 						int msg_count = folder.getMessageCount();
@@ -88,11 +95,11 @@ public class MessageReader implements Iterable<Message> {
 					} catch (MessagingException e) {
 						e.printStackTrace();
 					} finally {
-						try {
+						/*try {
 							folder.close(false);
 						} catch (MessagingException e) {
 							e.printStackTrace();
-						}
+						}*/
 					}
 				} else {
 					System.out.println("Desechada: " + folder.getFullName());
