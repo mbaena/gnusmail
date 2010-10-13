@@ -121,13 +121,22 @@ public class MultilabelFolder extends Filter {
 		
 	}
 	
-	private void recursiveLabels(Iterator<String> iter, Writer output, String parentFolder, String tab) throws IOException {
+	private String recursiveLabels(Iterator<String> iter, Writer output, String parentFolder, String tab) throws IOException {
 		output.write(tab + "<label name=\"" + parentFolder + "\">\n");
 		int count = 0;
+		boolean readNextFolder = true; 
+		String folder = null;
 		while (iter.hasNext()) {
-			String folder = iter.next();
+			if (readNextFolder) {
+				folder = iter.next();
+			} else {
+				readNextFolder = true;
+			}
 			if (folder.startsWith(parentFolder)) {
-			   recursiveLabels(iter, output, folder, tab+"\t");
+			    folder = recursiveLabels(iter, output, folder, tab+"\t");
+			    if (folder!=null) {
+			    	readNextFolder = false;
+			    }
 			} else {
 				break;
 			}
@@ -137,6 +146,7 @@ public class MultilabelFolder extends Filter {
 			output.write(tab+"\t<label name=\"" + parentFolder + ".DUMMY\"/>\n");			
 		}
 		output.write(tab + "</label>\n");
+		return folder;
 	}
 
 }
