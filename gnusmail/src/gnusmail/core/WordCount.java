@@ -55,6 +55,8 @@ class WordCount implements Comparable<WordCount> {
         this.word = word;
     }
 
+
+    @Override
     public int compareTo(WordCount wc) {
         int res = 0;
         if (getCount() < wc.getCount()) {
