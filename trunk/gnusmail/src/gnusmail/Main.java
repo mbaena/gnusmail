@@ -17,6 +17,9 @@ public class Main {
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
 		System.out.println("WELCOME TO GENUSMAIL!!!");
+		for (String s : argv) {
+			System.out.println(s);
+		}
 
 		String arg;
 		int c;
@@ -77,6 +80,7 @@ public class Main {
 					options.setUpdateModelWithMail();
 					break;
 				case 'l':
+					System.out.println("Arg es" + arg);
 					options.setListMails(true, Integer.parseInt(arg));
 					break;
 				case 'm':

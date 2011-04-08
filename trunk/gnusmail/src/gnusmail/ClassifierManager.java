@@ -18,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
-import moa.classifiers.HoeffdingTreeNBAdaptive;
 import moa.core.InstancesHeader;
 import moa.core.Measurement;
 import moa.evaluation.ClassificationPerformanceEvaluator;
@@ -35,6 +34,7 @@ import weka.core.Utils;
 
 /**
  * TODO
+ * 
  * @author jmcarmona
  */
 public class ClassifierManager {
@@ -56,26 +56,31 @@ public class ClassifierManager {
 	}
 
 	/**
-	 * This method reads the messages in chronological order, and updates
-	 * the underlying model with each message
-	 * @return 
+	 * This method reads the messages in chronological order, and updates the
+	 * underlying model with each message
+	 * 
+	 * @return
 	 */
-	public List<Double> incrementallyTrainModel(MessageReader reader, String wekaClassifier) {
+	public List<Double> incrementallyTrainModel(MessageReader reader,
+			String wekaClassifier) {
 		int seenMails = 0;
 		int goodClassifications = 0;
 		Map<String, Integer> messagesViewedByFolder = new TreeMap<String, Integer>();
 		Map<String, Double> correctClassificationsByFolder = new TreeMap<String, Double>();
-		List<Double> rates = new ArrayList<Double>();
+		List<Double> successes = new ArrayList<Double>();
 		try {
 			Classifier model = null;
 			model = (Classifier) Class.forName(wekaClassifier).newInstance();
 			try {
-				model.buildClassifier(filterManager.getDataset()); // Add attributes information
+				model.buildClassifier(filterManager.getDataset()); // Add
+																	// attributes
+																	// information
 			} catch (Exception ex) {
-				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(ClassifierManager.class.getName()).log(
+						Level.SEVERE, null, ex);
 			}
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
-			for (Message msg : reader) { //TODO: esto en mainmanager,
+			for (Message msg : reader) { // TODO: esto en mainmanager,
 				double predictedClass = 0.0;
 				try {
 					MessageInfo msgInfo = new MessageInfo(msg);
@@ -87,41 +92,58 @@ public class ClassifierManager {
 					}
 					double trueClass = inst.classValue();
 
-					//Statistics update: total number
+					// Statistics update: total number
 					if (predictedClass == trueClass) {
 						goodClassifications++;
+						successes.add(1.0);
+					} else {
+						successes.add(0.0);
 					}
+
 					seenMails++;
 
 					double rate = goodClassifications * 100.0 / seenMails;
 					System.out.println("Correct answers rate: " + rate + "%");
-					rates.add(rate);
 
-					//Statistics update by folder
+					// Statistics update by folder
 					if (!messagesViewedByFolder.containsKey(folder)) {
 						messagesViewedByFolder.put(folder, 0);
 					}
 					if (!correctClassificationsByFolder.containsKey(folder)) {
 						correctClassificationsByFolder.put(folder, 0.0);
 					}
-					int currentViewedMessages = messagesViewedByFolder.get(folder);
-					messagesViewedByFolder.put(folder, currentViewedMessages + 1);
+					int currentViewedMessages = messagesViewedByFolder
+							.get(folder);
+					messagesViewedByFolder.put(folder,
+							currentViewedMessages + 1);
 					if (predictedClass == trueClass) {
-						double currentGuessed = correctClassificationsByFolder.get(folder);
-						correctClassificationsByFolder.put(folder, currentGuessed + 1);
+						double currentGuessed = correctClassificationsByFolder
+								.get(folder);
+						correctClassificationsByFolder.put(folder,
+								currentGuessed + 1);
 					}
 					String strCorrectByFolder = "";
 					for (String f : messagesViewedByFolder.keySet()) {
 						int totalForThisFolder = messagesViewedByFolder.get(f);
-						double guessedForThisFolder = correctClassificationsByFolder.get(f);
-						strCorrectByFolder += "\t" + f + ": " + guessedForThisFolder + "/" + totalForThisFolder +
-								"(" + (guessedForThisFolder * 100.0 / totalForThisFolder) + "%); \n";
+						double guessedForThisFolder = correctClassificationsByFolder
+								.get(f);
+						strCorrectByFolder += "\t"
+								+ f
+								+ ": "
+								+ guessedForThisFolder
+								+ "/"
+								+ totalForThisFolder
+								+ "("
+								+ (guessedForThisFolder * 100.0 / totalForThisFolder)
+								+ "%); \n";
 					}
-					System.out.println("Correct answers rate by folder: " + strCorrectByFolder);
+					System.out.println("Correct answers rate by folder: "
+							+ strCorrectByFolder);
 
 					updateableModel.updateClassifier(inst);
 				} catch (Exception ex) {
-					Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(ClassifierManager.class.getName()).log(
+							Level.SEVERE, null, ex);
 				}
 			}
 			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
@@ -129,15 +151,19 @@ public class ClassifierManager {
 			fis.writeObject(updateableModel);
 			fis.close();
 		} catch (InstantiationException ex) {
-			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(ClassifierManager.class.getName()).log(
+					Level.SEVERE, null, ex);
 		} catch (IllegalAccessException ex) {
-			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(ClassifierManager.class.getName()).log(
+					Level.SEVERE, null, ex);
 		} catch (ClassNotFoundException ex) {
-			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(ClassifierManager.class.getName()).log(
+					Level.SEVERE, null, ex);
 		} catch (IOException ex) {
-			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(ClassifierManager.class.getName()).log(
+					Level.SEVERE, null, ex);
 		}
-		return rates;
+		return successes;
 	}
 
 	/**
@@ -148,7 +174,8 @@ public class ClassifierManager {
 		System.out.println("Training model...");
 		try {
 			UpdateableClassifier updateableClassifier = (UpdateableClassifier) model;
-			for (Enumeration instances = dataSet.enumerateInstances(); instances.hasMoreElements();) {
+			for (Enumeration instances = dataSet.enumerateInstances(); instances
+					.hasMoreElements();) {
 				Instance instance = (Instance) instances.nextElement();
 				updateableClassifier.updateClassifier(instance);
 			}
@@ -162,51 +189,67 @@ public class ClassifierManager {
 			fis.writeObject(model);
 			fis.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("File " + ConfigManager.MODEL_FILE.getAbsolutePath() + " not found");
+			System.out
+					.println("File "
+							+ ConfigManager.MODEL_FILE.getAbsolutePath()
+							+ " not found");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public List<Double> evaluatePrecuential(MessageReader reader, String moaClassifier) {
+	public List<Double> evaluatePrecuential(MessageReader reader,
+			String moaClassifier) {
 		Map<String, Double> messagesViewedByFolder = new TreeMap<String, Double>();
 		Map<String, Double> correctClassificationsByFolder = new TreeMap<String, Double>();
 		// Evaluator Factory
 		ClassOption evaluatorOption = new ClassOption("evaluator", 'e',
-				"Evaluator to use.", ClassificationPerformanceEvaluator.class, "WindowClassificationPerformanceEvaluator");
-		evaluatorOption.setValueViaCLIString(ConfigManager.getProperty("moaPrecuentialEvaluator"));
-		ClassificationPerformanceEvaluator evaluator = (ClassificationPerformanceEvaluator) evaluatorOption.materializeObject(null, null);
-		//evaluator.prepareForUse(); TODO (in moa)
+				"Evaluator to use.", ClassificationPerformanceEvaluator.class,
+				"WindowClassificationPerformanceEvaluator");
+		evaluatorOption.setValueViaCLIString(ConfigManager
+				.getProperty("moaPrecuentialEvaluator"));
+		ClassificationPerformanceEvaluator evaluator = (ClassificationPerformanceEvaluator) evaluatorOption
+				.materializeObject(null, null);
+		// evaluator.prepareForUse(); TODO (in moa)
 		if (evaluator instanceof WindowClassificationPerformanceEvaluator) {
-			((WindowClassificationPerformanceEvaluator) evaluator).setWindowWidth(Integer.parseInt(ConfigManager.getProperty("windowWidth")));
+			((WindowClassificationPerformanceEvaluator) evaluator)
+					.setWindowWidth(Integer.parseInt(ConfigManager
+							.getProperty("windowWidth")));
 		}
 		if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
-			((EWMAClassificationPerformanceEvaluator) evaluator).setalpha(Double.parseDouble(ConfigManager.getProperty("alphaOption")));
+			((EWMAClassificationPerformanceEvaluator) evaluator)
+					.setalpha(Double.parseDouble(ConfigManager
+							.getProperty("alphaOption")));
 		}
 
-		// Learner Factory 
+		// Learner Factory
 		if (moaClassifier == null) {
 			moaClassifier = ConfigManager.getProperty("moaClassifier");
 		}
 		ClassOption learnerOption = new ClassOption("learner", 'l',
-				"Classifier to train.", moa.classifiers.Classifier.class, "NaiveBayes");
+				"Classifier to train.", moa.classifiers.Classifier.class,
+				"NaiveBayes");
 		learnerOption.setValueViaCLIString(moaClassifier);
-		moa.classifiers.Classifier learner = (moa.classifiers.Classifier) learnerOption.materializeObject(null, null);
+		moa.classifiers.Classifier learner = (moa.classifiers.Classifier) learnerOption
+				.materializeObject(null, null);
 		learner.prepareForUse();
+		
 
 		try {
 			System.out.println("\n**MOA**\nLearner: " + learner);
 			System.out.println("\nEvaluator: " + evaluator + "\n**MOA**\n");
 		} catch (Exception ex) {
-			System.out.println("Can't print model. Is sizeofag.jar accessible?");
+			System.out
+					.println("Can't print model. Is sizeofag.jar accessible?");
 		}
 
-		InstancesHeader instancesHeader = new InstancesHeader(filterManager.getDataset());
+		InstancesHeader instancesHeader = new InstancesHeader(filterManager
+				.getDataset());
 		learner.setModelContext(instancesHeader);
 
-		List<Double> tasas = new ArrayList<Double>();
-		Map<String, List<Double>>tasasByFolder = new TreeMap<String, List<Double>>();
+		List<Double> successes = new ArrayList<Double>();
+		Map<String, List<Double>> tasasByFolder = new TreeMap<String, List<Double>>();
 
 		Measurement[] listMs = evaluator.getPerformanceMeasurements();
 		int posCorrect = 0;
@@ -237,61 +280,40 @@ public class ClassifierManager {
 			}
 
 			double totalThisFolder = messagesViewedByFolder.get(folder);
-			double correctThisFolder = correctClassificationsByFolder.get(folder);
+			double correctThisFolder = correctClassificationsByFolder
+					.get(folder);
 			Instance trainInst = filterManager.makeInstance(msgInfo);
 			Instance testInst = (Instance) trainInst.copy();
 			int trueClass = (int) trainInst.classValue();
 			testInst.setClassMissing();
 			double[] prediction = learner.getVotesForInstance(testInst);
 
-			//Update statistics
+			// Update statistics
 			if (Utils.maxIndex(prediction) == trueClass) {
-				System.out.println("---------->Correctly classifies!!!! folder autentica es " + folder + ", ponemos " + testInst.weight());
-				correctClassificationsByFolder.put(folder, correctThisFolder + testInst.weight());
+				correctClassificationsByFolder.put(folder, correctThisFolder
+						+ testInst.weight());
 				numeroAciertos++;
+				successes.add(1.0);
 			} else {
-				System.out.println("---------->FAIL classification!!!!" + folder);
+				successes.add(0.0);
 			}
-			System.out.println("Numero de aciertos " + numeroAciertos);
-			System.out.println("Numero de mensajes " + nmess);
-			System.out.println("Predictions " + prediction);
 
-			messagesViewedByFolder.put(folder, totalThisFolder + testInst.weight());
-			String strCorrectByFolder = "";
-			for (String f : messagesViewedByFolder.keySet()) {
-				double totalForThisFolder = messagesViewedByFolder.get(f);
-				double guessedForThisFolder = correctClassificationsByFolder.get(f);
-				strCorrectByFolder += "\t" + f + ": " + guessedForThisFolder + "/" + totalForThisFolder +
-						"(" + (guessedForThisFolder * 100.0 / totalForThisFolder) + "%); \n";
-				System.out.println("A la folder " + f + " le anadimos " + guessedForThisFolder *100 / totalForThisFolder);
-			}
-			System.out.println("Correct answers rate by folder: " + strCorrectByFolder);
-
-			evaluator.addClassificationAttempt(trueClass, prediction, testInst.weight());
+			messagesViewedByFolder.put(folder, totalThisFolder
+					+ testInst.weight());
+			
+			evaluator.addClassificationAttempt(trueClass, prediction, testInst
+					.weight());
 			listMs = evaluator.getPerformanceMeasurements();
-			tasas.add(listMs[posCorrect].getValue());
-
-
-			for (Measurement measurement : listMs) {
-				System.out.print(measurement.getName() + ": Tasa: " + measurement.getValue() + "\t");
-			}
-
-			System.out.println();
+			System.out.println("Train on instance");
 			learner.trainOnInstance(trainInst);
-//			System.out.println(learner);
-			System.out.println("Press a key to continue..."); //We want to see the model
-			//BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			//String aux = br.readLine();
-
-			//msg.getFolder().close(false);
-			//	}
 			nmess++;
 			try {
 			} catch (Exception ex) {
-				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(ClassifierManager.class.getName()).log(
+						Level.SEVERE, null, ex);
 			}
 		}
-		return tasas;
+		return successes;
 	}
 
 	public void trainModel() {
@@ -309,7 +331,10 @@ public class ClassifierManager {
 			fis.writeObject(model);
 			fis.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("File " + ConfigManager.MODEL_FILE.getAbsolutePath() + " not found");
+			System.out
+					.println("File "
+							+ ConfigManager.MODEL_FILE.getAbsolutePath()
+							+ " not found");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -329,8 +354,7 @@ public class ClassifierManager {
 
 		FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
 		ObjectInputStream fie = new ObjectInputStream(fe);
-		model =
-				(Classifier) fie.readObject();
+		model = (Classifier) fie.readObject();
 
 		System.out.println("\nClassifying...\n");
 		double[] res = model.distributionForInstance(inst);
@@ -338,31 +362,31 @@ public class ClassifierManager {
 		double biggest = 0;
 		int biggest_index = 0;
 		for (int i = 0; i < res.length; i++) {
-			System.out.println("\nDestination folder will be " + att.value(i) + " with probability: " + res[i]);
+			System.out.println("\nDestination folder will be " + att.value(i)
+					+ " with probability: " + res[i]);
 			if (res[i] > biggest) {
 				biggest_index = i;
-				biggest =
-						res[i];
+				biggest = res[i];
 			}
 
 		}
 		System.out.println("------------------------------");
-		System.out.println("\nThe most probable folder is: " + att.value(biggest_index));
+		System.out.println("\nThe most probable folder is: "
+				+ att.value(biggest_index));
 	}
 
 	void updateModelWithMessage(MimeMessage mimeMessage) {
 		Reader r = null;
 		try {
 			MessageInfo msg = new MessageInfo(mimeMessage);
-			System.out.println("Updating model with message, which folder is " +
-					msg.getFolderAsString());
+			System.out.println("Updating model with message, which folder is "
+					+ msg.getFolderAsString());
 			Instance inst = filterManager.makeInstance(msg);
 			Classifier model;
 
 			FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
 			ObjectInputStream fie = new ObjectInputStream(fe);
-			model =
-					(Classifier) fie.readObject();
+			model = (Classifier) fie.readObject();
 			UpdateableClassifier updateableModel = (UpdateableClassifier) model;
 			updateableModel.updateClassifier(inst);
 			FileOutputStream f = new FileOutputStream(ConfigManager.MODEL_FILE);
@@ -371,15 +395,16 @@ public class ClassifierManager {
 			fis.close();
 			System.out.println("Model updated");
 		} catch (Exception ex) {
-			Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(ClassifierManager.class.getName()).log(
+					Level.SEVERE, null, ex);
 		} finally {
 			try {
 				r.close();
 			} catch (IOException ex) {
-				Logger.getLogger(ClassifierManager.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(ClassifierManager.class.getName()).log(
+						Level.SEVERE, null, ex);
 			}
 		}
 
 	}
 }
-
