@@ -46,6 +46,9 @@ def genericEvaluation(task):
     os.system("bash %s" % (task))
     hechos += 1
 
+def apply_cochram_test(matrix):
+  pass
+
 def evaluateWeka(author, alg, output):
     maildir = os.path.join(_MAILDIR_PATH, author)
     task = """%s -z%s -i%s -e --weka-classifier=%s > %s.cdrifts""" % (_GNUSMAIL_SH, maildir, output, alg, output+"salidaporpantalla") #moaClassifier
@@ -125,6 +128,7 @@ def plot_matplotlib(file_in, method, param):
     averages.append(average)
     count += 1
   plot(averages, label=file_in, linewidth=1)
+  return(averages)
 
 def add_cdrift_to_graphic(cdrift):
   state = "BuscarFolder"
@@ -152,17 +156,20 @@ def add_cdrift_to_graphic(cdrift):
 
 def imprimirgraficas(graficas, cdrifts, method, param):
     for author in graficas.keys():
+      performances_per_author = []
       filename = "grafica_" + author + ".pdf"
       for graph in graficas[author]:
-        plot_matplotlib(graph, method, param)
+        performance = plot_matplotlib(graph, method, param)
+        performances_per_author.append(performance)
         add_cdrift_to_graphic(cdrifts[author])
 
       fp = FontProperties(size=6)
       legend(loc=0, prop=fp, title="leyenda")
       savefig(filename + ".pdf")
+      apply_cochram_test(performances_per_author)
 
 
-def launchEvaluation(evaluation_method, prefix, algorithms):
+def launchEvaluation(evaluation_method, prefix, algorithms, method, param):
     global hechos
     pool = ThreadPool(4)
     if not os.path.exists(_OUTPUT_PATH):
@@ -195,14 +202,14 @@ def launchEvaluation(evaluation_method, prefix, algorithms):
             #evaluation_method(author, alg, output_file)
     pool.joinAll()
     print("Hecho, a imprimir graficas")
-    imprimirgraficas(graficas, cdrifts, "sliding-window", 10000)
+    imprimirgraficas(graficas, cdrifts, method, param)
 
 """""""""
 MAIN SECTION
 """""""""
 
-errormessage = "Usage: python " + sys.argv[0] + " moa | weka"
-if len(sys.argv) < 2:
+errormessage = "Usage: python " + sys.argv[0] + " moa|weka sliding-window|fading-factor param"
+if len(sys.argv) < 4:
     print(errormessage)
     exit()
 param = sys.argv[1].lower()
@@ -217,6 +224,8 @@ else:
     evaluation_method = evaluateWeka
     algs = getWekaAlgorithms()
     prefix = 'ratesWeka'
+method = sys.argv[2]
+param = sys.argv[3]
 
-launchEvaluation(evaluation_method, prefix, algs)
+launchEvaluation(evaluation_method, prefix, algs, method, param)
 
