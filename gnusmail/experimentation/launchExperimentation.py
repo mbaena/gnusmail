@@ -9,6 +9,8 @@ from time import sleep
 import urllib
 from matplotlib.pyplot import *
 from matplotlib.font_manager import FontProperties
+import math
+import Queue
 from string import Template
 
 _GNUSMAIL_PATH=os.path.join("..", "dist")
@@ -18,11 +20,11 @@ _MAILDIR_PATH=os.path.join("dataset","maildir")
 _OUTPUT_PATH="output"
 
 #For graphics
-accs = [] #for 
+accs = [] 
 Bs = []
 Ss = []
 
-hechos = 0
+facts = 0
 
 def get_enron_dataset():
     import tarfile
@@ -41,13 +43,11 @@ def get_enron_dataset():
     tar.close()
 
 def genericEvaluation(task):
-    global hechos
+    global facts
     print task
     os.system("bash %s" % (task))
-    hechos += 1
+    facts += 1
 
-def apply_cochram_test(matrix):
-  pass
 
 def evaluateWeka(author, alg, output):
     maildir = os.path.join(_MAILDIR_PATH, author)
@@ -61,8 +61,7 @@ def evaluateMOA(author, alg, output):
     genericEvaluation(task)
 
 def getAuthors():
-	#return ['beck-s', 'kaminski-v', 'kitchen-l', 'lokay-m','sanders-r','williams-w3', 'farmer-d'][-2:-1]
-	return ['beck-s']
+	return ['beck-s', 'kaminski-v', 'kitchen-l', 'lokay-m','sanders-r','williams-w3', 'farmer-d']
 
 def getMoaAlgorithms():
 	return ["MajorityClass", 
@@ -130,17 +129,134 @@ def plot_matplotlib(file_in, method, param):
   plot(averages, label=file_in, linewidth=1)
   return(averages)
 
+def get_mcnemar_points_slidingwindow(file_in1, file_in2, window_size):
+  q1 = Queue.Queue(int(window_size))
+  q2 = Queue.Queue(int(window_size))
+  sign = lambda x: math.copysign(1, x)
+  f1 = open(file_in1)
+  f2 = open(file_in2)
+  nums = []
+  n01 = 0
+  n10 = 0
+  mcnemars = []
+  while True:
+    try:
+      n1 = float(f1.next())
+      n2 = float(f2.next())
+
+      #Queue to manage time window. When an item is too old, is deleted
+      item_to_deduce1 = item_to_deduce2 = 0
+      if q1.full(): 
+        item_to_deduce1 = q1.get()
+      q1.put(n1)
+      if q2.full(): 
+        item_to_deduce2 = q2.get()
+      q2.put(n2)
+      if item_to_deduce1 == 0 and item_to_deduce2 == 1: 
+        n01 -= 1
+      elif item_to_deduce1 == 1 and item_to_deduce2 == 0: 
+        n10 -= 1
+
+      if n1 == 0 and n2 == 1: n01 += 1
+      elif n1 == 1 and n2 == 0: n10 += 1
+      mcnemar = 0
+      if (n01+n10) > 0: mcnemar = 1.0 * sign(n01-n10)  * ((n01-n10) ** 2) / (n01+n10)
+      mcnemars.append(mcnemar)
+    except:  #End of iteration
+      break
+  return mcnemars
+
+def get_mcnemar_points_fadingfactors_v1(file_in1, file_in2, factor):
+  """
+  First version of the McNemar measure with fading factors
+  """
+  #First, MnNemar points as calculated by original formula
+  sign = lambda x: math.copysign(1, x)
+  f1 = open(file_in1)
+  f2 = open(file_in2)
+  nums = []
+  n01 = = n10 = 0
+  mcnemars = []
+  while True:
+    try:
+      n1 = float(f1.next())
+      n2 = float(f2.next())
+      if n1 == 0 and n2 == 1: n01 += 1
+      elif n1 == 1 and n2 == 0: n10 += 1
+      mcnemar = 0
+      if (n01+n10) > 0: mcnemar = 1.0 * sign(n01-n10)  * ((n01-n10) ** 2) / (n01+n10)
+      mcnemars.append(mcnemar)
+    except: 
+      print("End of iteration")
+      break
+
+  #Then, fading factors, using S_i = M_i + \alpha S_{i-1], B_i = N_i + \alpha B_{i-1} and Ej = Sj / Bj
+  res = []
+  Sj = 0
+  Bj = 0
+  for i in range(1, len(mcnemars)):
+    vector = mcnemars[0:i]
+    Sj = vector[-1] + (Sj*factor)
+    Bj = i +1 + (Bj*factor)
+    Ej = Sj / Bj
+    res.append(Ej)
+  return res
+
+def get_mcnemar_points_fadingfactors_v2(file_in1, file_in2, factor):
+  """
+  Second version of the McNemar measure with fading factors.
+  Short explation: M = sign(n01-n10)\frac{(n01-n10)P^2}{n01-n10}
+  Let f01_i == 0 for a point i if classifier A misclassifies and B classifies well. 
+  Similar with f10.
+  Then, rewriting n10_i = n10{i-1} + f10_i (and similarly with n01_i}:
+  M = sign (n01_{i-1} + f01_i - n10{i-1} - f10_i) \frac{(n01_{i-1} + f01_i - n10{i-1} - f10_i)^2 }{(n01_{i-1} + f01_i + n10{i-1} + f10_i) }
+
+  The idea is to apply fading factor \alpha to the n10_{i-1} and n01_{i-1}:
+  M = sign (\alpha n01_{i-1} + f01_i -\alpha  n10{i-1} - f10_i) \frac{(\alpha n01_{i-1} + f01_i - \alpha n10{i-1} - f10_i)^2 }{(\alpha n01_{i-1} + f01_i + \alpha n10{i-1} + f10_i) }
+  """
+  sign = lambda x: math.copysign(1, x)
+  f1 = open(file_in1)
+  f2 = open(file_in2)
+  nums = []
+  n01 = 0
+  n10 = 0
+  mcnemars = []
+  while True:
+    try:
+      n1 = float(f1.next())
+      n2 = float(f2.next())
+      print((n1, n2))
+      update01 = 0
+      update10 = 0
+      if n1 == 0 and n2 == 1: update01 = 1
+      elif n1 == 1 and n2 == 0: update10 = 1
+      n01 = update01 + (factor*n01)
+      n10 = update10 + (factor*n10)
+      mcnemar = 0
+      if (n01+n10) > 0: mcnemar = 1.0 * sign(n01-n10)  * ((n01-n10) ** 2) / (n01+n10)
+      mcnemars.append(mcnemar)
+    except: 
+      break
+  return mcnemars
+
+def get_mcnemar_points(file_in1, file_in2, method, param):
+  if method == "sliding-window":
+    return get_mcnemar_points_slidingwindow(file_in1, file_in2, param)
+  if method == "fading-factor":
+    return get_mcnemar_points_fadingfactors_v1(file_in1, file_in2, float(param))
+  else: print("Method unknown " + method)
+
 def add_cdrift_to_graphic(cdrift):
-  state = "BuscarFolder"
+  state = "SearchFolder"
   v = []
   f = open(cdrift[0])
   for line in f.readlines():
-    if state == "BuscarFolder":
+    if state == "SearchFolder":
       if line.startswith("Folder: "): 
         found = False
         foundWarning = False
-        state = "BuscarCD"
-    elif state == "BuscarCD":
+        state = "SearchCD"
+    elif state == "SearchCD":
       if line.startswith("0 1"): 
         found = True
       elif line.startswith("1 0"):
@@ -154,30 +270,47 @@ def add_cdrift_to_graphic(cdrift):
   f.close()
   plot(v, linestyle="--", linewidth=.5)
 
-def imprimirgraficas(graficas, cdrifts, method, param):
-    for author in graficas.keys():
+
+def print_graphics(graphs, cdrifts, method_prequential, param):
+    for author in graphs.keys():
       performances_per_author = []
-      filename = "grafica_" + author + ".pdf"
-      for graph in graficas[author]:
-        performance = plot_matplotlib(graph, method, param)
+      filename = "graph_" + author + ".pdf"
+      for graph in graphs[author]:
+        performance = plot_matplotlib(graph, method_prequential, param)
         performances_per_author.append(performance)
         add_cdrift_to_graphic(cdrifts[author])
 
       fp = FontProperties(size=6)
       legend(loc=0, prop=fp, title="leyenda")
-      savefig(filename + ".pdf")
-      apply_cochram_test(performances_per_author)
+      savefig(filename)
 
+def print_mcnemar(graphs, method, param):
+  def pairs(vector):
+    print(vector)
+    res = []
+    for i in range(0, len(vector)):
+      for j in range(0, len(vector)):
+        if i != j: res.append((vector[i],vector[j]))
+    return res
+  for author in graphs.keys():
+    graph_pairs = pairs(graphs[author])
+    for pair in graph_pairs:
+      mcnemar = get_mcnemar_points(pair[0], pair[1], method, param)
+      axhline(6.635) #McNemar critical point
+      plot(mcnemar)
+      filename = "mcnemar_%s_%s_%s_%s_%s.pdf" % (author,method, param, pair[0].split("/")[-1], pair[1].split("/")[-1])
+      savefig(filename)
+      clf()
 
-def launchEvaluation(evaluation_method, prefix, algorithms, method, param):
-    global hechos
+def launchEvaluation(evaluation_method, prefix, algorithms, method, param, method_mcnemar, param_mcnemar):
+    global facts
     pool = ThreadPool(4)
     if not os.path.exists(_OUTPUT_PATH):
         os.mkdir(_OUTPUT_PATH)
     if not os.path.exists(_MAILDIR_PATH):
         print "Enron Dataset not found in %s!" % (_MAILDIR_PATH,)
         get_enron_dataset()
-    graficas = {}
+    graphs = {}
     cdrifts = {}
     purge_pat = re.compile(r"[^\w]")
     for author in getAuthors():
@@ -185,11 +318,11 @@ def launchEvaluation(evaluation_method, prefix, algorithms, method, param):
             maildir = os.path.join(_MAILDIR_PATH, author)
             logging.info("PATH NOT FOUND! %s " % (maildir))
             continue
-        graficas[author] = []
+        graphs[author] = []
         cdrifts[author] = []
         for alg in algorithms:
             output_file = os.path.join(_OUTPUT_PATH, "%s_%s_%s" % (prefix, author, purge_pat.sub("", alg)))
-            graficas[author].append(output_file)
+            graphs[author].append(output_file)
             if "SingleClassifierDrift" in output_file: 
               cdrifts[author].append(output_file + ".cdrifts")
             else:
@@ -201,15 +334,15 @@ def launchEvaluation(evaluation_method, prefix, algorithms, method, param):
             pool.queueTask(evaluation_method, (author, alg, output_file))
             #evaluation_method(author, alg, output_file)
     pool.joinAll()
-    print("Hecho, a imprimir graficas")
-    imprimirgraficas(graficas, cdrifts, method, param)
+    #print_graphics(graphs, cdrifts, method, param)
+    print_mcnemar(graphs, method_mcnemar, param_mcnemar)
 
 """""""""
 MAIN SECTION
 """""""""
 
-errormessage = "Usage: python " + sys.argv[0] + " moa|weka sliding-window|fading-factor param"
-if len(sys.argv) < 4:
+errormessage = "Usage: python " + sys.argv[0] + " moa|weka sliding-window|fading-factor param sliding-window|fading-factor param"
+if len(sys.argv) < 6:
     print(errormessage)
     exit()
 param = sys.argv[1].lower()
@@ -226,6 +359,8 @@ else:
     prefix = 'ratesWeka'
 method = sys.argv[2]
 param = sys.argv[3]
+method_mcnemar = sys.argv[4]
+param_mcnemar = sys.argv[5]
 
-launchEvaluation(evaluation_method, prefix, algs, method, param)
+launchEvaluation(evaluation_method, prefix, algs, method, param, method_mcnemar, param_mcnemar)
 
