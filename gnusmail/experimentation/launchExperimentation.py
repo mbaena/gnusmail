@@ -21,8 +21,6 @@ _OUTPUT_PATH="output"
 
 #For graphics
 accs = [] 
-Bs = []
-Ss = []
 
 facts = 0
 
@@ -104,26 +102,31 @@ def get_average_for_slidingwindow(num, window_size, count, accs):
   average = (accs[-1] - factor_to_deduce)/min(window_size, count+1)*1.0
   return average, accs
 
-def get_average_for_fading_factors(num,fading_factor, Bs, Ss):
-  if Bs == []: Bs.append(1)
-  else: Bs.append(Bs[-1]*fading_factor + 1)
-  if Ss == []: Ss.append(num)
+def get_average_for_fading_factors(num,fading_factor, Ss, Bs):
+  if Bs == []: 
+    Bs.append(1)
+  else: 
+    Bs.append(Bs[-1]*fading_factor + 1)
+  if Ss == []: 
+    Ss.append(num)
   else: Ss.append(Ss[-1]*fading_factor + num)
-  return Ss[-1]*1.0/Bs[-1], Ss, Bs
+  res =  (Ss[-1]*1.0/Bs[-1], Ss, Bs)
+  return res
 
 
 def plot_matplotlib(file_in, method, param):
-  print("MATPLOTLIB")
-  accs = Bs = Ss = []
+  accs = [] 
+  Bs = []
+  Ss = []
   count = 0
   averages = []
   f = open(file_in)
   for line in f.readlines():
     num = float(line)
     if method == "sliding-window":
-      average, accs = get_average_for_slidingwindow(num, param, count, accs)
+      average, accs = get_average_for_slidingwindow(num, int(param), count, accs)
     else:
-      average , Bs, Ss = get_average_for_fading_factors(num, param, Bs, Ss)
+      (average, Ss, Bs) = get_average_for_fading_factors(num, float(param), Ss, Bs)
     averages.append(average)
     count += 1
   plot(averages, label=file_in, linewidth=1)
@@ -175,7 +178,7 @@ def get_mcnemar_points_fadingfactors_v1(file_in1, file_in2, factor):
   f1 = open(file_in1)
   f2 = open(file_in2)
   nums = []
-  n01 = = n10 = 0
+  n01  = n10 = 0
   mcnemars = []
   while True:
     try:
@@ -187,7 +190,6 @@ def get_mcnemar_points_fadingfactors_v1(file_in1, file_in2, factor):
       if (n01+n10) > 0: mcnemar = 1.0 * sign(n01-n10)  * ((n01-n10) ** 2) / (n01+n10)
       mcnemars.append(mcnemar)
     except: 
-      print("End of iteration")
       break
 
   #Then, fading factors, using S_i = M_i + \alpha S_{i-1], B_i = N_i + \alpha B_{i-1} and Ej = Sj / Bj
@@ -225,7 +227,6 @@ def get_mcnemar_points_fadingfactors_v2(file_in1, file_in2, factor):
     try:
       n1 = float(f1.next())
       n2 = float(f2.next())
-      print((n1, n2))
       update01 = 0
       update10 = 0
       if n1 == 0 and n2 == 1: update01 = 1
@@ -246,30 +247,93 @@ def get_mcnemar_points(file_in1, file_in2, method, param):
     return get_mcnemar_points_fadingfactors_v1(file_in1, file_in2, float(param))
   else: print("Method unknown " + method)
 
+#def add_cdrift_to_graphic(cdrift):
+#  state = "SearchFolder"
+#  v = []
+#  f = open(cdrift[0])
+#  for line in f.readlines():
+#    if state == "SearchFolder":
+#      if line.startswith("Folder: "): 
+#        found = False
+#        foundWarning = False
+#        state = "SearchCD"
+#    elif state == "SearchCD":
+#      if line.startswith("0 1"): 
+#        found = True
+#      elif line.startswith("1 0"):
+#        foundWarning = True
+#      elif line.startswith("Folder: "):
+#        if found: v.append(1.0)
+#        #elif foundWarning: v.append(0.5)
+#        else: v.append(0)
+#        found = False
+#        foundWarning = False
+#  f.close()
+#  plot(v, linestyle="--", linewidth=.5)
+
 def add_cdrift_to_graphic(cdrift):
+  class CDriftAccumulator(object): 
+
+    def __init__(self):
+      self.changes_in_state = []
+
+    def add_state(self, point, state):
+      if self.changes_in_state == [] or self.changes_in_state[-1][1] != state:
+        self.changes_in_state.append((point, state))
+
+    def search_cd(self):
+      concept_drifts = []
+      for i in range(0, len(self.changes_in_state)-1):
+        if self.changes_in_state[i][-1] == "W" and self.changes_in_state[i+1][-1] == "D":
+          concept_drifts.append(self.changes_in_state[i][0])
+      return concept_drifts
+
+    def __str__(self):
+      return (str(self.changes_in_state))
+      
+
   state = "SearchFolder"
   v = []
   f = open(cdrift[0])
+  counter = 0
+  counter_documents = 0
+  counter_classifier = 0
+  last_warning = -1
+  cdaccumulators = []
+  for i in range(0, 10): cdaccumulators.append(CDriftAccumulator())
   for line in f.readlines():
     if state == "SearchFolder":
       if line.startswith("Folder: "): 
+        counter_documents += 1
         found = False
         foundWarning = False
         state = "SearchCD"
     elif state == "SearchCD":
       if line.startswith("0 1"): 
-        found = True
+        cdaccumulators[counter_classifier].add_state(counter_documents, "D") #Drift
+        counter_classifier += 1
       elif line.startswith("1 0"):
-        foundWarning = True
+        cdaccumulators[counter_classifier].add_state(counter_documents, "W") #Warning
+        counter_classifier += 1
+      elif line.startswith("0 0"):
+        cdaccumulators[counter_classifier].add_state(counter_documents, "I") #Inline
+        counter_classifier += 1
       elif line.startswith("Folder: "):
-        if found: v.append(1.0)
-        #elif foundWarning: v.append(0.5)
-        else: v.append(0)
-        found = False
-        foundWarning = False
+        counter_classifier = 0
+        counter_documents += 1
+    counter += 1
   f.close()
+  lim = 40
+  all_changes = []
+  reduced_changes = []
+  for c in cdaccumulators:
+    all_changes += c.search_cd()
+  for c in all_changes:
+    if reduced_changes == [] or c - reduced_changes[-1] > lim: reduced_changes.append(c)
+  for i in range(0, counter_documents): 
+    if i in reduced_changes: v.append(1)
+    else: v.append(0)
   plot(v, linestyle="--", linewidth=.5)
-
 
 def print_graphics(graphs, cdrifts, method_prequential, param):
     for author in graphs.keys():
@@ -283,6 +347,7 @@ def print_graphics(graphs, cdrifts, method_prequential, param):
       fp = FontProperties(size=6)
       legend(loc=0, prop=fp, title="leyenda")
       savefig(filename)
+      clf()
 
 def print_mcnemar(graphs, method, param):
   def pairs(vector):
@@ -324,7 +389,7 @@ def launchEvaluation(evaluation_method, prefix, algorithms, method, param, metho
             output_file = os.path.join(_OUTPUT_PATH, "%s_%s_%s" % (prefix, author, purge_pat.sub("", alg)))
             graphs[author].append(output_file)
             if "SingleClassifierDrift" in output_file: 
-              cdrifts[author].append(output_file + ".cdrifts")
+              cdrifts[author].append(output_file + ".out")
             else:
               print("No " + output_file)
             if os.path.exists(output_file):
@@ -334,8 +399,8 @@ def launchEvaluation(evaluation_method, prefix, algorithms, method, param, metho
             pool.queueTask(evaluation_method, (author, alg, output_file))
             #evaluation_method(author, alg, output_file)
     pool.joinAll()
-    #print_graphics(graphs, cdrifts, method, param)
-    print_mcnemar(graphs, method_mcnemar, param_mcnemar)
+    print_graphics(graphs, cdrifts, method, param)
+    #print_mcnemar(graphs, method_mcnemar, param_mcnemar)
 
 """""""""
 MAIN SECTION
