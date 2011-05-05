@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import weka.classifiers.UpdateableClassifier;
-import weka.classifiers.bayes.DMNBtext;
 import weka.classifiers.bayes.NaiveBayesMultinomialUpdateable;
 
 /**
