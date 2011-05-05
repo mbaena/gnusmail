@@ -18,6 +18,7 @@
         <pathelement location="lib/mail.jar"/>
         <pathelement location="lib/weka.jar"/>
         <pathelement location="lib/moa.jar"/>
+        <pathelement location="lib/NNge.jar"/>    	
         <pathelement location="lib/sizeofag.jar"/>
     </path>
     <pathconvert property="mf.classpath" refid="gnusmail.classpath"
