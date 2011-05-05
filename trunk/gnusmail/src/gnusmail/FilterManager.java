@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import javax.mail.Message;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
@@ -70,10 +70,10 @@ public class FilterManager {
 			}
 		}
 
-		FastVector attInfo = new FastVector();
+		ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
 		for (Filter filter : filterList) {
 			for (Attribute att : filter.getAttributes()) {
-				attInfo.addElement(att);
+				attInfo.add(att);
 			}
 		}
 
@@ -106,7 +106,7 @@ public class FilterManager {
 			return null;
 		}
 
-		Instance inst = new Instance(dataset.numAttributes());
+		Instance inst = new DenseInstance(dataset.numAttributes());
 		inst.setDataset(dataset);
 		for (Filter filter : filterList) {
 			filter.updateInstance(inst, messageInfo);
