@@ -12,6 +12,7 @@ from matplotlib.font_manager import FontProperties
 import math
 import Queue
 from string import Template
+import subprocess
 
 _GNUSMAIL_PATH=os.path.join("..", "dist")
 _GNUSMAIL_SH=os.path.join(_GNUSMAIL_PATH, "gnusmail.sh")
@@ -39,6 +40,15 @@ def get_enron_dataset():
     tar = tarfile.open("dataset/enron_mail_082109.tar.gz")
     tar.extractall("dataset")
     tar.close()
+
+def install_wekapackage(package):
+    task = """java -cp %s weka.core.WekaPackageManager -list-packages installed""" % (_WEKA_JAR)
+    output = subprocess.Popen(task.split(' '), stdout=subprocess.PIPE).communicate()[0]
+    if output.find(package) < 0:
+        task = """java -cp %s weka.core.WekaPackageManager -install-package %s""" % (_WEKA_JAR, package)
+        print(task)
+        p = subprocess.Popen(task.split(' '), shell=True)
+        sts = os.waitpid(p.pid, 0)[1]
 
 def genericEvaluation(task):
     global facts
@@ -375,6 +385,8 @@ def launchEvaluation(evaluation_method, prefix, algorithms, method, param, metho
     if not os.path.exists(_MAILDIR_PATH):
         print "Enron Dataset not found in %s!" % (_MAILDIR_PATH,)
         get_enron_dataset()
+    print "Installing weka packages ..."
+    install_wekapackage("NNge")
     graphs = {}
     cdrifts = {}
     purge_pat = re.compile(r"[^\w]")
