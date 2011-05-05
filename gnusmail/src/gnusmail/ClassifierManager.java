@@ -24,6 +24,8 @@ import moa.evaluation.ClassificationPerformanceEvaluator;
 import moa.evaluation.EWMAClassificationPerformanceEvaluator;
 import moa.evaluation.WindowClassificationPerformanceEvaluator;
 import moa.options.ClassOption;
+import moa.options.FloatOption;
+import moa.options.IntOption;
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
@@ -213,14 +215,16 @@ public class ClassifierManager {
 				.materializeObject(null, null);
 		// evaluator.prepareForUse(); TODO (in moa)
 		if (evaluator instanceof WindowClassificationPerformanceEvaluator) {
-			((WindowClassificationPerformanceEvaluator) evaluator)
-					.setWindowWidth(Integer.parseInt(ConfigManager
-							.getProperty("windowWidth")));
+			((WindowClassificationPerformanceEvaluator) evaluator).widthOption = 
+				new IntOption("width",
+			            'w', "Size of Window", Integer.parseInt(ConfigManager
+								.getProperty("windowWidth")));				
 		}
 		if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
-			((EWMAClassificationPerformanceEvaluator) evaluator)
-					.setalpha(Double.parseDouble(ConfigManager
-							.getProperty("alphaOption")));
+			((EWMAClassificationPerformanceEvaluator) evaluator).alphaOption =
+				new FloatOption("alpha",
+			            'a', "Fading factor or exponential smoothing factor", Double.parseDouble(ConfigManager
+								.getProperty("alphaOption")));
 		}
 
 		// Learner Factory
@@ -284,12 +288,12 @@ public class ClassifierManager {
 					.get(folder);
 			Instance trainInst = filterManager.makeInstance(msgInfo);
 			Instance testInst = (Instance) trainInst.copy();
-			int trueClass = (int) trainInst.classValue();
-			testInst.setClassMissing();
+			//int trueClass = (int) trainInst.classValue();
+			//testInst.setClassMissing();
 			double[] prediction = learner.getVotesForInstance(testInst);
 
 			// Update statistics
-			if (Utils.maxIndex(prediction) == trueClass) {
+			if (Utils.maxIndex(prediction) == (int) trainInst.classValue()) {
 				correctClassificationsByFolder.put(folder, correctThisFolder
 						+ testInst.weight());
 				numeroAciertos++;
@@ -301,8 +305,7 @@ public class ClassifierManager {
 			messagesViewedByFolder.put(folder, totalThisFolder
 					+ testInst.weight());
 			
-			evaluator.addClassificationAttempt(trueClass, prediction, testInst
-					.weight());
+			evaluator.addResult(testInst, prediction);
 			listMs = evaluator.getPerformanceMeasurements();
 			System.out.println("Train on instance");
 			learner.trainOnInstance(trainInst);
