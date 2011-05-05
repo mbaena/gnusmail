@@ -12,7 +12,8 @@ from matplotlib.font_manager import FontProperties
 import math
 import Queue
 from string import Template
-import subprocess
+import itertools
+
 
 _GNUSMAIL_PATH=os.path.join("..", "dist")
 _GNUSMAIL_SH=os.path.join(_GNUSMAIL_PATH, "gnusmail.sh")
@@ -24,6 +25,25 @@ _OUTPUT_PATH="output"
 accs = [] 
 
 facts = 0
+
+
+def _ncycle(iterable,n):
+  """
+  Method to create a generator from an iterable.  It keeps the
+  current position of the iterable in memory.  Each time the
+  next() method for the iterable is called, it will return the
+  next item.  If there are no more items, it will cycle to the
+  first item.
+   """
+  
+  for item in itertools.cycle(iterable):
+      yield item
+
+colors = _ncycle(('r','g','b','c','y','m','k'),1)
+markers = _ncycle(('o','s','v', 'D'),1)
+alphas = _ncycle((1.0, 0.8, 0.6, 0.4), 1)
+linestyles = _ncycle(("-", "--", "-.", ":"),1)
+
 
 def get_enron_dataset():
     import tarfile
@@ -41,15 +61,6 @@ def get_enron_dataset():
     tar.extractall("dataset")
     tar.close()
 
-def install_wekapackage(package):
-    task = """java -cp %s weka.core.WekaPackageManager -list-packages installed""" % (_WEKA_JAR)
-    output = subprocess.Popen(task.split(' '), stdout=subprocess.PIPE).communicate()[0]
-    if output.find(package) < 0:
-        task = """java -cp %s weka.core.WekaPackageManager -install-package %s""" % (_WEKA_JAR, package)
-        print(task)
-        p = subprocess.Popen(task.split(' '), shell=True)
-        sts = os.waitpid(p.pid, 0)[1]
-
 def genericEvaluation(task):
     global facts
     print task
@@ -59,7 +70,7 @@ def genericEvaluation(task):
 
 def evaluateWeka(author, alg, output):
     maildir = os.path.join(_MAILDIR_PATH, author)
-    task = """%s -z%s -i%s -e --weka-classifier=%s > %s.cdrifts""" % (_GNUSMAIL_SH, maildir, output, alg, output+"salidaporpantalla") #moaClassifier
+    task = """%s -z%s -i%s -e --weka-classifier=%s > %s.out""" % (_GNUSMAIL_SH, maildir, output, alg, output+"salidaporpantalla") #moaClassifier
     print(task)
     genericEvaluation(task)
 
@@ -69,11 +80,18 @@ def evaluateMOA(author, alg, output):
     genericEvaluation(task)
 
 def getAuthors():
-	return ['beck-s', 'kaminski-v', 'kitchen-l', 'lokay-m','sanders-r','williams-w3', 'farmer-d']
+	#return ['beck-s', 'kaminski-v', 'kitchen-l', 'lokay-m','sanders-r','williams-w3', 'farmer-d']
+	return ['beck-s', 'kitchen-l']
 
 def getMoaAlgorithms():
-	return ["MajorityClass", 
+	return [
+        """OzaBag -l \(SingleClassifierDrift -d DDM -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)\) -s 10""",
+##        """LeveragingBag -l \(SingleClassifierDrift -d DDM -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)\)""",
+##        """LeveragingBag -l \(SingleClassifierDrift -d DDM -l \(WEKAClassifier -l weka.classifiers.functions.SGD\)\)""",
+#       """LeveragingBag -l \(SingleClassifierDrift -d DDM -l \(WEKAClassifier -l weka.classifiers.bayes.NaiveBayesMultinomialUpdateable\)\)""",
+        """WEKAClassifier -l weka.classifiers.rules.NNge""",
         """HoeffdingTreeNBAdaptive -g 1""",
+        "MajorityClass", 
 #        """HoeffdingTreeNBAdaptive -g 1 -c .05""",
 #        """HoeffdingTreeNBAdaptive -g 1 -c .1""",
 #        """HoeffdingTreeNBAdaptive -g 1 -c .2""",
@@ -81,9 +99,7 @@ def getMoaAlgorithms():
 #        """HoeffdingTreeNBAdaptive -g 1 -c .4""",
 #        """HoeffdingTreeNBAdaptive -g 1 -c .1 -b""",
 #        """HoeffdingTreeNBAdaptive -g 1 -c .4 -b""",
-        """WEKAClassifier -l weka.classifiers.rules.NNge""",
 #        """OzaBag -l \(WEKAClassifier -l weka.classifiers.rules.NNge\) -s 10""",
-        """OzaBag -l \(SingleClassifierDrift -d DDM -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)\) -s 10""",
 #        """OzaBag -l \(SingleClassifierDrift -d EDDM -l \(WEKAClassifier -l weka.classifiers.rules.NNge\)\) -s 10""",
 #        """OzaBagAdwin -l \(WEKAClassifier -l weka.classifiers.rules.NNge\) -s 10""",
 #        """OzaBagAdwin -l \(HoeffdingTreeNBAdaptive -g 1 -c .1 -b\) -s 10""",
@@ -99,7 +115,7 @@ def getMoaAlgorithms():
 
 def getWekaAlgorithms():
 	return [
-"weka.classifiers.bayes.NaiveBayesUpdateable",
+#"weka.classifiers.bayes.NaiveBayesUpdateable",
         "weka.classifiers.lazy.IBk",
         "weka.classifiers.rules.NNge"]
 
@@ -123,6 +139,12 @@ def get_average_for_fading_factors(num,fading_factor, Ss, Bs):
   res =  (Ss[-1]*1.0/Bs[-1], Ss, Bs)
   return res
 
+def file_in_to_algorithm(f):
+  alg = f.split("_")[-1]
+  alg = alg.replace("WEKAClassifierlwekaclassifiersrules", "")
+  if "OzaBag" in alg: alg = "OzaBag"
+  if "HoeffdingTree" in alg: alg = "HoeffdingTree"
+  return(alg)
 
 def plot_matplotlib(file_in, method, param):
   accs = [] 
@@ -139,7 +161,7 @@ def plot_matplotlib(file_in, method, param):
       (average, Ss, Bs) = get_average_for_fading_factors(num, float(param), Ss, Bs)
     averages.append(average)
     count += 1
-  plot(averages, label=file_in, linewidth=1)
+  plot(averages, label=file_in_to_algorithm(file_in), linewidth=1, marker=markers.next(), markersize=8, markevery=200, alpha = alphas.next())
   return(averages)
 
 def get_mcnemar_points_slidingwindow(file_in1, file_in2, window_size):
@@ -226,6 +248,8 @@ def get_mcnemar_points_fadingfactors_v2(file_in1, file_in2, factor):
   The idea is to apply fading factor \alpha to the n10_{i-1} and n01_{i-1}:
   M = sign (\alpha n01_{i-1} + f01_i -\alpha  n10{i-1} - f10_i) \frac{(\alpha n01_{i-1} + f01_i - \alpha n10{i-1} - f10_i)^2 }{(\alpha n01_{i-1} + f01_i + \alpha n10{i-1} + f10_i) }
   """
+
+  factor = float(factor)
   sign = lambda x: math.copysign(1, x)
   f1 = open(file_in1)
   f2 = open(file_in2)
@@ -254,7 +278,7 @@ def get_mcnemar_points(file_in1, file_in2, method, param):
   if method == "sliding-window":
     return get_mcnemar_points_slidingwindow(file_in1, file_in2, param)
   if method == "fading-factor":
-    return get_mcnemar_points_fadingfactors_v1(file_in1, file_in2, float(param))
+    return get_mcnemar_points_fadingfactors_v2(file_in1, file_in2, float(param))
   else: print("Method unknown " + method)
 
 #def add_cdrift_to_graphic(cdrift):
@@ -354,8 +378,11 @@ def print_graphics(graphs, cdrifts, method_prequential, param):
         performances_per_author.append(performance)
         add_cdrift_to_graphic(cdrifts[author])
 
-      fp = FontProperties(size=6)
-      legend(loc=0, prop=fp, title="leyenda")
+      fp = FontProperties(size=4)
+      leg = legend(loc=0, prop=fp, numpoints=1, markerscale="10", handlelength=5, borderpad=1, labelspacing=1)
+
+      xlabel("Examples", fontsize='x-large')
+      ylabel("Prequential error", fontsize='x-large')
       savefig(filename)
       clf()
 
@@ -371,9 +398,15 @@ def print_mcnemar(graphs, method, param):
     graph_pairs = pairs(graphs[author])
     for pair in graph_pairs:
       mcnemar = get_mcnemar_points(pair[0], pair[1], method, param)
-      axhline(6.635) #McNemar critical point
+      #axhline(6.635) #McNemar critical point
+      #axhline(-6.635) #McNemar critical point
+      axhspan(-6.635, 6.635, facecolor='0.75',alpha=0.5)
       plot(mcnemar)
-      filename = "mcnemar_%s_%s_%s_%s_%s.pdf" % (author,method, param, pair[0].split("/")[-1], pair[1].split("/")[-1])
+      filename = "mcnemar_%s_%s_%s_%s_%s" % (author,method, param, pair[0].split("/")[-1], pair[1].split("/")[-1])
+      filename = filename.replace(".", "") + ".pdf"
+      #ylim(-20, 160)
+      xlabel("Examples", fontsize='x-large')
+      ylabel("McNemar statistic", fontsize='x-large')
       savefig(filename)
       clf()
 
@@ -385,8 +418,6 @@ def launchEvaluation(evaluation_method, prefix, algorithms, method, param, metho
     if not os.path.exists(_MAILDIR_PATH):
         print "Enron Dataset not found in %s!" % (_MAILDIR_PATH,)
         get_enron_dataset()
-    print "Installing weka packages ..."
-    install_wekapackage("NNge")
     graphs = {}
     cdrifts = {}
     purge_pat = re.compile(r"[^\w]")
