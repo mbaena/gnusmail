@@ -218,13 +218,15 @@ public class ClassifierManager {
 			((WindowClassificationPerformanceEvaluator) evaluator).widthOption = 
 				new IntOption("width",
 			            'w', "Size of Window", Integer.parseInt(ConfigManager
-								.getProperty("windowWidth")));				
+								.getProperty("windowWidth")));
+			evaluator.reset(); //  TODO: fix it in MOA!!
 		}
 		if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
 			((EWMAClassificationPerformanceEvaluator) evaluator).alphaOption =
 				new FloatOption("alpha",
 			            'a', "Fading factor or exponential smoothing factor", Double.parseDouble(ConfigManager
 								.getProperty("alphaOption")));
+			evaluator.reset(); //  TODO: fix it in MOA!!
 		}
 
 		// Learner Factory
