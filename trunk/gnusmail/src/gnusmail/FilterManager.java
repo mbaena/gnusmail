@@ -62,12 +62,17 @@ public class FilterManager {
 	 * @return
 	 */
 	public Instances extractAttributeHeaders(MessageReader reader) {
-
+		int messagesToUseToExtractAtts = 1000;
+		int messageCount = 0;
 		for (Message msg : reader) {
 			MessageInfo msgInfo = new MessageInfo(msg);
-			for (Filter filter : filterList) {
-				filter.updateAttValues(msgInfo);
+			if (messageCount <= messagesToUseToExtractAtts) {
+				for (Filter filter : filterList) {
+					filter.updateAttValues(msgInfo);
+				}
 			}
+			messageCount++;
+
 		}
 
 		ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
