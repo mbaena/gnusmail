@@ -21,7 +21,7 @@ public class MessageInfo implements Comparable<MessageInfo> {
 
 	}
 
-	public String getMessageId() {// throws MessagingException {
+	public String getMessageId() {//throws MessagingException {
 		String[] res;
 		try {
 			res = message.getHeader("Message-Id");
@@ -34,8 +34,8 @@ public class MessageInfo implements Comparable<MessageInfo> {
 	public String getBcc() throws MessagingException {
 		String res;
 		try {
-			res = formatAddresses(message
-					.getRecipients(Message.RecipientType.BCC));
+			res = formatAddresses(
+					message.getRecipients(Message.RecipientType.BCC));
 		} catch (Exception e) {
 			res = "?";
 		}
@@ -77,8 +77,8 @@ public class MessageInfo implements Comparable<MessageInfo> {
 	public String getCc() {
 		String res;
 		try {
-			res = formatAddresses(message
-					.getRecipients(Message.RecipientType.CC));
+			res = formatAddresses(
+					message.getRecipients(Message.RecipientType.CC));
 		} catch (MessagingException e) {
 			res = "?";
 		}
@@ -215,17 +215,16 @@ public class MessageInfo implements Comparable<MessageInfo> {
 	}
 
 	/**
-	 * This method returns the folder of a message, as a string. If the message
-	 * comes from an IMAP mail, the folder header is read. If the message comes
-	 * from a parsed file, the wrapper class MIMEMessageWithFolder is used.
-	 * 
+	 * This method returns the folder of a message, as a string.
+	 * If the message comes from an IMAP mail, the folder header is read.
+	 * If the message comes from a parsed file, the wrapper class MIMEMessageWithFolder
+	 * is used.
 	 * @return
 	 */
 	public String getFolderAsString() {
-		if (message instanceof MIMEMessageWithFolder) // return
-														// ((MIMEMessageWithFolder)message).getFolderAsStr();
+		if (message instanceof MIMEMessageWithFolder) //return ((MIMEMessageWithFolder)message).getFolderAsStr();
 		{
-			MIMEMessageWithFolder msg = (MIMEMessageWithFolder) message;
+			MIMEMessageWithFolder msg = (MIMEMessageWithFolder)message;
 			return msg.getFolderAsStr();
 		} else {
 			return getFolderAsStringFromIMAPMAil();
@@ -233,34 +232,47 @@ public class MessageInfo implements Comparable<MessageInfo> {
 	}
 
 	/**
-	 * If this MessageInfo is the result of reading a message from console, no
-	 * Folder info will be available, hence getFolder will return null. This
-	 * method returns the name getFolder().getName(), if possible, or the
-	 * contents of a header 'Folder', that will have to be included when it's
-	 * necessary to know the folder (that's when we update the classifier model
-	 * with a mail read from stdinput).
-	 * 
+	 * If this MessageInfo is the result of reading a message from console,
+	 * no Folder info will be available, hence getFolder will return null.
+	 * This method returns the name getFolder().getName(), if possible,
+	 * or the contents of a header 'Folder', that will have to be included
+	 * when it's necessary to know the folder (that's when we update the
+	 * classifier model with a mail read from stdinput).
+	 *
 	 * TODO
-	 * 
+
 	 * @return
 	 */
 	public String getFolderAsStringFromIMAPMAil() {
 		String res = "?";
-		/*
-		 * Folder folder = message.getFolder(); if (folder != null) { String
-		 * fullName = folder.getFullName(); String fields[] =
-		 * fullName.split("@"); if (fields.length > 1) { res = fields[1]; } else
-		 * { res = fields[0]; } res = res.replace(" ", "_"); res =
-		 * res.replace("INBOX.", ""); //res = res.replace("LCC.", "");
-		 * //Provisional, coge solo la primera subcadena String fieldsRes[] =
-		 * res.split("\\."); res = fieldsRes[0];
-		 * 
-		 * } else { String headerFolder[] = null; try { headerFolder =
-		 * message.getHeader("Folder"); } catch (MessagingException ex) {
-		 * Logger.getLogger(MessageInfo.class.getName()).log(Level.SEVERE, null,
-		 * ex); } if (headerFolder != null && headerFolder.length > 0) { res =
-		 * headerFolder[0]; } } return res;
-		 */
+		/*Folder folder = message.getFolder();
+		if (folder != null) {
+			String fullName = folder.getFullName();
+			String fields[] = fullName.split("@");
+			if (fields.length > 1) {
+				res = fields[1];
+			} else {
+				res = fields[0];
+			}
+			res = res.replace(" ", "_");
+			res = res.replace("INBOX.", "");
+			//res = res.replace("LCC.", "");
+			//Provisional, coge solo la primera subcadena
+			String fieldsRes[] = res.split("\\.");
+			res = fieldsRes[0];
+
+		} else {
+			String headerFolder[] = null;
+			try {
+				headerFolder = message.getHeader("Folder");
+			} catch (MessagingException ex) {
+				Logger.getLogger(MessageInfo.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			if (headerFolder != null && headerFolder.length > 0) {
+				res = headerFolder[0];
+			}
+		}
+		return res;*/
 		return message.getFolder().getFullName();
 	}
 
@@ -274,12 +286,13 @@ public class MessageInfo implements Comparable<MessageInfo> {
 
 	}
 
+
 	public void createHeader(String nombre, String contenido) {
 		try {
 			message.addHeader(nombre, contenido);
 		} catch (MessagingException e) {
 			System.out.println("Impossible to add new header");
-			// e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 	}
@@ -300,8 +313,7 @@ public class MessageInfo implements Comparable<MessageInfo> {
 		String addr = null;
 		pers = ((InternetAddress) a).getPersonal();
 		if (a instanceof InternetAddress && (pers != null)) {
-			// addr = pers +
-			// "  "+"&lt;"+((InternetAddress)a).getAddress()+"&gt;";
+//		addr = pers + "  "+"&lt;"+((InternetAddress)a).getAddress()+"&gt;";
 			addr = ((InternetAddress) a).getAddress();
 		} else {
 			addr = a.toString();
@@ -310,26 +322,25 @@ public class MessageInfo implements Comparable<MessageInfo> {
 	}
 
 	public int compareTo(MessageInfo o) {
-		int res = 0;
-		MessageInfo mi = (MessageInfo) o;
-		try {
-			res = getDate().compareTo(mi.getDate());
-		} catch (MessagingException ex) {
-			Logger.getLogger(MessageInfo.class.getName()).log(Level.SEVERE,
-					null, ex);
-		}
-		return res;
-	}
+        int res = 0;
+        MessageInfo mi = (MessageInfo) o;
+        try {
+            res = getDate().compareTo(mi.getDate());
+        } catch (MessagingException ex) {
+            Logger.getLogger(MessageInfo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return res;
+    }
 
 	public int size() throws MessagingException {
 		return message.getSize();
 	}
 
 	public int numberOfAttachments() throws MessagingException, IOException {
-		if (message.isMimeType("multipart/*")) {
-			Multipart mp = (Multipart) message.getContent();
-			return mp.getCount();
-		}
-		return 1;
+        if (message.isMimeType("multipart/*")) {
+    	    Multipart mp = (Multipart)message.getContent();
+    	    return mp.getCount();
+        }
+        return 1;
 	}
 }

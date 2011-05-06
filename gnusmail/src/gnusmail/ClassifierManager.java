@@ -2,7 +2,6 @@ package gnusmail;
 
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.MessageInfo;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -12,16 +11,13 @@ import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
-
 import moa.core.InstancesHeader;
 import moa.core.Measurement;
 import moa.evaluation.ClassificationPerformanceEvaluator;
@@ -79,8 +75,8 @@ public class ClassifierManager {
 			model = (Classifier) Class.forName(wekaClassifier).newInstance();
 			try {
 				model.buildClassifier(filterManager.getDataset()); // Add
-				// attributes
-				// information
+																	// attributes
+																	// information
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(
 						Level.SEVERE, null, ex);
@@ -205,7 +201,7 @@ public class ClassifierManager {
 		}
 	}
 
-	public List<Double> evaluatePrecuential(Iterator<Message> iterator,
+	public List<Double> evaluatePrecuential(MessageReader reader,
 			String moaClassifier) {
 		Map<String, Double> messagesViewedByFolder = new TreeMap<String, Double>();
 		Map<String, Double> correctClassificationsByFolder = new TreeMap<String, Double>();
@@ -219,18 +215,18 @@ public class ClassifierManager {
 				.materializeObject(null, null);
 		// evaluator.prepareForUse(); TODO (in moa)
 		if (evaluator instanceof WindowClassificationPerformanceEvaluator) {
-			((WindowClassificationPerformanceEvaluator) evaluator).widthOption = new IntOption(
-					"width", 'w', "Size of Window", Integer
-							.parseInt(ConfigManager.getProperty("windowWidth")));
-			evaluator.reset(); // TODO: fix it in MOA!!
+			((WindowClassificationPerformanceEvaluator) evaluator).widthOption = 
+				new IntOption("width",
+			            'w', "Size of Window", Integer.parseInt(ConfigManager
+								.getProperty("windowWidth")));
+			evaluator.reset(); //  TODO: fix it in MOA!!
 		}
 		if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
-			((EWMAClassificationPerformanceEvaluator) evaluator).alphaOption = new FloatOption(
-					"alpha", 'a',
-					"Fading factor or exponential smoothing factor", Double
-							.parseDouble(ConfigManager
-									.getProperty("alphaOption")));
-			evaluator.reset(); // TODO: fix it in MOA!!
+			((EWMAClassificationPerformanceEvaluator) evaluator).alphaOption =
+				new FloatOption("alpha",
+			            'a', "Fading factor or exponential smoothing factor", Double.parseDouble(ConfigManager
+								.getProperty("alphaOption")));
+			evaluator.reset(); //  TODO: fix it in MOA!!
 		}
 
 		// Learner Factory
@@ -244,6 +240,7 @@ public class ClassifierManager {
 		moa.classifiers.Classifier learner = (moa.classifiers.Classifier) learnerOption
 				.materializeObject(null, null);
 		learner.prepareForUse();
+		
 
 		try {
 			System.out.println("\n**MOA**\nLearner: " + learner);
@@ -268,13 +265,9 @@ public class ClassifierManager {
 			}
 		}
 
-		int numMessagesToSkip = 0;
 		int nmess = 0;
 		int numeroAciertos = 0;
-		while (iterator.hasNext()) {
-			Message msg = iterator.next();
-			System.out.println("nmess/ messagesToSkip " + nmess + " "
-					+ numMessagesToSkip);
+		for (Message msg : reader) {
 			MessageInfo msgInfo = new MessageInfo(msg);
 			System.out.println("Folder: " + msgInfo.getFolderAsString());
 			String folder = msgInfo.getFolderAsString();
@@ -297,8 +290,8 @@ public class ClassifierManager {
 					.get(folder);
 			Instance trainInst = filterManager.makeInstance(msgInfo);
 			Instance testInst = (Instance) trainInst.copy();
-			// int trueClass = (int) trainInst.classValue();
-			// testInst.setClassMissing();
+			//int trueClass = (int) trainInst.classValue();
+			//testInst.setClassMissing();
 			double[] prediction = learner.getVotesForInstance(testInst);
 
 			// Update statistics
@@ -313,21 +306,17 @@ public class ClassifierManager {
 
 			messagesViewedByFolder.put(folder, totalThisFolder
 					+ testInst.weight());
-
+			
 			evaluator.addResult(testInst, prediction);
 			listMs = evaluator.getPerformanceMeasurements();
 			System.out.println("Train on instance");
 			learner.trainOnInstance(trainInst);
-
+			nmess++;
 			try {
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(
 						Level.SEVERE, null, ex);
 			}
-
-			nmess++;
-			System.out.println("Nmess " + nmess);
-
 		}
 		return successes;
 	}
