@@ -75,8 +75,8 @@ public class ClassifierManager {
 			model = (Classifier) Class.forName(wekaClassifier).newInstance();
 			try {
 				model.buildClassifier(filterManager.getDataset()); // Add
-																	// attributes
-																	// information
+				// attributes
+				// information
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(
 						Level.SEVERE, null, ex);
@@ -215,18 +215,18 @@ public class ClassifierManager {
 				.materializeObject(null, null);
 		// evaluator.prepareForUse(); TODO (in moa)
 		if (evaluator instanceof WindowClassificationPerformanceEvaluator) {
-			((WindowClassificationPerformanceEvaluator) evaluator).widthOption = 
-				new IntOption("width",
-			            'w', "Size of Window", Integer.parseInt(ConfigManager
-								.getProperty("windowWidth")));
-			evaluator.reset(); //  TODO: fix it in MOA!!
+			((WindowClassificationPerformanceEvaluator) evaluator).widthOption = new IntOption(
+					"width", 'w', "Size of Window", Integer
+							.parseInt(ConfigManager.getProperty("windowWidth")));
+			evaluator.reset(); // TODO: fix it in MOA!!
 		}
 		if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
-			((EWMAClassificationPerformanceEvaluator) evaluator).alphaOption =
-				new FloatOption("alpha",
-			            'a', "Fading factor or exponential smoothing factor", Double.parseDouble(ConfigManager
-								.getProperty("alphaOption")));
-			evaluator.reset(); //  TODO: fix it in MOA!!
+			((EWMAClassificationPerformanceEvaluator) evaluator).alphaOption = new FloatOption(
+					"alpha", 'a',
+					"Fading factor or exponential smoothing factor", Double
+							.parseDouble(ConfigManager
+									.getProperty("alphaOption")));
+			evaluator.reset(); // TODO: fix it in MOA!!
 		}
 
 		// Learner Factory
@@ -240,7 +240,6 @@ public class ClassifierManager {
 		moa.classifiers.Classifier learner = (moa.classifiers.Classifier) learnerOption
 				.materializeObject(null, null);
 		learner.prepareForUse();
-		
 
 		try {
 			System.out.println("\n**MOA**\nLearner: " + learner);
@@ -264,59 +263,69 @@ public class ClassifierManager {
 				posCorrect = i;
 			}
 		}
-
+		
+		int numMessagesToSkip = 0;
 		int nmess = 0;
 		int numeroAciertos = 0;
 		for (Message msg : reader) {
-			MessageInfo msgInfo = new MessageInfo(msg);
-			System.out.println("Folder: " + msgInfo.getFolderAsString());
-			String folder = msgInfo.getFolderAsString();
-			if (!messagesViewedByFolder.containsKey(folder)) {
-				messagesViewedByFolder.put(folder, 0.0);
-			}
-			if (!correctClassificationsByFolder.containsKey(folder)) {
-				correctClassificationsByFolder.put(folder, 0.0);
-			}
-
-			if (!tasasByFolder.containsKey(folder)) {
-				tasasByFolder.put(folder, new ArrayList<Double>());
-				for (int i = 0; i < nmess; i++) {
-					tasasByFolder.get(folder).add(0.0);
+			if (nmess > numMessagesToSkip) { //The first messages are used to extract attributes
+				System.out.println("nmess/ messagesToSkip " + nmess + " " + numMessagesToSkip);
+				MessageInfo msgInfo = new MessageInfo(msg);
+				System.out.println("Folder: " + msgInfo.getFolderAsString());
+				String folder = msgInfo.getFolderAsString();
+				if (!messagesViewedByFolder.containsKey(folder)) {
+					messagesViewedByFolder.put(folder, 0.0);
 				}
-			}
+				if (!correctClassificationsByFolder.containsKey(folder)) {
+					correctClassificationsByFolder.put(folder, 0.0);
+				}
 
-			double totalThisFolder = messagesViewedByFolder.get(folder);
-			double correctThisFolder = correctClassificationsByFolder
-					.get(folder);
-			Instance trainInst = filterManager.makeInstance(msgInfo);
-			Instance testInst = (Instance) trainInst.copy();
-			//int trueClass = (int) trainInst.classValue();
-			//testInst.setClassMissing();
-			double[] prediction = learner.getVotesForInstance(testInst);
+				if (!tasasByFolder.containsKey(folder)) {
+					tasasByFolder.put(folder, new ArrayList<Double>());
+					for (int i = 0; i < nmess; i++) {
+						tasasByFolder.get(folder).add(0.0);
+					}
+				}
 
-			// Update statistics
-			if (Utils.maxIndex(prediction) == (int) trainInst.classValue()) {
-				correctClassificationsByFolder.put(folder, correctThisFolder
+				double totalThisFolder = messagesViewedByFolder.get(folder);
+				double correctThisFolder = correctClassificationsByFolder
+						.get(folder);
+				Instance trainInst = filterManager.makeInstance(msgInfo);
+				Instance testInst = (Instance) trainInst.copy();
+				// int trueClass = (int) trainInst.classValue();
+				// testInst.setClassMissing();
+				double[] prediction = learner.getVotesForInstance(testInst);
+
+				// Update statistics
+				if (Utils.maxIndex(prediction) == (int) trainInst.classValue()) {
+					correctClassificationsByFolder.put(folder,
+							correctThisFolder + testInst.weight());
+					numeroAciertos++;
+					successes.add(1.0);
+				} else {
+					successes.add(0.0);
+				}
+
+				messagesViewedByFolder.put(folder, totalThisFolder
 						+ testInst.weight());
-				numeroAciertos++;
-				successes.add(1.0);
-			} else {
-				successes.add(0.0);
-			}
 
-			messagesViewedByFolder.put(folder, totalThisFolder
-					+ testInst.weight());
-			
-			evaluator.addResult(testInst, prediction);
-			listMs = evaluator.getPerformanceMeasurements();
-			System.out.println("Train on instance");
-			learner.trainOnInstance(trainInst);
-			nmess++;
-			try {
-			} catch (Exception ex) {
-				Logger.getLogger(ClassifierManager.class.getName()).log(
-						Level.SEVERE, null, ex);
+				evaluator.addResult(testInst, prediction);
+				listMs = evaluator.getPerformanceMeasurements();
+				System.out.println("Train on instance");
+				learner.trainOnInstance(trainInst);
+				
+				try {
+				} catch (Exception ex) {
+					Logger.getLogger(ClassifierManager.class.getName()).log(
+							Level.SEVERE, null, ex);
+				}
+				
+			} else {
+				System.out.println("No entra " + msg);
 			}
+			nmess++;
+			System.out.println("Nmess " + nmess);
+			
 		}
 		return successes;
 	}
