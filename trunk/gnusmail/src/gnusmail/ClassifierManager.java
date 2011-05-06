@@ -2,6 +2,7 @@ package gnusmail;
 
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.MessageInfo;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -11,13 +12,16 @@ import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
+
 import moa.core.InstancesHeader;
 import moa.core.Measurement;
 import moa.evaluation.ClassificationPerformanceEvaluator;
@@ -201,7 +205,7 @@ public class ClassifierManager {
 		}
 	}
 
-	public List<Double> evaluatePrecuential(MessageReader reader,
+	public List<Double> evaluatePrecuential(Iterator<Message> iterator,
 			String moaClassifier) {
 		Map<String, Double> messagesViewedByFolder = new TreeMap<String, Double>();
 		Map<String, Double> correctClassificationsByFolder = new TreeMap<String, Double>();
@@ -263,69 +267,67 @@ public class ClassifierManager {
 				posCorrect = i;
 			}
 		}
-		
+
 		int numMessagesToSkip = 0;
 		int nmess = 0;
 		int numeroAciertos = 0;
-		for (Message msg : reader) {
-			if (nmess > numMessagesToSkip) { //The first messages are used to extract attributes
-				System.out.println("nmess/ messagesToSkip " + nmess + " " + numMessagesToSkip);
-				MessageInfo msgInfo = new MessageInfo(msg);
-				System.out.println("Folder: " + msgInfo.getFolderAsString());
-				String folder = msgInfo.getFolderAsString();
-				if (!messagesViewedByFolder.containsKey(folder)) {
-					messagesViewedByFolder.put(folder, 0.0);
-				}
-				if (!correctClassificationsByFolder.containsKey(folder)) {
-					correctClassificationsByFolder.put(folder, 0.0);
-				}
-
-				if (!tasasByFolder.containsKey(folder)) {
-					tasasByFolder.put(folder, new ArrayList<Double>());
-					for (int i = 0; i < nmess; i++) {
-						tasasByFolder.get(folder).add(0.0);
-					}
-				}
-
-				double totalThisFolder = messagesViewedByFolder.get(folder);
-				double correctThisFolder = correctClassificationsByFolder
-						.get(folder);
-				Instance trainInst = filterManager.makeInstance(msgInfo);
-				Instance testInst = (Instance) trainInst.copy();
-				// int trueClass = (int) trainInst.classValue();
-				// testInst.setClassMissing();
-				double[] prediction = learner.getVotesForInstance(testInst);
-
-				// Update statistics
-				if (Utils.maxIndex(prediction) == (int) trainInst.classValue()) {
-					correctClassificationsByFolder.put(folder,
-							correctThisFolder + testInst.weight());
-					numeroAciertos++;
-					successes.add(1.0);
-				} else {
-					successes.add(0.0);
-				}
-
-				messagesViewedByFolder.put(folder, totalThisFolder
-						+ testInst.weight());
-
-				evaluator.addResult(testInst, prediction);
-				listMs = evaluator.getPerformanceMeasurements();
-				System.out.println("Train on instance");
-				learner.trainOnInstance(trainInst);
-				
-				try {
-				} catch (Exception ex) {
-					Logger.getLogger(ClassifierManager.class.getName()).log(
-							Level.SEVERE, null, ex);
-				}
-				
-			} else {
-				System.out.println("No entra " + msg);
+		while (iterator.hasNext()) {
+			Message msg = iterator.next();
+			System.out.println("nmess/ messagesToSkip " + nmess + " "
+					+ numMessagesToSkip);
+			MessageInfo msgInfo = new MessageInfo(msg);
+			System.out.println("Folder: " + msgInfo.getFolderAsString());
+			String folder = msgInfo.getFolderAsString();
+			if (!messagesViewedByFolder.containsKey(folder)) {
+				messagesViewedByFolder.put(folder, 0.0);
 			}
+			if (!correctClassificationsByFolder.containsKey(folder)) {
+				correctClassificationsByFolder.put(folder, 0.0);
+			}
+
+			if (!tasasByFolder.containsKey(folder)) {
+				tasasByFolder.put(folder, new ArrayList<Double>());
+				for (int i = 0; i < nmess; i++) {
+					tasasByFolder.get(folder).add(0.0);
+				}
+			}
+
+			double totalThisFolder = messagesViewedByFolder.get(folder);
+			double correctThisFolder = correctClassificationsByFolder
+					.get(folder);
+			Instance trainInst = filterManager.makeInstance(msgInfo);
+			Instance testInst = (Instance) trainInst.copy();
+			// int trueClass = (int) trainInst.classValue();
+			// testInst.setClassMissing();
+			double[] prediction = learner.getVotesForInstance(testInst);
+
+			// Update statistics
+			if (Utils.maxIndex(prediction) == (int) trainInst.classValue()) {
+				correctClassificationsByFolder.put(folder, correctThisFolder
+						+ testInst.weight());
+				numeroAciertos++;
+				successes.add(1.0);
+			} else {
+				successes.add(0.0);
+			}
+
+			messagesViewedByFolder.put(folder, totalThisFolder
+					+ testInst.weight());
+
+			evaluator.addResult(testInst, prediction);
+			listMs = evaluator.getPerformanceMeasurements();
+			System.out.println("Train on instance");
+			learner.trainOnInstance(trainInst);
+
+			try {
+			} catch (Exception ex) {
+				Logger.getLogger(ClassifierManager.class.getName()).log(
+						Level.SEVERE, null, ex);
+			}
+
 			nmess++;
 			System.out.println("Nmess " + nmess);
-			
+
 		}
 		return successes;
 	}
