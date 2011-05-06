@@ -7,10 +7,12 @@ import gnusmail.filters.MultilabelFolder;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -140,7 +142,7 @@ public class MainManager {
 
 	public void extractAttributes(String datasetFileName) {
 		System.out.println("Mainmanager.extract attributes");
-		filterManager.extractAttributeHeaders(getMessageReader());
+		filterManager.extractAttributeHeaders(getMessageReader().iterator(), 1000);
 		Instances instances = new Instances(filterManager.getDataset());
 		MessageReader reader = getMessageReader();
 		for (Message msg: reader) {
@@ -170,7 +172,7 @@ public class MainManager {
 		//initiallyTrainModel();
 		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Incrementally Train Model");
 		MessageReader reader = getMessageReader();
-		filterManager.extractAttributeHeaders(reader);
+		filterManager.extractAttributeHeaders(reader.iterator(), 1000);
 		List<Double> rates = classifierManager.incrementallyTrainModel(reader, wekaClassifier);
 		printRateToFile(rates, tasasFileName);
 		System.out.println("Fin");
@@ -224,8 +226,9 @@ public class MainManager {
 	public void evaluateWithMOA(String moaClassifier) {
 		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Evaluate with moa");
 		MessageReader reader = getMessageReader();
-		filterManager.extractAttributeHeaders(reader);
-		List<Double> rates = classifierManager.evaluatePrecuential(reader, moaClassifier);
+		Iterator<Message> iterator = reader.iterator();
+		filterManager.extractAttributeHeaders(iterator, 1000);
+		List<Double> rates = classifierManager.evaluatePrecuential(iterator, moaClassifier);
 		printRateToFile(rates, tasasFileName);
 		
 	}

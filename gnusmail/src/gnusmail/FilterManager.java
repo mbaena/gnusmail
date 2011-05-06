@@ -7,7 +7,7 @@ import gnusmail.filters.Filter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,11 +61,10 @@ public class FilterManager {
 	 * @param ws
 	 * @return
 	 */
-	public Instances extractAttributeHeaders(MessageReader reader) {
-		int messagesToUseToExtractAtts = 1000;
+	public Instances extractAttributeHeaders(Iterator<Message>iterator, int messagesToUseToExtractAtts) {
 		int messageCount = 0;
-		for (Message msg : reader) {
-			MessageInfo msgInfo = new MessageInfo(msg);
+		while (iterator.hasNext() && messageCount < messagesToUseToExtractAtts ){
+			MessageInfo msgInfo = new MessageInfo(iterator.next());
 			if (messageCount <= messagesToUseToExtractAtts) {
 				for (Filter filter : filterList) {
 					filter.updateAttValues(msgInfo);
@@ -74,7 +73,6 @@ public class FilterManager {
 			messageCount++;
 
 		}
-
 		ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
 		for (Filter filter : filterList) {
 			for (Attribute att : filter.getAttributes()) {
