@@ -227,6 +227,7 @@ public class MainManager {
 		filterManager.extractAttributeHeaders(reader);
 		List<Double> rates = classifierManager.evaluatePrecuential(reader, moaClassifier);
 		printRateToFile(rates, tasasFileName);
+		
 	}
 
 	private void printRatesByFolderToFile(Map<String, List<Double>> rates, String fileName) {
