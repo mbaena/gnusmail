@@ -3,7 +3,6 @@ package gnusmail;
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
 import gnusmail.core.cnx.MessageInfo;
-import gnusmail.filters.Filter;
 import gnusmail.filters.MultilabelFolder;
 
 import java.io.BufferedWriter;
@@ -52,8 +51,7 @@ public class MainManager {
 	}
 
 	public void setReadMailsFromFile(String maildir) {
-		System.out.println("Main Manager: set read mail from file "
-				+ readMailsFromFile);
+		System.out.println("Main Manager: set read mail from file " + readMailsFromFile);
 		this.readMailsFromFile = true;
 		if (maildir == null) {
 			this.maildir = ConfigManager.MAILDIR.getAbsolutePath();
@@ -62,11 +60,8 @@ public class MainManager {
 		}
 	}
 
-	/**
-	 * Connects to URL
-	 * 
-	 * @throws Exception
-	 */
+	/** Connects to URL
+	 * @throws Exception */
 	private void connect(String url) throws MessagingException {
 		if (url != null) {
 			try {
@@ -116,8 +111,7 @@ public class MainManager {
 			System.out.println("New message in reader");
 			MessageInfo msgInfo = new MessageInfo(msg);
 			try {
-				System.out.println(msgInfo.getReceivedDate() + " "
-						+ msgInfo.getSubject());
+				System.out.println(msgInfo.getReceivedDate() + " " + msgInfo.getSubject());
 			} catch (MessagingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -149,7 +143,7 @@ public class MainManager {
 		filterManager.extractAttributeHeaders(getMessageReader());
 		Instances instances = new Instances(filterManager.getDataset());
 		MessageReader reader = getMessageReader();
-		for (Message msg : reader) {
+		for (Message msg: reader) {
 			// TODO new incrementalWriteToFile in filterManager
 			MessageInfo msgInfo = new MessageInfo(msg);
 			Instance inst = filterManager.makeInstance(msgInfo);
@@ -157,14 +151,14 @@ public class MainManager {
 		}
 		for (gnusmail.filters.Filter f : filterManager.filterList) {
 			if (f instanceof MultilabelFolder) {
-				((MultilabelFolder) f).writeToHierarchicalFile();
+				((MultilabelFolder)f).writeToHierarchicalFile();
 			}
 		}
-		filterManager.writeToFile(instances, datasetFileName);
+		filterManager.writeToFile(instances, datasetFileName);			
 	}
 
 	/**
-	 * This method trains the model incrementally, using every available mail.
+	 * This method trains the model incrementally, using every available mail. 
 	 * First, it creates an initial model, and then iterates over the mail set,
 	 * using each message to update the model
 	 */
@@ -173,22 +167,21 @@ public class MainManager {
 	}
 
 	public void incrementallyTrainModel(String wekaClassifier) {
-		// initiallyTrainModel();
-		Logger.getLogger(MainManager.class.getName()).log(Level.INFO,
-				"Incrementally Train Model");
+		//initiallyTrainModel();
+		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Incrementally Train Model");
 		MessageReader reader = getMessageReader();
 		filterManager.extractAttributeHeaders(reader);
-		List<Double> rates = classifierManager.incrementallyTrainModel(reader,
-				wekaClassifier);
+		List<Double> rates = classifierManager.incrementallyTrainModel(reader, wekaClassifier);
 		printRateToFile(rates, tasasFileName);
 		System.out.println("Fin");
 	}
 
-	/*
-	 * public void trainModelFromFile() {
-	 * System.out.println("TrainModel from file"); initiallyTrainModel();
-	 * classifierManager.incrementallyTrainModelFromDataSet(); }
-	 */
+/*	public void trainModelFromFile() {
+		System.out.println("TrainModel from file");
+		initiallyTrainModel();
+		classifierManager.incrementallyTrainModelFromDataSet();
+	}
+*/
 	public void classifyMail(MimeMessage msg) {
 		try {
 			classifierManager.classifyMail(msg);
@@ -199,16 +192,16 @@ public class MainManager {
 	}
 
 	/**
-	 * This method uses the MimeMessage passed as parameter to update the
-	 * classifier. If no classifier is found, an initial model is created (using
-	 * a very limited number of messages from those available in the mailbox
-	 * 
+	 * This method uses the MimeMessage passed as parameter to update the 
+	 * classifier. If no classifier is found, an initial model is created
+	 * (using a very limited number of messages from those available in 
+	 * the mailbox
 	 * @param msg
 	 */
 	public void updateModelWithMail(MimeMessage msg) {
 		try {
 			if (!ConfigManager.MODEL_FILE.exists()) {
-				// initiallyTrainModel();
+				//initiallyTrainModel();
 			}
 			classifierManager.updateModelWithMessage(msg);
 		} catch (Exception e) {
@@ -229,17 +222,14 @@ public class MainManager {
 	}
 
 	public void evaluateWithMOA(String moaClassifier) {
-		Logger.getLogger(MainManager.class.getName()).log(Level.INFO,
-				"Evaluate with moa");
-
+		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Evaluate with moa");
+		MessageReader reader = getMessageReader();
 		filterManager.extractAttributeHeaders(reader);
-		List<Double> rates = classifierManager.evaluatePrecuential(reader,
-				moaClassifier);
+		List<Double> rates = classifierManager.evaluatePrecuential(reader, moaClassifier);
 		printRateToFile(rates, tasasFileName);
 	}
 
-	private void printRatesByFolderToFile(Map<String, List<Double>> rates,
-			String fileName) {
+	private void printRatesByFolderToFile(Map<String, List<Double>> rates, String fileName) {
 		try {
 			// Create file
 			FileWriter fstream = new FileWriter(fileName);
@@ -253,19 +243,19 @@ public class MainManager {
 				}
 			}
 
-			header = header.substring(0, header.length() - 1);
+			header = header.substring(0, header.length()-1);
 			out.write(header + "\n");
 			for (int i = 0; i < minLength; i++) {
 				String line = "";
 				for (String folder : rates.keySet()) {
-					line += rates.get(folder).get(i) + " ";
+					line +=  rates.get(folder).get(i) + " ";
 				}
 				line = line.substring(0, line.length() - 1);
 				out.write(line + "\n");
 			}
 
 			out.close();
-		} catch (Exception e) {// Catch exception if any
+		} catch (Exception e) {//Catch exception if any
 			System.err.println("No se pueden imprimir tasas a " + fileName);
 			e.printStackTrace();
 		}
@@ -280,7 +270,7 @@ public class MainManager {
 				out.write(d + "\n");
 			}
 			out.close();
-		} catch (Exception e) {// Catch exception if any
+		} catch (Exception e) {//Catch exception if any
 			System.err.println("No se pueden imprimir tasas a " + fileName);
 			e.printStackTrace();
 		}
@@ -289,15 +279,7 @@ public class MainManager {
 	private MessageReader getMessageReader() {
 		MessageReader reader = null;
 		if (readMailsFromFile) {
-			reader = MessageReaderFactory.createReader(this.maildir, 5000); // Para
-			// no
-			// limitar
-			// el
-			// n.
-			// de
-			// mensajes
-			// por
-			// carpeta
+			reader = MessageReaderFactory.createReader(this.maildir, 5000); //Para no limitar el n. de mensajes por carpeta
 		} else {
 			reader = MessageReaderFactory.createReader(connection, 2000);
 		}
