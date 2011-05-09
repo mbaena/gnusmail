@@ -23,6 +23,7 @@ import moa.core.Measurement;
 import moa.evaluation.ClassificationPerformanceEvaluator;
 import moa.evaluation.EWMAClassificationPerformanceEvaluator;
 import moa.evaluation.WindowClassificationPerformanceEvaluator;
+import moa.options.AbstractOptionHandler;
 import moa.options.ClassOption;
 import moa.options.FloatOption;
 import moa.options.IntOption;
@@ -213,20 +214,20 @@ public class ClassifierManager {
 				.getProperty("moaPrecuentialEvaluator"));
 		ClassificationPerformanceEvaluator evaluator = (ClassificationPerformanceEvaluator) evaluatorOption
 				.materializeObject(null, null);
-		// evaluator.prepareForUse(); TODO (in moa)
+		if (evaluator instanceof AbstractOptionHandler) {
+			((AbstractOptionHandler) evaluator).prepareForUse();
+		}
 		if (evaluator instanceof WindowClassificationPerformanceEvaluator) {
 			((WindowClassificationPerformanceEvaluator) evaluator).widthOption = 
 				new IntOption("width",
 			            'w', "Size of Window", Integer.parseInt(ConfigManager
 								.getProperty("windowWidth")));
-			evaluator.reset(); //  TODO: fix it in MOA!!
 		}
 		if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
 			((EWMAClassificationPerformanceEvaluator) evaluator).alphaOption =
 				new FloatOption("alpha",
 			            'a', "Fading factor or exponential smoothing factor", Double.parseDouble(ConfigManager
 								.getProperty("alphaOption")));
-			evaluator.reset(); //  TODO: fix it in MOA!!
 		}
 
 		// Learner Factory
@@ -256,14 +257,6 @@ public class ClassifierManager {
 
 		List<Double> successes = new ArrayList<Double>();
 		Map<String, List<Double>> tasasByFolder = new TreeMap<String, List<Double>>();
-
-		Measurement[] listMs = evaluator.getPerformanceMeasurements();
-		int posCorrect = 0;
-		for (int i = 0; i < listMs.length; i++) {
-			if (listMs[i].getName().contains("correct")) {
-				posCorrect = i;
-			}
-		}
 
 		int nmess = 0;
 		int numeroAciertos = 0;
@@ -308,7 +301,7 @@ public class ClassifierManager {
 					+ testInst.weight());
 			
 			evaluator.addResult(testInst, prediction);
-			listMs = evaluator.getPerformanceMeasurements();
+			//Measurement[] listMs = evaluator.getPerformanceMeasurements();
 			System.out.println("Train on instance");
 			learner.trainOnInstance(trainInst);
 			nmess++;
