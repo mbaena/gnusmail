@@ -28,7 +28,9 @@ import gnusmail.datasource.MessageReaderFactory;
 import gnusmail.datasource.mailconnection.Connection;
 import gnusmail.datasource.mailconnection.Document;
 import gnusmail.datasource.mailconnection.MessageInfo;
+import gnusmail.filters.FilterManager;
 import gnusmail.filters.MultilabelFolder;
+import gnusmail.learning.ClassifierManager;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
