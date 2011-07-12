@@ -26,13 +26,12 @@ import gnusmail.core.cnx.Document;
 
 import javax.mail.MessagingException;
 
-public final class ReceivedDate extends SingleAttFilter {
+public final class Date extends SingleAttFilter {
 
 	@Override
 	protected String getSingleValue(Document doc)
 			throws MessagingException {
-		//return doc.getReceivedDate();
-		return null; //TODO
+		return doc.getDate() + "";		
 	}
 
 }
