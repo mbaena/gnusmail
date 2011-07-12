@@ -21,7 +21,9 @@
  * 
  */
 package gnusmail.filters;
+import gnusmail.core.cnx.Document;
 import gnusmail.core.cnx.MessageInfo;
+
 import java.util.List;
 
 import weka.core.Attribute;
@@ -41,9 +43,9 @@ public abstract class Filter {
 	 * @param inst, messageInfo
 	 * @return
 	 */
-	abstract public void updateInstance(Instance inst, MessageInfo messageInfo);
+	abstract public void updateInstance(Instance inst, Document document);
 
 	abstract public List<Attribute> getAttributes();
 
-	abstract public void updateAttValues(MessageInfo msgInfo);
+	abstract public void updateAttValues(Document document);
 }

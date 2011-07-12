@@ -22,15 +22,24 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
 
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
 public final class ReplyTo extends SingleAttFilter {
 
 	@Override
-	protected String getSingleValue(MessageInfo messageInfo)
+	protected String getSingleValue(Document doc)
 			throws MessagingException {
-		return messageInfo.getReplyTo();
+		String res = "";
+		if (doc instanceof MailMessage) {
+			Message m = ((MailMessage)doc).getMessage();
+			MessageInfo mi = new MessageInfo(m);
+			res = mi.getReplyTo();
+		}
+		return res;
 	}
 }

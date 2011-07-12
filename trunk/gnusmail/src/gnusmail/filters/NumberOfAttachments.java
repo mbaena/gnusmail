@@ -21,12 +21,11 @@
  * 
  */
 package gnusmail.filters;
-
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
-
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
 /**
@@ -36,11 +35,13 @@ import javax.mail.MessagingException;
 public class NumberOfAttachments extends SingleNumericAttFilter {
 
 	@Override
-	protected double getSingleValue(MessageInfo messageInfo)
+	protected double getSingleValue(Document doc)
 			throws MessagingException {
         int res = 0;
         try {
-            res = messageInfo.numberOfAttachments();
+        	Message m = ((MailMessage)doc).getMessage();
+        	MessageInfo mi = new MessageInfo(m);
+        	res = mi.numberOfAttachments();
         } catch (IOException ex) {
         	throw new MessagingException();
         }

@@ -22,7 +22,7 @@
  */
 package gnusmail.filters;
 
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.core.cnx.Document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,9 +58,9 @@ public abstract class SingleAttFilter extends Filter {
 	}
 
 	@Override
-	public void updateAttValues(MessageInfo msgInfo) {
+	public void updateAttValues(Document doc) {
 		try {
-			String value = getSingleValue(msgInfo);
+			String value = getSingleValue(doc);
 			attValues.add(value);
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
@@ -69,15 +69,15 @@ public abstract class SingleAttFilter extends Filter {
 	}
 
 	@Override
-	public void updateInstance(Instance inst, MessageInfo messageInfo) {
+	public void updateInstance(Instance inst, Document document) {
 		try {
-			int index = attribute.indexOfValue(getSingleValue(messageInfo));
+			int index = attribute.indexOfValue(getSingleValue(document));
 			inst.setValue(attribute, index);
 		} catch (MessagingException e) {
 			inst.setMissing(attribute);
 		}
 	}
 	
-	protected abstract String getSingleValue(MessageInfo messageInfo) throws MessagingException;
+	protected abstract String getSingleValue(Document doc) throws MessagingException;
 	
 }

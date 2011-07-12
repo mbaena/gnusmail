@@ -22,10 +22,12 @@
  */
 package gnusmail;
 
+import gnusmail.core.ConfigManager;
+
+import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import gnusmail.core.ConfigManager;
-import javax.mail.Folder;
 
 public class Options {
 
@@ -86,9 +88,9 @@ public class Options {
 		if (this.readMailsFromFileSystem) {
 			mainManager.setReadMailsFromFile(this.maildir);
 		}
-		if (this.showAttributes >= 0) {
+		/*if (this.showAttributes >= 0) {
 			mainManager.showAttibutes(this.showAttributes);
-		}
+		}*/
 		if (this.attributeExtraction) {
 			mainManager.extractAttributes(this.datasetFileName);
 		}
@@ -111,33 +113,33 @@ public class Options {
 			mainManager.evaluateWithMOA(moaClassifier);
 		}
 
-		if (this.listFolders) {
+		/*if (this.listFolders) {
 			mainManager.listFolders();
-		}
-		if (this.listMails) {
+		}*/
+		/*if (this.listMails) {
 			mainManager.listMails(this.listMailsLimit);
-		}
+		}*/
 		if (this.listMailsInFolder) {
 			mainManager.mailsInFolder();
 		}
 
-		if (this.studyHeaders) {
+		/*if (this.studyHeaders) {
 			//mainManager.studyHeaders();
-		}
+		}*/
 
 
-		if (this.updateModelWithMail) {
+		/*if (this.updateModelWithMail) {
 			MimeMessage msg;
 			try {
 				System.out.println("Ready to Read Message:");
 				msg = new MimeMessage(null, System.in); // std. input
-				mainManager.updateModelWithMail(msg);
+				mainManager.updateModelWithDocument(msg);
 			} catch (MessagingException e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 
-		if (this.mailClassification) {
+		/*if (this.mailClassification) {
 			MimeMessage msg;
 			try {
 				System.out.println("Ready to Read Message:");
@@ -149,11 +151,11 @@ public class Options {
 				} else {
 					System.out.println("Era null el folder, Mensch");
 				}
-				mainManager.classifyMail(msg);
+				mainManager.classifyDocument(msg);
 			} catch (MessagingException e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 		if (this.openMail > 0) {
 			//		mainManager = new MainManager("imaps://jmcarmona:@albireo.lcc.uma.es/INBOX.Drafts");
 			mainManager.openMail(this.openMail);

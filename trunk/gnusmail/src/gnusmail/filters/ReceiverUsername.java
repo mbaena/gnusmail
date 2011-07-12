@@ -22,10 +22,11 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
 /**
@@ -35,16 +36,19 @@ import javax.mail.MessagingException;
 public class ReceiverUsername extends SingleAttFilter {
 
 	@Override
-	protected String getSingleValue(MessageInfo messageInfo)
-			throws MessagingException {
+	protected String getSingleValue(Document doc) throws MessagingException {
 		String res = null;
-		String to = messageInfo.getTo();
-		String[] fields = to.split("@");
-		if (fields.length > 0) {
-			res = fields[0];
-		}
-		if (res==null) {
-			throw new MessagingException();
+		if (doc instanceof MailMessage) {
+			Message m = ((MailMessage)doc).getMessage();
+			MessageInfo mi = new MessageInfo(m);
+			String to = mi.getTo();
+			String[] fields = to.split("@");
+			if (fields.length > 0) {
+				res = fields[0];
+			}
+			if (res == null) {
+				throw new MessagingException();
+			}
 		}
 		return res;
 	}

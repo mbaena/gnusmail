@@ -30,11 +30,11 @@ import gnusmail.filesystem.MessageFromFileReader;
  * @author jmcarmona
  */
 public class MessageReaderFactory {
-	public static MessageReader createReader(Connection connection, int limit) {
-		return new MessageReader(connection, limit);
+	public static DocumentReader createReader(Connection connection, int limit) {
+		return new MailReader(connection, limit);
 	}
 
-	public static MessageReader createReader(String maildir, int limit) {
+	public static DocumentReader createReader(String maildir, int limit) {
 		return new MessageFromFileReader(maildir, limit);
 	}
 	

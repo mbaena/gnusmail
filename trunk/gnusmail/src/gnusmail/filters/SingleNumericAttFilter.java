@@ -22,11 +22,13 @@
  */
 package gnusmail.filters;
 
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.core.cnx.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.mail.MessagingException;
+
 import weka.core.Attribute;
 import weka.core.Instance;
 
@@ -46,19 +48,19 @@ public abstract class SingleNumericAttFilter extends Filter {
 	}
 
 	@Override
-	public void updateAttValues(MessageInfo msgInfo) {
+	public void updateAttValues(Document doc) {
 	}
 
 	@Override
-	public void updateInstance(Instance inst, MessageInfo messageInfo) {
+	public void updateInstance(Instance inst, Document doc) {
 		try {
-			inst.setValue(attribute, getSingleValue(messageInfo));
+			inst.setValue(attribute, getSingleValue(doc));
 		} catch (MessagingException e) {
 			inst.setMissing(attribute);
 		}
 	}
 	
-	protected abstract double getSingleValue(MessageInfo messageInfo) throws MessagingException;
+	protected abstract double getSingleValue(Document doc) throws MessagingException;
 
 
 }

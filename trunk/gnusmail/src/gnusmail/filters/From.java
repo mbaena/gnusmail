@@ -22,6 +22,8 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
 
 import javax.mail.MessagingException;
@@ -29,8 +31,13 @@ import javax.mail.MessagingException;
 public final class From extends SingleAttFilter {
 	
 	@Override
-	protected String getSingleValue(MessageInfo messageInfo)
+	protected String getSingleValue(Document doc)
 			throws MessagingException {
-		return messageInfo.getFrom();
+		String from = "";
+		if (doc instanceof MailMessage) {
+			MessageInfo mi = new MessageInfo(((MailMessage) doc).getMessage());
+			from = mi.getTo();
+		}
+		return from;
 	}
 }
