@@ -20,11 +20,12 @@
  * www.uma.es if you need additional information or have any questions.
  * 
  */
-package gnusmail;
+package gnusmail.learning;
 
 import gnusmail.core.ConfigManager;
 import gnusmail.datasource.DocumentReader;
 import gnusmail.datasource.mailconnection.Document;
+import gnusmail.filters.FilterManager;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

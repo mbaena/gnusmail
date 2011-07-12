@@ -28,7 +28,7 @@
  */
 package gnusmail.core;
 
-import gnusmail.FilterManager;
+import gnusmail.filters.FilterManager;
 import gnusmail.filters.WordFrequency;
 import java.util.*;
 import java.io.*;
