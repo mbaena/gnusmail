@@ -21,8 +21,8 @@
  * 
  */
 package gnusmail.filters;
-import gnusmail.core.cnx.Document;
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.datasource.mailconnection.Document;
+import gnusmail.datasource.mailconnection.MessageInfo;
 
 import java.util.List;
 

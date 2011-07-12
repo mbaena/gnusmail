@@ -23,7 +23,8 @@
 package gnusmail;
 
 import gnusmail.core.ConfigManager;
-import gnusmail.core.cnx.Document;
+import gnusmail.datasource.DocumentReader;
+import gnusmail.datasource.mailconnection.Document;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

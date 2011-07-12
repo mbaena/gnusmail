@@ -23,7 +23,7 @@
 package gnusmail.core;
 
 import gnusmail.Languages.Language;
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.datasource.mailconnection.MessageInfo;
 import gnusmail.languagefeatures.TFIDFSummary;
 import gnusmail.languagefeatures.TermFrequencyManager;
 import gnusmail.languagefeatures.Token;

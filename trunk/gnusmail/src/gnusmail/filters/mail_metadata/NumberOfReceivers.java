@@ -22,9 +22,9 @@
  */
 package gnusmail.filters;
 
-import gnusmail.core.cnx.Document;
-import gnusmail.core.cnx.MailMessage;
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.datasource.mailconnection.Document;
+import gnusmail.datasource.mailconnection.MailMessage;
+import gnusmail.datasource.mailconnection.MessageInfo;
 
 import java.util.StringTokenizer;
 

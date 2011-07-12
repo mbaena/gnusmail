@@ -24,9 +24,9 @@ package gnusmail.filters;
 
 import java.io.IOException;
 
-import gnusmail.core.cnx.Document;
-import gnusmail.core.cnx.MailMessage;
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.datasource.mailconnection.Document;
+import gnusmail.datasource.mailconnection.MailMessage;
+import gnusmail.datasource.mailconnection.MessageInfo;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;

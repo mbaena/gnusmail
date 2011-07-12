@@ -23,8 +23,9 @@
 package gnusmail;
 
 import gnusmail.core.ConfigManager;
-import gnusmail.core.cnx.Document;
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.datasource.DocumentReader;
+import gnusmail.datasource.mailconnection.Document;
+import gnusmail.datasource.mailconnection.MessageInfo;
 import gnusmail.filters.Filter;
 
 import java.io.File;
@@ -129,10 +130,6 @@ public class FilterManager {
 		}
 
 		return inst;
-		/*
-		 * String[] sres = new String[res.size()]; if (msj.getFolder() != null)
-		 * { msj.getFolder().close(false); }
-		 */
 	}
 
 	public void writeToFile(Instances instances) {

@@ -23,9 +23,11 @@
 package gnusmail;
 
 import gnusmail.core.ConfigManager;
-import gnusmail.core.cnx.Connection;
-import gnusmail.core.cnx.Document;
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.datasource.DocumentReader;
+import gnusmail.datasource.MessageReaderFactory;
+import gnusmail.datasource.mailconnection.Connection;
+import gnusmail.datasource.mailconnection.Document;
+import gnusmail.datasource.mailconnection.MessageInfo;
 import gnusmail.filters.MultilabelFolder;
 
 import java.io.BufferedWriter;
@@ -134,7 +136,6 @@ public class MainManager {
 		Instances instances = new Instances(filterManager.getDataset());
 		DocumentReader reader = getMessageReader();
 		for (Document doc: reader) {
-			// TODO new incrementalWriteToFile in filterManager
 			Instance inst = doc.toWekaInstance();
 			instances.add(inst);
 		}
