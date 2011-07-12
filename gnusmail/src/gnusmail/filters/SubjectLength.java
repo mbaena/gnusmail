@@ -22,10 +22,11 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
 /**
@@ -35,9 +36,15 @@ import javax.mail.MessagingException;
 public class SubjectLength extends SingleNumericAttFilter {
 
 	@Override
-	protected double getSingleValue(MessageInfo messageInfo)
+	protected double getSingleValue(Document doc)
 			throws MessagingException {
-        return messageInfo.getSubject().length();
+		int res = 0;
+		if (doc instanceof MailMessage) {
+			Message m = ((MailMessage)doc).getMessage();
+			MessageInfo mi = new MessageInfo(m);
+			res = mi.getSubject().length();			
+		}
+        return res;
 	}
 
 }

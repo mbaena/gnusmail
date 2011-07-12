@@ -22,6 +22,8 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
 
 import javax.mail.MessagingException;
@@ -33,16 +35,19 @@ import javax.mail.MessagingException;
 public class DomainOfReceiver extends SingleAttFilter {
 
 	@Override
-	protected String getSingleValue(MessageInfo messageInfo)
+	protected String getSingleValue(Document doc)
 			throws MessagingException {
-		String res = null;
-		String to = messageInfo.getTo();
-		String fields[] = to.split("@");
-		if (fields.length > 0)
-			res = fields[1];
-        if (res==null){
-        	throw new MessagingException();
-        }
+		String to = "";
+		String res = "";
+		if (doc instanceof MailMessage) {
+			MessageInfo mi = new MessageInfo(((MailMessage) doc).getMessage());
+			to = mi.getTo();
+			String fields[] = to.split("@");
+			if (fields.length > 0) {
+				res = fields[1];	
+			}
+		}
+		
 		return res;
 	}
 

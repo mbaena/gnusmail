@@ -22,20 +22,29 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
+
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
 /**
- *
+ * 
  * @author jmcarmona
  */
 public class NumberOfCcRecipients extends SingleNumericAttFilter {
 
 	@Override
-	protected double getSingleValue(MessageInfo messageInfo) throws MessagingException {
-		String ccs = messageInfo.getCc();
-		int length = ccs.split(",").length;
-		return length;
+	protected double getSingleValue(Document doc) throws MessagingException {
+		int res = 0;
+		if (doc instanceof MailMessage) {
+			Message m = ((MailMessage)doc).getMessage();
+			MessageInfo mi = new MessageInfo(m);
+			String ccs = mi.getCc();
+			res = ccs.split(",").length;
+		}
+		return res;
 	}
 
 }

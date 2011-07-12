@@ -24,21 +24,31 @@ package gnusmail.filters;
 
 import java.io.IOException;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
 
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
 public final class Attachments extends SingleAttFilter {
 
 	@Override
-	protected String getSingleValue(MessageInfo messageInfo)
+	protected String getSingleValue(Document document)
 			throws MessagingException {
-		try {
-			if (messageInfo.hasAttachments()) return "True";
-		} catch (IOException e) {
-			throw new MessagingException();
-		}
-		return "False";
+		String res = "False";
+		if (document instanceof MailMessage) {
+			Message m = ((MailMessage) document).getMessage();
+			MessageInfo mi = new MessageInfo(m);
+			try {
+				if (mi.hasAttachments()) res = "True";
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}		
+		return res;
+
+		
 	}
 
 }

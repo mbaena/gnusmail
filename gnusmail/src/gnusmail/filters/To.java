@@ -22,19 +22,26 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
-import javax.mail.MessagingException;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
 
 public final class To extends SingleAttFilter {
 
 	@Override
-	protected String getSingleValue(MessageInfo messageInfo)
-			throws MessagingException {
-		String to =  messageInfo.getTo();
-		String splits[] = to.split(",");
+	protected String getSingleValue(Document doc) throws MessagingException {
 		String ret = "None";
-		if (splits.length > 0) ret = splits[0];
+		if (doc instanceof MailMessage) {
+			Message m = ((MailMessage) doc).getMessage();
+			MessageInfo mi = new MessageInfo(m);
+			String to = mi.getTo();
+			String splits[] = to.split(",");
+			if (splits.length > 0)
+				ret = splits[0];
+		}
 		return ret;
 	}
 

@@ -22,7 +22,10 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
+
 import javax.mail.MessagingException;
 
 
@@ -30,10 +33,15 @@ import javax.mail.MessagingException;
 public final class Cc extends SingleAttFilter {
 
 	@Override
-	protected String getSingleValue(MessageInfo messageInfo)
+	protected String getSingleValue(Document doc)
 			throws MessagingException {
-		String cc = messageInfo.getBcc();
-		if (cc.equals("")) cc = "None";
+		String cc = "";
+		if (doc instanceof MailMessage) {
+			MessageInfo mi = new MessageInfo(((MailMessage) doc).getMessage());
+			cc = mi.getCc();
+		}
+		if (cc.equals(""))
+			cc = "None";
 		return cc;
 	}
 

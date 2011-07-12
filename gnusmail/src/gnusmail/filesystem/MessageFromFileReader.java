@@ -22,10 +22,12 @@
  */
 package gnusmail.filesystem;
 
-import gnusmail.MessageReader;
 import gnusmail.SortableMessage;
+import gnusmail.core.cnx.Document;
 import gnusmail.core.cnx.MIMEMessageWithFolder;
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.core.cnx.MailMessage;
+import gnusmail.DocumentReader;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -40,6 +42,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -48,9 +51,9 @@ import javax.mail.Session;
  * TODO paramtro
  * @author jmcarmona
  */
-public class MessageFromFileReader extends MessageReader implements Iterable<Message> {
+public class MessageFromFileReader implements DocumentReader {
 
-	private class MessagesFromFileIterator implements Iterator<Message> {
+	private class MessagesFromFileIterator implements Iterator<Document> {
 
 		int index = 0;
 		FolderMessagesIterator it;
@@ -92,10 +95,11 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 			return res;
 		}
 
-		public Message next() {
+		public Document next() {
 			Message res = messages.get(index).getMesssage();
 			index++;
-			return res;
+			Document doc = new MailMessage(res);
+			return doc;
 		}
 
 		public void remove() {
@@ -155,7 +159,7 @@ public class MessageFromFileReader extends MessageReader implements Iterable<Mes
 	}
 
 	@Override
-	public Iterator<Message> iterator() {
+	public Iterator<Document> iterator() {
 		return new MessagesFromFileIterator(baseFolder, recursive, limit);
 	}
 }

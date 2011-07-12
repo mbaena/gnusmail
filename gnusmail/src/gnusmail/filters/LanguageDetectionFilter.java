@@ -22,7 +22,7 @@
  */
 package gnusmail.filters;
 
-import gnusmail.core.cnx.MessageInfo;
+import gnusmail.core.cnx.Document;
 import gnusmail.languagefeatures.LanguageDetection;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -38,14 +38,9 @@ import javax.mail.MessagingException;
 public class LanguageDetectionFilter extends SingleAttFilter {
 
 	@Override
-	protected String getSingleValue(MessageInfo messageInfo)
+	protected String getSingleValue(Document doc)
 			throws MessagingException {
-        String body = "";
-        try {
-            body = messageInfo.getBody();
-        } catch (IOException ex) {
-            throw new MessagingException();
-        }
+        String body = doc.getText();
         return new LanguageDetection().detectLanguage(body).getLanguageName();
 	}
 }

@@ -22,11 +22,13 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
 
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
 /**
@@ -36,9 +38,13 @@ import javax.mail.MessagingException;
 public class NumberOfReceivers extends SingleNumericAttFilter {
 
 	@Override
-	protected double getSingleValue(MessageInfo messageInfo)
-			throws MessagingException {
-		int res = new StringTokenizer(messageInfo.getTo(), ",").countTokens();
+	protected double getSingleValue(Document doc) throws MessagingException {
+		int res = 0;
+		if (doc instanceof MailMessage) {
+			Message m = ((MailMessage)doc).getMessage();
+			MessageInfo mi = new MessageInfo(m);
+			res = new StringTokenizer(mi.getTo(), ",").countTokens();
+		}
 		return res;
 	}
 

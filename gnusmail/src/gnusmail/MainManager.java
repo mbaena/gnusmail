@@ -24,6 +24,7 @@ package gnusmail;
 
 import gnusmail.core.ConfigManager;
 import gnusmail.core.cnx.Connection;
+import gnusmail.core.cnx.Document;
 import gnusmail.core.cnx.MessageInfo;
 import gnusmail.filters.MultilabelFolder;
 
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -64,6 +66,7 @@ public class MainManager {
 		}
 	}
 
+	//TODO toda configuracion de punto de acceso, fuera de aqui
 	public void setDataset(Instances dataSet) {
 		classifierManager.setDataSet(dataSet);
 	}
@@ -84,6 +87,7 @@ public class MainManager {
 
 	/** Connects to URL
 	 * @throws Exception */
+	//TODO no deberia estar aqui
 	private void connect(String url) throws MessagingException {
 		if (url != null) {
 			try {
@@ -105,43 +109,7 @@ public class MainManager {
 		}
 	}
 
-	public void showAttibutes(int mail_id) {
-		System.out.println("MainManager.Show attributes");
-		try {
-			connection.showAttributes(mail_id);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	public void listFolders() {
-		System.out.println("MainManager.List folders");
-		try {
-			connection.listFolders();
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	public void listMails(int limit) {
-		Iterable<Message> reader;
-		reader = new MessageReader(connection, limit);
-		System.out.println("List mails");
-		for (Message msg : reader) {
-			System.out.println("New message in reader");
-			MessageInfo msgInfo = new MessageInfo(msg);
-			try {
-				System.out.println(msgInfo.getReceivedDate() + " " + msgInfo.getSubject());
-			} catch (MessagingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-	}
-
+	
 	public void mailsInFolder() {
 		try {
 			connection.showMessages("INBOX");
@@ -164,11 +132,10 @@ public class MainManager {
 		System.out.println("Mainmanager.extract attributes");
 		filterManager.extractAttributeHeaders(getMessageReader());
 		Instances instances = new Instances(filterManager.getDataset());
-		MessageReader reader = getMessageReader();
-		for (Message msg: reader) {
+		DocumentReader reader = getMessageReader();
+		for (Document doc: reader) {
 			// TODO new incrementalWriteToFile in filterManager
-			MessageInfo msgInfo = new MessageInfo(msg);
-			Instance inst = filterManager.makeInstance(msgInfo);
+			Instance inst = doc.toWekaInstance();
 			instances.add(inst);
 		}
 		for (gnusmail.filters.Filter f : filterManager.filterList) {
@@ -191,7 +158,7 @@ public class MainManager {
 	public void incrementallyTrainModel(String wekaClassifier) {
 		//initiallyTrainModel();
 		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Incrementally Train Model");
-		MessageReader reader = getMessageReader();
+		DocumentReader reader = getMessageReader();
 		filterManager.extractAttributeHeaders(reader);
 		List<Double> rates = classifierManager.incrementallyTrainModel(reader, wekaClassifier);
 		printRateToFile(rates, tasasFileName);
@@ -204,9 +171,9 @@ public class MainManager {
 		classifierManager.incrementallyTrainModelFromDataSet();
 	}
 */
-	public void classifyMail(MimeMessage msg) {
+	public void classifyDocument(Document doc) {
 		try {
-			classifierManager.classifyMail(msg);
+			classifierManager.classifyDocument(doc);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -220,18 +187,19 @@ public class MainManager {
 	 * the mailbox
 	 * @param msg
 	 */
-	public void updateModelWithMail(MimeMessage msg) {
+	public void updateModelWithDocument(Document doc) {
 		try {
 			if (!ConfigManager.MODEL_FILE.exists()) {
 				//initiallyTrainModel();
 			}
-			classifierManager.updateModelWithMessage(msg);
+			classifierManager.updateModelWithDocument(doc);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
+	//TODO: sacar todo lo relativo al punto de acceso
 	public void close() {
 		if ((connection != null) && (connection.isLoggedIn())) {
 			try {
@@ -245,9 +213,9 @@ public class MainManager {
 
 	public void evaluateWithMOA(String moaClassifier) {
 		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Evaluate with moa");
-		MessageReader reader = getMessageReader();
+		DocumentReader reader = getMessageReader();
 		filterManager.extractAttributeHeaders(reader);
-		List<Double> rates = classifierManager.evaluatePrecuential(reader, moaClassifier);
+		List<Double> rates = classifierManager.evaluatePrequential(reader, moaClassifier);
 		printRateToFile(rates, tasasFileName);
 	}
 
@@ -298,8 +266,8 @@ public class MainManager {
 		}
 	}
 
-	private MessageReader getMessageReader() {
-		MessageReader reader = null;
+	private DocumentReader getMessageReader() {
+		DocumentReader reader = null;
 		if (readMailsFromFile) {
 			reader = MessageReaderFactory.createReader(this.maildir, 5000); //Para no limitar el n. de mensajes por carpeta
 		} else {

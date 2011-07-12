@@ -23,13 +23,13 @@
 package gnusmail;
 
 import gnusmail.core.ConfigManager;
+import gnusmail.core.cnx.Document;
 import gnusmail.core.cnx.MessageInfo;
 import gnusmail.filters.Filter;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,12 +83,11 @@ public class FilterManager {
 	 * @param ws
 	 * @return
 	 */
-	public Instances extractAttributeHeaders(MessageReader reader) {
+	public Instances extractAttributeHeaders(DocumentReader reader) {
 
-		for (Message msg : reader) {
-			MessageInfo msgInfo = new MessageInfo(msg);
+		for (Document doc: reader) {
 			for (Filter filter : filterList) {
-				filter.updateAttValues(msgInfo);
+				filter.updateAttValues(doc);
 			}
 		}
 
@@ -116,12 +115,7 @@ public class FilterManager {
 	 * chronologically):w
 	 * 
 	 */
-	public Instance makeInstance(MessageInfo messageInfo) {
-		/*
-		 * if (msj.getFolder() != null) { //The folder can be null when the
-		 * message is read from console if (!msj.getFolder().isOpen()) {
-		 * msj.getFolder().open(Folder.READ_ONLY); } }
-		 */
+	public Instance makeInstance(Document document) {
 		if (dataset == null) {
 			Logger.getLogger(FilterManager.class.getName()).log(Level.SEVERE,
 					"Dataset is null");
@@ -131,7 +125,7 @@ public class FilterManager {
 		Instance inst = new DenseInstance(dataset.numAttributes());
 		inst.setDataset(dataset);
 		for (Filter filter : filterList) {
-			filter.updateInstance(inst, messageInfo);
+			filter.updateInstance(inst, document);
 		}
 
 		return inst;

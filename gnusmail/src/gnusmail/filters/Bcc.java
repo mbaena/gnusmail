@@ -22,18 +22,23 @@
  */
 package gnusmail.filters;
 
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
 
 import javax.mail.MessagingException;
 
-
 public final class Bcc extends SingleAttFilter {
-	
+
 	@Override
-	protected String getSingleValue(MessageInfo messageInfo)
-			throws MessagingException {
-		String bcc = messageInfo.getBcc();
-		if (bcc.equals("")) bcc = "None";
+	protected String getSingleValue(Document doc) throws MessagingException {
+		String bcc = "";
+		if (doc instanceof MailMessage) {
+			MessageInfo mi = new MessageInfo(((MailMessage) doc).getMessage());
+			bcc = mi.getBcc();
+		}
+		if (bcc.equals(""))
+			bcc = "None";
 		return bcc;
 	}
 }

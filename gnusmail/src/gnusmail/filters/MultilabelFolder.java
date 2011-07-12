@@ -23,22 +23,24 @@
 package gnusmail.filters;
 
 import gnusmail.core.ConfigManager;
+import gnusmail.core.cnx.Document;
+import gnusmail.core.cnx.MailMessage;
 import gnusmail.core.cnx.MessageInfo;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import javax.mail.Message;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -48,11 +50,11 @@ public class MultilabelFolder extends Filter {
 	private Set<String> existingFolders;
 	List<Attribute> attList;
 	private Map<String, Attribute> attrMap;
-	
+
 	public MultilabelFolder() {
 		this.existingFolders = new TreeSet<String>();
 		attList = new ArrayList<Attribute>();
-		attrMap = new TreeMap<String, Attribute>();		
+		attrMap = new TreeMap<String, Attribute>();
 	}
 
 	@Override
@@ -70,27 +72,35 @@ public class MultilabelFolder extends Filter {
 	}
 
 	@Override
-	public void updateAttValues(MessageInfo msgInfo) {
-		String mainFolder = msgInfo.getFolderAsString();
-		List<String> listOfFolders = extractFoldersFromHierarchy(mainFolder);
-		for (String folder : listOfFolders) {
-			this.existingFolders.add(folder);
-		}
-	}
-	
-
-	@Override
-	public void updateInstance(Instance inst, MessageInfo messageInfo) {
-		List<String> listOfFolders = extractFoldersFromHierarchy(messageInfo.getFolderAsString());
-        for (Attribute att : attList) {
-        	if (listOfFolders.contains(att.name())) { 
-				inst.setValue(att, "1");
-			} else {
-				inst.setValue(att, "0");
+	public void updateAttValues(Document doc) {
+		if (doc instanceof MailMessage) {
+			Message m = ((MailMessage) doc).getMessage();
+			MessageInfo mi = new MessageInfo(m);
+			String mainFolder = mi.getFolderAsString();
+			List<String> listOfFolders = extractFoldersFromHierarchy(mainFolder);
+			for (String folder : listOfFolders) {
+				this.existingFolders.add(folder);
 			}
 		}
 	}
-	
+
+	@Override
+	public void updateInstance(Instance inst, Document doc) {
+		if (doc instanceof MailMessage) {
+			Message m = ((MailMessage) doc).getMessage();
+			MessageInfo mi = new MessageInfo(m);
+			List<String> listOfFolders = extractFoldersFromHierarchy(mi
+					.getFolderAsString());
+			for (Attribute att : attList) {
+				if (listOfFolders.contains(att.name())) {
+					inst.setValue(att, "1");
+				} else {
+					inst.setValue(att, "0");
+				}
+			}
+		}
+	}
+
 	private List<String> extractFoldersFromHierarchy(String folder) {
 		String separator = "\\.";
 		String folders[] = folder.split(separator);
@@ -99,7 +109,7 @@ public class MultilabelFolder extends Filter {
 		for (int i = 0; i < folders.length; i++) {
 			length += folders[i].length();
 			String s = folder.substring(0, length + i);
-			multilabelFolders.add(s);			
+			multilabelFolders.add(s);
 		}
 		return multilabelFolders;
 	}
@@ -107,46 +117,51 @@ public class MultilabelFolder extends Filter {
 	public void writeToFile() {
 		String filename = ConfigManager.CONF_FOLDER + "labels.xml";
 		try {
-			Writer output = new BufferedWriter(new FileWriter(new File(filename)));
-			output.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<labels xmlns=\"http://mulan.sourceforge.net/labels\">\n");
+			Writer output = new BufferedWriter(new FileWriter(
+					new File(filename)));
+			output
+					.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<labels xmlns=\"http://mulan.sourceforge.net/labels\">\n");
 			for (String folder : this.existingFolders) {
 				output.write("\t<label name=\"" + folder + "\"/>\n");
 			}
 			output.write("</labels>");
 			output.close();
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	public void writeToHierarchicalFile() {
 		String filename = ConfigManager.CONF_FOLDER + "labels.xml";
 		try {
-			Writer output = new BufferedWriter(new FileWriter(new File(filename)));
-			output.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<labels xmlns=\"http://mulan.sourceforge.net/labels\">\n");
+			Writer output = new BufferedWriter(new FileWriter(
+					new File(filename)));
+			output
+					.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<labels xmlns=\"http://mulan.sourceforge.net/labels\">\n");
 			Iterator<String> iter = this.existingFolders.iterator();
 			if (iter.hasNext()) {
 				String folder = iter.next();
 				recursiveLabels(iter, output, folder, "\t");
-				output.write("\t<label name=\"INBOX.DUMMY\"/>\n");				
+				output.write("\t<label name=\"INBOX.DUMMY\"/>\n");
 			}
 			output.write("</labels>");
 			output.close();
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
-	private String recursiveLabels(Iterator<String> iter, Writer output, String parentFolder, String tab) throws IOException {
+
+	private String recursiveLabels(Iterator<String> iter, Writer output,
+			String parentFolder, String tab) throws IOException {
 		output.write(tab + "<label name=\"" + parentFolder + "\">\n");
 		int count = 0;
-		boolean readNextFolder = true; 
+		boolean readNextFolder = true;
 		String folder = null;
 		while (iter.hasNext()) {
 			if (readNextFolder) {
@@ -155,17 +170,18 @@ public class MultilabelFolder extends Filter {
 				readNextFolder = true;
 			}
 			if (folder.startsWith(parentFolder)) {
-			    folder = recursiveLabels(iter, output, folder, tab+"\t");
-			    if (folder!=null) {
-			    	readNextFolder = false;
-			    }
+				folder = recursiveLabels(iter, output, folder, tab + "\t");
+				if (folder != null) {
+					readNextFolder = false;
+				}
 			} else {
 				break;
 			}
 			count++;
-		}	
-		if (count==1) {
-			output.write(tab+"\t<label name=\"" + parentFolder + ".DUMMY\"/>\n");			
+		}
+		if (count == 1) {
+			output.write(tab + "\t<label name=\"" + parentFolder
+					+ ".DUMMY\"/>\n");
 		}
 		output.write(tab + "</label>\n");
 		return folder;
