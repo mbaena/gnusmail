@@ -25,7 +25,9 @@ package gnusmail.core;
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.CSVPrinter;
 import com.Ostermiller.util.LabeledCSVParser;
-import gnusmail.core.cnx.MessageInfo;
+
+import gnusmail.datasource.mailconnection.MessageInfo;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;

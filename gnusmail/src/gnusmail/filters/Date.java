@@ -22,7 +22,7 @@
  */
 package gnusmail.filters;
 
-import gnusmail.core.cnx.Document;
+import gnusmail.datasource.mailconnection.Document;
 
 import javax.mail.MessagingException;
 

@@ -23,10 +23,10 @@
 package gnusmail.filesystem;
 
 import gnusmail.SortableMessage;
-import gnusmail.core.cnx.Document;
-import gnusmail.core.cnx.MIMEMessageWithFolder;
-import gnusmail.core.cnx.MailMessage;
-import gnusmail.DocumentReader;
+import gnusmail.datasource.DocumentReader;
+import gnusmail.datasource.mailconnection.Document;
+import gnusmail.datasource.mailconnection.MIMEMessageWithFolder;
+import gnusmail.datasource.mailconnection.MailMessage;
 
 import java.io.File;
 import java.io.FileInputStream;

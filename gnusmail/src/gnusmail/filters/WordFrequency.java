@@ -24,8 +24,8 @@ package gnusmail.filters;
 
 import gnusmail.Languages.Language;
 import gnusmail.core.WordsStore;
-import gnusmail.core.cnx.Document;
-import gnusmail.core.cnx.MailMessage;
+import gnusmail.datasource.mailconnection.Document;
+import gnusmail.datasource.mailconnection.MailMessage;
 import gnusmail.languagefeatures.DocumentTokenizer;
 import gnusmail.languagefeatures.LanguageDetection;
 import gnusmail.languagefeatures.Token;
