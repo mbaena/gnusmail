@@ -23,8 +23,8 @@
 package gnusmail.learning;
 
 import gnusmail.core.ConfigManager;
+import gnusmail.datasource.Document;
 import gnusmail.datasource.DocumentReader;
-import gnusmail.datasource.mailconnection.Document;
 import gnusmail.filters.FilterManager;
 
 import java.io.FileInputStream;
@@ -53,6 +53,7 @@ import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Utils;
 
 /**
  * TODO
@@ -63,7 +64,7 @@ public class ClassifierManager {
 
 	private Instances dataSet;
 	private FilterManager filterManager;
-	
+
 	private ClassificationPerformanceEvaluator getEvaluator() {
 		// Evaluator Factory
 		ClassOption evaluatorOption = new ClassOption("evaluator", 'e',
@@ -77,20 +78,20 @@ public class ClassifierManager {
 			((AbstractOptionHandler) evaluator).prepareForUse();
 		}
 		if (evaluator instanceof WindowClassificationPerformanceEvaluator) {
-			((WindowClassificationPerformanceEvaluator) evaluator).widthOption = 
-				new IntOption("width",
-			            'w', "Size of Window", Integer.parseInt(ConfigManager
-								.getProperty("windowWidth")));
+			((WindowClassificationPerformanceEvaluator) evaluator).widthOption = new IntOption(
+					"width", 'w', "Size of Window", Integer
+							.parseInt(ConfigManager.getProperty("windowWidth")));
 		}
 		if (evaluator instanceof EWMAClassificationPerformanceEvaluator) {
-			((EWMAClassificationPerformanceEvaluator) evaluator).alphaOption =
-				new FloatOption("alpha",
-			            'a', "Fading factor or exponential smoothing factor", Double.parseDouble(ConfigManager
-								.getProperty("alphaOption")));
+			((EWMAClassificationPerformanceEvaluator) evaluator).alphaOption = new FloatOption(
+					"alpha", 'a',
+					"Fading factor or exponential smoothing factor", Double
+							.parseDouble(ConfigManager
+									.getProperty("alphaOption")));
 		}
 		return evaluator;
 	}
-	
+
 	private moa.classifiers.Classifier getMoaLearner(String moaClassifier) {
 		if (moaClassifier == null) {
 			moaClassifier = ConfigManager.getProperty("moaClassifier");
@@ -105,13 +106,18 @@ public class ClassifierManager {
 		return learner;
 	}
 
+	
+	private boolean goodPrediction(double[] prediction, Instance trainInst) {
+		return Utils.maxIndex(prediction) == (int) trainInst.classValue();
+	}
+	
 	public Instances getDataSet() {
 		return dataSet;
 	}
 
 	public void setDataSet(Instances dataSet) {
 		this.dataSet = dataSet;
-		this.dataSet.setClass(dataSet.attribute("Folder"));
+		this.dataSet.setClass(dataSet.attribute("Label"));
 	}
 
 	public ClassifierManager(FilterManager filterManager) {
@@ -125,13 +131,13 @@ public class ClassifierManager {
 	 * @return
 	 */
 	public List<Double> incrementallyTrainModel(DocumentReader reader,
-			String wekaClassifier) {
+			String wekaClassifier, FilterManager fm) {
 		List<Double> successes = new ArrayList<Double>();
 		try {
 			Classifier model = null;
 			model = (Classifier) Class.forName(wekaClassifier).newInstance();
 			try {
-				model.buildClassifier(filterManager.getDataset()); 
+				model.buildClassifier(filterManager.getDataset());
 			} catch (Exception ex) {
 				Logger.getLogger(ClassifierManager.class.getName()).log(
 						Level.SEVERE, null, ex);
@@ -140,7 +146,7 @@ public class ClassifierManager {
 			for (Document doc : reader) {
 				double predictedClass = 0.0;
 				try {
-					Instance inst = doc.toWekaInstance();
+					Instance inst = doc.toWekaInstance(fm);
 					predictedClass = model.classifyInstance(inst);
 					double trueClass = inst.classValue();
 					successes.add((predictedClass == trueClass) ? 1.0 : 0.0);
@@ -161,27 +167,28 @@ public class ClassifierManager {
 		return successes;
 	}
 
-	
 	/**
 	 * This method is used to evaluate a MOA classifier over a data stream
+	 * 
 	 * @param reader
 	 * @param moaClassifier
 	 * @return
 	 */
 	public List<Double> evaluatePrequential(DocumentReader reader,
 			String moaClassifier) {
-		ClassificationPerformanceEvaluator evaluator = getEvaluator();		
-		moa.classifiers.Classifier learner = getMoaLearner(moaClassifier);	
+		ClassificationPerformanceEvaluator evaluator = getEvaluator();
+		moa.classifiers.Classifier learner = getMoaLearner(moaClassifier);
 		InstancesHeader instancesHeader = new InstancesHeader(filterManager
 				.getDataset());
 		learner.setModelContext(instancesHeader);
 
 		List<Double> successes = new ArrayList<Double>();
-	
-		for (Document doc: reader) {
-			Instance trainInst = doc.toWekaInstance();
+
+		for (Document doc : reader) {
+			Instance trainInst = doc.toWekaInstance(filterManager);
 			Instance testInst = (Instance) trainInst.copy();
 			double[] prediction = learner.getVotesForInstance(testInst);
+			successes.add(goodPrediction(prediction, trainInst) ? 1.0 : 0.0);
 			evaluator.addResult(testInst, prediction);
 			learner.trainOnInstance(trainInst);
 			try {
@@ -192,6 +199,8 @@ public class ClassifierManager {
 		}
 		return successes;
 	}
+
+	
 
 	/**
 	 * Batch training
@@ -221,7 +230,7 @@ public class ClassifierManager {
 	}
 
 	public void classifyDocument(Document document) throws Exception {
-		Instance inst = document.toWekaInstance();
+		Instance inst = document.toWekaInstance(filterManager);
 		Classifier model;
 
 		System.out.println(inst);
@@ -235,7 +244,7 @@ public class ClassifierManager {
 
 		System.out.println("\nClassifying...\n");
 		double[] res = model.distributionForInstance(inst);
-		Attribute att = dataSet.attribute("Folder");
+		Attribute att = dataSet.attribute("Label");
 		double biggest = 0;
 		int biggest_index = 0;
 		for (int i = 0; i < res.length; i++) {
@@ -255,7 +264,7 @@ public class ClassifierManager {
 	public void updateModelWithDocument(Document document) {
 		Reader r = null;
 		try {
-			Instance inst = document.toWekaInstance();
+			Instance inst = document.toWekaInstance(filterManager);
 			Classifier model;
 
 			FileInputStream fe = new FileInputStream(ConfigManager.MODEL_FILE);
