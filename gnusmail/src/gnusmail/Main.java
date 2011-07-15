@@ -24,6 +24,7 @@ package gnusmail;
 
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
+import gnusmail.datasource.DataSource;
 
 public class Main {
 
@@ -35,10 +36,11 @@ public class Main {
 		longopts[2] = new LongOpt("atrib", LongOpt.REQUIRED_ARGUMENT, sb, 'a');
 		longopts[3] = new LongOpt("moa-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 243);
 		longopts[4] = new LongOpt("weka-classifier", LongOpt.REQUIRED_ARGUMENT, sb, 244);
-		Getopt getopt = new Getopt("Clasificador", argv, "-:b::defgi::kz::m::n::r::p::a::c:::l::hx", longopts);
+		Getopt getopt = new Getopt("Clasificador", argv, "-:b::defgi::kz::y::m::n::r::p::a::c:::l::hx", longopts);
 		getopt.setOpterr(false); 	// Disabling automatic handling of errors
 
 		System.out.println("WELCOME TO GENUSMAIL!!!");
+		System.out.println((char)243);
 		for (String s : argv) {
 			System.out.println(s);
 		}
@@ -55,8 +57,8 @@ public class Main {
 					if (arg != null) {
 						if (car == 'c') {
 							options.setURL(arg);
-						} else if (car == 'a') {
-							options.setShowAttributes(Integer.parseInt(arg));
+						//} else if (car == 'a') {
+						//	options.setShowAttributes(Integer.parseInt(arg));
 						} else if (car == 243) {
 							options.setMoaClassifier(arg);
 						} else if (car == 244) {
@@ -67,9 +69,9 @@ public class Main {
 								"\nUse command --help (or -h) to see available options");
 					}
 					break;
-				case 'a':
-					options.setShowAttributes(Integer.parseInt(arg));
-					break;
+				//case 'a':
+				//	options.setShowAttributes(Integer.parseInt(arg));
+				//	break;
 
 				case 'b':
 					options.setDatasetFileName(arg);
@@ -85,9 +87,9 @@ public class Main {
 				case 'e':
 					options.setModelTraining(true);
 					break;
-				case 'f':
-					options.setListFolders(true);
-					break;
+				//case 'f':
+				//	options.setListFolders(true);
+				//	break;
 				case 'g':
 					options.setListMailsInFolder(true);
 					break;
@@ -98,26 +100,28 @@ public class Main {
 					options.setTasasFileName(arg);					
 					options.setIncrementallyTraining(true);
 					break;
-				case 'k':
-					options.setUpdateModelWithMail();
-					break;
-				case 'l':
-					System.out.println("Arg es" + arg);
-					options.setListMails(true, Integer.parseInt(arg));
-					break;
+				//case 'k':
+				//	options.setUpdateModelWithMail();
+				//	break;
+				//case 'l':
+				//	System.out.println("Arg es" + arg);
+				//	options.setListMails(true, Integer.parseInt(arg));
+				//	break;
 				case 'm':
 					options.setTasasFileName(arg);
 					options.setMoaTraining(true);
 					break;					
-				case 'n':
-					options.setStudyHeaders(true);
-					break;
+				//case 'n':
+				//	options.setStudyHeaders(true);
+				//	break;
 				case 'r':
 					options.setOpenMail(Integer.parseInt(arg));
 					break;
-				case 'z':
-					options.setReadMailsFromFileSystem(arg);
-					System.out.println("Mails will be read from filesystem..." + arg);
+				case 'z':					
+					options.setDatasetType(DataSource.EMAIL_FROM_FILESYSTEM);
+					break;
+				case 'y':					
+					options.setDatasetType(DataSource.EMAIL_FROM_IMAPSERVER);
 					break;
 				case '?':
 					System.out.println("Invalid option" +

@@ -23,13 +23,11 @@
 package gnusmail;
 
 import gnusmail.core.ConfigManager;
+import gnusmail.datasource.DataSource;
+import gnusmail.datasource.Document;
 import gnusmail.datasource.DocumentReader;
-import gnusmail.datasource.MessageReaderFactory;
 import gnusmail.datasource.mailconnection.Connection;
-import gnusmail.datasource.mailconnection.Document;
-import gnusmail.datasource.mailconnection.MessageInfo;
 import gnusmail.filters.FilterManager;
-import gnusmail.filters.MultilabelFolder;
 import gnusmail.learning.ClassifierManager;
 
 import java.io.BufferedWriter;
@@ -39,28 +37,25 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 
 import weka.core.Instance;
 import weka.core.Instances;
 
 public class MainManager {
 
-	private Connection connection;
 	private ClassifierManager classifierManager;
 	private FilterManager filterManager;
 	private boolean readMailsFromFile = false;
-	private String maildir;
 	private String tasasFileName = "tasas";
+	private DataSource dataSource = null;
 
 	public MainManager() {
 		filterManager = new FilterManager();
 		classifierManager = new ClassifierManager(filterManager);
 	}
 
-	public MainManager(String url) {
+	/*public MainManager(String url) {
 		this();
 		try {
 			connect(url);
@@ -68,14 +63,14 @@ public class MainManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}*/
 
 	//TODO toda configuracion de punto de acceso, fuera de aqui
 	public void setDataset(Instances dataSet) {
 		classifierManager.setDataSet(dataSet);
 	}
 
-	public boolean isReadMailsFromFile() {
+	/*public boolean isReadMailsFromFile() {
 		return readMailsFromFile;
 	}
 
@@ -87,12 +82,12 @@ public class MainManager {
 		} else {
 			this.maildir = maildir;
 		}
-	}
+	}*/
 
 	/** Connects to URL
 	 * @throws Exception */
 	//TODO no deberia estar aqui
-	private void connect(String url) throws MessagingException {
+	/*private void connect(String url) throws MessagingException {
 		if (url != null) {
 			try {
 				connection = new Connection(url);
@@ -111,41 +106,41 @@ public class MainManager {
 				connection = new Connection();
 			}
 		}
-	}
+	}*/
 
 	
-	public void mailsInFolder() {
+	/*public void mailsInFolder() {
 		try {
 			connection.showMessages("INBOX");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}*/
 
-	public void openMail(int mail_id) {
+	/*public void openMail(int mail_id) {
 		try {
 			connection.readMail(mail_id);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}*/
 
 	public void extractAttributes(String datasetFileName) {
 		System.out.println("Mainmanager.extract attributes");
-		filterManager.extractAttributeHeaders(getMessageReader());
+		filterManager.extractAttributeHeaders(getDocumentReader());
 		Instances instances = new Instances(filterManager.getDataset());
-		DocumentReader reader = getMessageReader();
+		DocumentReader reader = getDocumentReader();
 		for (Document doc: reader) {
-			Instance inst = doc.toWekaInstance();
+			Instance inst = doc.toWekaInstance(filterManager);
 			instances.add(inst);
 		}
-		for (gnusmail.filters.Filter f : filterManager.filterList) {
+		/*for (gnusmail.filters.Filter f : filterManager.filterList) {
 			if (f instanceof MultilabelFolder) {
 				((MultilabelFolder)f).writeToHierarchicalFile();
 			}
-		}
+		}*/
 		filterManager.writeToFile(instances, datasetFileName);			
 	}
 
@@ -161,9 +156,9 @@ public class MainManager {
 	public void incrementallyTrainModel(String wekaClassifier) {
 		//initiallyTrainModel();
 		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Incrementally Train Model");
-		DocumentReader reader = getMessageReader();
+		DocumentReader reader = getDocumentReader();
 		filterManager.extractAttributeHeaders(reader);
-		List<Double> rates = classifierManager.incrementallyTrainModel(reader, wekaClassifier);
+		List<Double> rates = classifierManager.incrementallyTrainModel(reader, wekaClassifier, filterManager);
 		printRateToFile(rates, tasasFileName);
 		System.out.println("Fin");
 	}
@@ -203,7 +198,7 @@ public class MainManager {
 	}
 
 	//TODO: sacar todo lo relativo al punto de acceso
-	public void close() {
+	/*public void close() {
 		if ((connection != null) && (connection.isLoggedIn())) {
 			try {
 				connection.logout();
@@ -212,16 +207,20 @@ public class MainManager {
 				e.printStackTrace();
 			}
 		}
-	}
+	}*/
 
 	public void evaluateWithMOA(String moaClassifier) {
-		Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Evaluate with moa");
-		DocumentReader reader = getMessageReader();
+		//Logger.getLogger(MainManager.class.getName()).log(Level.INFO, "Evaluate with moa");
+		System.out.println("Evaluar con MOA " + moaClassifier);
+		DocumentReader reader = getDocumentReader();
 		filterManager.extractAttributeHeaders(reader);
-		List<Double> rates = classifierManager.evaluatePrequential(reader, moaClassifier);
+		
+		List<Double> rates = classifierManager.evaluatePrequential(reader, moaClassifier);	
 		printRateToFile(rates, tasasFileName);
 	}
+	
 
+	//TODO todo lo relacionado con salida deberia estar fuera
 	private void printRatesByFolderToFile(Map<String, List<Double>> rates, String fileName) {
 		try {
 			// Create file
@@ -269,17 +268,17 @@ public class MainManager {
 		}
 	}
 
-	private DocumentReader getMessageReader() {
-		DocumentReader reader = null;
-		if (readMailsFromFile) {
-			reader = MessageReaderFactory.createReader(this.maildir, 5000); //Para no limitar el n. de mensajes por carpeta
-		} else {
-			reader = MessageReaderFactory.createReader(connection, 2000);
-		}
-		return reader;
+	private DocumentReader getDocumentReader() {
+		return dataSource.getDocumentReader();
 	}
+	
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+	
+	
 
-	public void setTasasFileName(String tasasFileName) {
+	public void setRatesFileName(String tasasFileName) {
 		this.tasasFileName = tasasFileName;
 	}
 

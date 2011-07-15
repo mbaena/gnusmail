@@ -23,8 +23,8 @@
 package gnusmail.filters;
 
 import gnusmail.core.ConfigManager;
+import gnusmail.datasource.Document;
 import gnusmail.datasource.DocumentReader;
-import gnusmail.datasource.mailconnection.Document;
 import gnusmail.datasource.mailconnection.MessageInfo;
 
 import java.io.File;
@@ -48,7 +48,6 @@ import weka.core.converters.ArffSaver;
  * @author jmcarmona
  */
 public class FilterManager {
-
 	Instances dataset;
 	List<Filter> filterList;
 
@@ -76,34 +75,29 @@ public class FilterManager {
 	}
 
 	/**
-	 * Nuevo metodo Este metodo devuelve un conjunto de nombres de atributos con
-	 * sus valores asociados, incluyendo la informacion de las palabras
-	 * frecuentes
+	 * This method returns a set of attribute names and asociated values
 	 * 
 	 * @param ws
 	 * @return
 	 */
 	public Instances extractAttributeHeaders(DocumentReader reader) {
-
 		for (Document doc: reader) {
 			for (Filter filter : filterList) {
 				filter.updateAttValues(doc);
 			}
 		}
-
 		ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
 		for (Filter filter : filterList) {
 			for (Attribute att : filter.getAttributes()) {
 				attInfo.add(att);
 			}
 		}
-
 		dataset = new Instances("gnusmail", attInfo, 0);
 		try {
-			dataset.setClass(dataset.attribute("Folder"));
+			dataset.setClass(dataset.attribute("Label"));
 		} catch (NullPointerException e) {
 			System.out
-					.println("Folder attribute not found; probably handling a multilabel dataset");
+					.println("Label attribute not found; probably handling a multilabel dataset");
 		}
 		return dataset;
 	}
@@ -121,7 +115,6 @@ public class FilterManager {
 					"Dataset is null");
 			return null;
 		}
-
 		Instance inst = new DenseInstance(dataset.numAttributes());
 		inst.setDataset(dataset);
 		for (Filter filter : filterList) {

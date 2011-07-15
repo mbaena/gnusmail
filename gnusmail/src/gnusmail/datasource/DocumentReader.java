@@ -1,7 +1,10 @@
 package gnusmail.datasource;
 
-import gnusmail.datasource.mailconnection.Document;
+import gnusmail.filters.FilterManager;
+
 
 public interface DocumentReader extends Iterable<Document> {
+
+	
 
 }

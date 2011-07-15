@@ -20,13 +20,14 @@
  * www.uma.es if you need additional information or have any questions.
  * 
  */
-package gnusmail.filters;
+package gnusmail.filters.mail_metadata;
 
-import java.io.IOException;
-
-import gnusmail.datasource.mailconnection.Document;
+import gnusmail.datasource.Document;
 import gnusmail.datasource.mailconnection.MailMessage;
 import gnusmail.datasource.mailconnection.MessageInfo;
+import gnusmail.filters.SingleAttFilter;
+
+import java.io.IOException;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;

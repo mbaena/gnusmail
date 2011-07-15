@@ -23,8 +23,8 @@
 package gnusmail.filesystem;
 
 import gnusmail.SortableMessage;
+import gnusmail.datasource.Document;
 import gnusmail.datasource.DocumentReader;
-import gnusmail.datasource.mailconnection.Document;
 import gnusmail.datasource.mailconnection.MIMEMessageWithFolder;
 import gnusmail.datasource.mailconnection.MailMessage;
 
@@ -121,12 +121,16 @@ public class MessageFromFileReader implements DocumentReader {
 				Session s = null;
 				is = new FileInputStream(f);
 				m = new MIMEMessageWithFolder(s, is);
+				System.out.println("MessageFromFileRead");
 				if (baseFolderLength < parentFolder.length()) {
+					System.out.println("Case 1");
 					((MIMEMessageWithFolder) m).setFolderAsStr(parentFolder.substring(baseFolderLength, parentFolder.length()));
 					//((MIMEMessageWithFolder) m).setFolderAsStr(parentFolder);
+					System.out.println(((MIMEMessageWithFolder) m).getFolderAsStr());
 				} else {
+					System.out.println("Case 2");
 					((MIMEMessageWithFolder) m).setFolderAsStr("/");
-				}
+				}				
 			} catch (MessagingException ex) {
 				Logger.getLogger(MessageFromFileReader.class.getName()).log(Level.SEVERE, null, ex);
 			} catch (FileNotFoundException ex) {
