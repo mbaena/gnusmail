@@ -382,7 +382,7 @@ def print_graphics(graphs, cdrifts, method_prequential, param):
       leg = legend(loc=0, prop=fp, numpoints=1, markerscale="10", handlelength=5, borderpad=1, labelspacing=1)
 
       xlabel("Examples", fontsize='x-large')
-      ylabel("Prequential error", fontsize='x-large')
+      ylabel("Prequential accuracy", fontsize='x-large')
       savefig(filename)
       clf()
 
@@ -431,7 +431,8 @@ def launchEvaluation(evaluation_method, prefix, algorithms, method, param, metho
         for alg in algorithms:
             output_file = os.path.join(_OUTPUT_PATH, "%s_%s_%s" % (prefix, author, purge_pat.sub("", alg)))
             graphs[author].append(output_file)
-            if "SingleClassifierDrift" in output_file: 
+            print("Output_file " + output_file)
+            if "SingleClassifierDrift" in output_file or True: 
               cdrifts[author].append(output_file + ".out")
             else:
               print("No " + output_file)
