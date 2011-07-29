@@ -112,7 +112,7 @@ public class WordFrequency extends Filter {
 		}
 
 		for (Attribute att : attList) {
-			if (stringThisDocument.contains(att.name())) { //TODO esto es lento...mejorar
+			if (stringThisDocument.contains(att.name())) { //TODO esto es lento...mejorar. Pondria un getWords en Documnet
 				inst.setValue(att, "True");
 			} else {
 				inst.setValue(att, "False");
@@ -123,7 +123,6 @@ public class WordFrequency extends Filter {
 	private static List<Token> tokenizeDocument(Document doc) {
 		String body = null;
 		try {
-			// Extraemos las palabras del cuerpo y la cabecera
 			String subject = "";
 			if (doc instanceof MailMessage) {
 			  subject = ((MailMessage)doc).getMessage().getSubject();
