@@ -1,0 +1,1 @@
+**Gnusmail** is a framework which includes a number of ready-to-use language processing and machine learning resources, allowing other developers to incorporate new tools, in order to produce customized classifiers.
